@@ -551,7 +551,7 @@ export const HeroLoop: React.FC<{ mobile?: boolean }> = ({ mobile }) => {
   return (
     <AbsoluteFill style={{ backgroundColor: C.bg0 }}>
       <HeroBackground />
-      <Sequence from={0} durationInFrames={90}>
+      <Sequence durationInFrames={90}>
         <S1Logo mobile={mobile} />
       </Sequence>
       <Sequence from={90} durationInFrames={150}>

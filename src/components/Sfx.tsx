@@ -27,7 +27,7 @@ export const SfxLayer: React.FC = () => (
   <>
     {CUES.map((c, i) => (
       <Sequence key={i} from={Math.max(0, c.f)} durationInFrames={c.d ?? 60}>
-        <Audio src={staticFile(`sfx/${c.s}.${EXT[c.s]}`)} volume={c.v} />
+        <Audio src={staticFile(`sfx/${c.s}.${EXT[c.s]}`)} volume={() => c.v ?? 1} />
       </Sequence>
     ))}
   </>

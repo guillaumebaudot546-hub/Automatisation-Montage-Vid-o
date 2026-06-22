@@ -6,7 +6,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { SceneWrapper } from "../components/SceneWrapper";
-import { Showcase3D } from "../components/Showcase3D";
+import { StillFrame } from "../components/StillFrame";
 import { Kicker } from "../components/Kicker";
 
 /**
@@ -127,7 +127,13 @@ export const ChaptersIntro: React.FC = () => {
           </div>
         </div>
 
-        <Showcase3D model="probe" width={440} height={760} delay={45} cameraZ={6.5} />
+        <StillFrame
+          src="laser-unit.jpg"
+          delay={45}
+          aspect={440 / 760}
+          caption="Plateau technique"
+          style={{ width: 440 }}
+        />
       </AbsoluteFill>
     </SceneWrapper>
   );

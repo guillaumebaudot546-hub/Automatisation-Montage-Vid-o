@@ -3,6 +3,7 @@ import { SceneWrapper, type TransitionKind } from "../components/SceneWrapper";
 import { Kicker } from "../components/Kicker";
 import { Bullet } from "../components/Bullet";
 import { StillFrame } from "../components/StillFrame";
+import { VideoFrame } from "../components/VideoFrame";
 import { Showcase3D } from "../components/Showcase3D";
 import { StatHero } from "../components/StatHero";
 import { BarCompare } from "../components/BarCompare";
@@ -11,7 +12,8 @@ import { PropertyChips } from "../components/PropertyChips";
 
 export type ChapterMedia =
   | { type: "3d"; model: "implant" | "laser" | "probe"; cameraZ?: number }
-  | { type: "still"; src: string; caption?: string };
+  | { type: "still"; src: string; caption?: string }
+  | { type: "video"; src: string; caption?: string; startFrom?: number; loopSeconds?: number };
 
 export type ChapterData =
   | {
@@ -54,6 +56,19 @@ const renderMedia = (media: ChapterMedia) => {
         height={MEDIA_H}
         delay={50}
         cameraZ={media.cameraZ ?? 6}
+      />
+    );
+  }
+  if (media.type === "video") {
+    return (
+      <VideoFrame
+        src={media.src}
+        delay={50}
+        caption={media.caption}
+        startFrom={media.startFrom}
+        loopSeconds={media.loopSeconds}
+        aspect={MEDIA_W / MEDIA_H}
+        style={{ width: MEDIA_W }}
       />
     );
   }

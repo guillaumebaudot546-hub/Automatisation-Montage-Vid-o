@@ -37,7 +37,7 @@ const CHAPTERS: ChapterProps[] = [
       },
       side: { value: "3×", label: "Plus rapide" },
     },
-    media: { type: "3d", model: "laser" },
+    media: { type: "still", src: "laser-handpiece.jpg", caption: "Laser Erbium-YAG" },
     transition: "slideRight",
   },
   {
@@ -62,7 +62,7 @@ const CHAPTERS: ChapterProps[] = [
         xRight: "Avec IMCP",
       },
     },
-    media: { type: "still", src: "photo-laser.jpg", caption: "Aides optiques" },
+    media: { type: "video", src: "clinical-procedure.mp4", caption: "Geste clinique", loopSeconds: 14 },
     transition: "fade",
   },
   {
@@ -90,7 +90,7 @@ const CHAPTERS: ChapterProps[] = [
         ],
       },
     },
-    media: { type: "3d", model: "implant", cameraZ: 7 },
+    media: { type: "video", src: "implant-zircone.mp4", caption: "Implant zircone", loopSeconds: 10.6 },
     transition: "slideLeft",
   },
 ];
