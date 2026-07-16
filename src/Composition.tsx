@@ -2,7 +2,9 @@ import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
 import { Background } from "./components/Background";
 import { SfxLayer } from "./components/Sfx";
 import { FilmBurn } from "./components/FilmBurn";
-import { TIMINGS } from "./lib/timing";
+import { TIMINGS, CONTENT_OFFSET } from "./lib/timing";
+import { Intro } from "./scenes/Intro";
+import { Story } from "./scenes/Story";
 import { Hook } from "./scenes/Hook";
 import { Presentation } from "./scenes/Presentation";
 import { ChaptersIntro } from "./scenes/ChaptersIntro";
@@ -37,7 +39,7 @@ const CHAPTERS: ChapterProps[] = [
       },
       side: { value: "3×", label: "Plus rapide" },
     },
-    media: { type: "still", src: "laser-handpiece.jpg", caption: "Laser Erbium-YAG" },
+    media: { type: "still", src: "laser-handpiece.jpg", caption: "Laser Erbium-YAG", aspect: 1093 / 719 },
     transition: "slideRight",
   },
   {
@@ -62,7 +64,7 @@ const CHAPTERS: ChapterProps[] = [
         xRight: "Avec IMCP",
       },
     },
-    media: { type: "video", src: "clinical-procedure.mp4", caption: "Geste clinique", loopSeconds: 14 },
+    media: { type: "video", src: "clinical-procedure.mp4", caption: "Geste clinique", loopSeconds: 14, aspect: 848 / 480 },
     transition: "fade",
   },
   {
@@ -90,7 +92,7 @@ const CHAPTERS: ChapterProps[] = [
         ],
       },
     },
-    media: { type: "video", src: "implant-zircone.mp4", caption: "Implant zircone", loopSeconds: 10.6 },
+    media: { type: "video", src: "implant-zircone.mp4", caption: "Implant zircone", loopSeconds: 10.6, aspect: 848 / 480 },
     transition: "slideLeft",
   },
 ];
@@ -99,16 +101,28 @@ const CHAPTERS: ChapterProps[] = [
 // le frame-skip de chargement aux transitions.
 const PREMOUNT = 30;
 
-// Frontières de scènes pour les flashs cyan (timeline 86s)
-const BOUNDARIES = [600, 1441, 1712, 2836, 3684, 4561, 5160, 5642];
+// Flashs cyan réservés aux 3 temps forts (les autres cuts passent en
+// fondu propre via les SceneWrapper — variété de transitions, règle A8) :
+// post-"Game Changer", entrée du programme, beat de conversion (CTA).
+const BOUNDARIES = [1620, 2732, 6180];
 
 export const MyComposition = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#060D18" }}>
       <Background />
 
-      {/* Voix off : rythme naturel (atempo 1.3) */}
-      <Audio src={staticFile("voiceover-natural-v3.wav")} />
+      {/* Voix off : démarre après l'intro pour rester synchro avec les scènes */}
+      <Sequence from={CONTENT_OFFSET}>
+        <Audio src={staticFile("voiceover-natural-v3.wav")} />
+      </Sequence>
+
+      <Sequence from={TIMINGS.intro.from} durationInFrames={TIMINGS.intro.duration} premountFor={PREMOUNT}>
+        <Intro />
+      </Sequence>
+
+      <Sequence from={TIMINGS.story.from} durationInFrames={TIMINGS.story.duration} premountFor={PREMOUNT}>
+        <Story />
+      </Sequence>
 
       <Sequence from={TIMINGS.hook.from} durationInFrames={TIMINGS.hook.duration} premountFor={PREMOUNT}>
         <Hook />
@@ -153,7 +167,10 @@ export const MyComposition = () => {
         </Sequence>
       ))}
 
-      <SfxLayer />
+      {/* SFX décalés après l'intro pour rester calés sur les transitions */}
+      <Sequence from={CONTENT_OFFSET}>
+        <SfxLayer />
+      </Sequence>
     </AbsoluteFill>
   );
 };

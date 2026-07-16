@@ -12,3 +12,13 @@ _sources-bruts/
 preview/
 IMCP - IA/
 
+
+# Heavy media excluded from GitHub (>100MB limit) — kept locally only.
+public/clinical/
+IMCP-master-*.mp4
+IMCP/node_modules/
+IMCP/*.mp4
+IMCP/*.mov
+IMCP/.next/
+Saint-Preux*.mp3
+IMCP/

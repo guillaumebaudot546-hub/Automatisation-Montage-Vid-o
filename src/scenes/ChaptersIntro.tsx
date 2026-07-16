@@ -130,9 +130,9 @@ export const ChaptersIntro: React.FC = () => {
         <StillFrame
           src="laser-unit.jpg"
           delay={45}
-          aspect={440 / 760}
+          aspect={520 / 820}
           caption="Plateau technique"
-          style={{ width: 440 }}
+          style={{ width: 520 }}
         />
       </AbsoluteFill>
     </SceneWrapper>

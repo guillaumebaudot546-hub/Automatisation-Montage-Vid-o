@@ -5,33 +5,14 @@ import { Bullet } from "../components/Bullet";
 import { StillFrame } from "../components/StillFrame";
 import { VideoFrame } from "../components/VideoFrame";
 import { Showcase3D } from "../components/Showcase3D";
-import { StatHero } from "../components/StatHero";
-import { BarCompare } from "../components/BarCompare";
-import { Curve } from "../components/Curve";
-import { PropertyChips } from "../components/PropertyChips";
+import { ChapterDataBlock, type ChapterData } from "./ChapterData";
 
 export type ChapterMedia =
   | { type: "3d"; model: "implant" | "laser" | "probe"; cameraZ?: number }
-  | { type: "still"; src: string; caption?: string }
-  | { type: "video"; src: string; caption?: string; startFrom?: number; loopSeconds?: number };
+  | { type: "still"; src: string; caption?: string; aspect?: number }
+  | { type: "video"; src: string; caption?: string; startFrom?: number; loopSeconds?: number; aspect?: number };
 
-export type ChapterData =
-  | {
-      kind: "bars";
-      stat: { value: string; caption: string; eyebrow?: string };
-      bars: { caption: string; items: { label: string; value: number; highlight?: boolean }[] };
-      side?: { value: string; label: string };
-    }
-  | {
-      kind: "curve";
-      stat: { value: string; caption: string; eyebrow?: string };
-      curve: { caption?: string; xLeft?: string; xRight?: string };
-    }
-  | {
-      kind: "chips";
-      stat: { value: string; caption: string; eyebrow?: string };
-      chips: { caption?: string; items: { label: string; sub?: string }[] };
-    };
+export type { ChapterData };
 
 export interface ChapterProps {
   number: string;
@@ -44,8 +25,12 @@ export interface ChapterProps {
   transition?: TransitionKind;
 }
 
-const MEDIA_W = 540;
-const MEDIA_H = 680;
+const MEDIA_W = 680;
+const MEDIA_H = 840;
+
+// Largeur du cadre selon le ratio natif du média : un média paysage
+// prend plus de largeur pour ne jamais être recadré/coupé.
+const widthFor = (aspect: number) => (aspect >= 1.3 ? 800 : aspect >= 1 ? 700 : MEDIA_W);
 
 const renderMedia = (media: ChapterMedia) => {
   if (media.type === "3d") {
@@ -59,6 +44,7 @@ const renderMedia = (media: ChapterMedia) => {
       />
     );
   }
+  const aspect = media.aspect ?? MEDIA_W / MEDIA_H;
   if (media.type === "video") {
     return (
       <VideoFrame
@@ -67,8 +53,8 @@ const renderMedia = (media: ChapterMedia) => {
         caption={media.caption}
         startFrom={media.startFrom}
         loopSeconds={media.loopSeconds}
-        aspect={MEDIA_W / MEDIA_H}
-        style={{ width: MEDIA_W }}
+        aspect={aspect}
+        style={{ width: widthFor(aspect) }}
       />
     );
   }
@@ -77,69 +63,9 @@ const renderMedia = (media: ChapterMedia) => {
       src={media.src}
       delay={50}
       caption={media.caption}
-      aspect={MEDIA_W / MEDIA_H}
-      style={{ width: MEDIA_W }}
+      aspect={aspect}
+      style={{ width: widthFor(aspect) }}
     />
-  );
-};
-
-const renderData = (data: ChapterData) => {
-  if (data.kind === "bars") {
-    return (
-      <div style={{ display: "flex", gap: 56, alignItems: "flex-start", flexWrap: "wrap" }}>
-        <StatHero {...data.stat} delay={90} />
-        <div style={{ display: "flex", flexDirection: "column", gap: 18, minWidth: 360 }}>
-          <BarCompare delay={149} {...data.bars} width={420} />
-          {data.side && (
-            <div
-              style={{
-                marginTop: 4,
-                display: "inline-flex",
-                alignItems: "baseline",
-                gap: 12,
-              }}
-            >
-              <span
-                className="font-stat"
-                style={{
-                  fontSize: 54,
-                  fontWeight: 700,
-                  color: "var(--cyan-1)",
-                  lineHeight: 1,
-                }}
-              >
-                {data.side.value}
-              </span>
-              <span
-                style={{
-                  fontSize: 14,
-                  letterSpacing: "0.26em",
-                  textTransform: "uppercase",
-                  fontWeight: 600,
-                  color: "var(--muted)",
-                }}
-              >
-                {data.side.label}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-  if (data.kind === "curve") {
-    return (
-      <div style={{ display: "flex", gap: 56, alignItems: "flex-end", flexWrap: "wrap" }}>
-        <StatHero {...data.stat} delay={90} />
-        <Curve delay={149} {...data.curve} width={500} height={200} />
-      </div>
-    );
-  }
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
-      <StatHero {...data.stat} delay={90} />
-      <PropertyChips delay={149} {...data.chips} />
-    </div>
   );
 };
 
@@ -224,7 +150,7 @@ export const Chapter: React.FC<ChapterProps> = ({
           </h2>
 
           {/* Bloc data (gros chiffre + viz) */}
-          {data && <div style={{ marginTop: 4 }}>{renderData(data)}</div>}
+          {data && <div style={{ marginTop: 4 }}><ChapterDataBlock data={data} /></div>}
 
           {/* Bullets compacts */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 4 }}>

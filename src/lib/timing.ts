@@ -1,18 +1,24 @@
-// Timings @ 60 fps — cible 97.3 s = 5836 frames.
-// Voix off naturelle (atempo 1.15 sur l'original 111.9 s) = 97.26 s.
+// Timings @ 60 fps.
+// Intro (sting logo, recadrée) : 4,5 s. Puis prologue Story (12,5 s, muet).
+// La voix off démarre au Hook → CONTENT_OFFSET = intro + story.
 
 export const FPS = 60;
 
+// Décalage appliqué au contenu porté par la voix off.
+export const CONTENT_OFFSET = 1020;
+
 export const TIMINGS = {
-  hook:          { from:    0, duration: 600 }, // 0     – 10.0  s
-  presentation:  { from:  600, duration: 841 }, // 10.0  – 24.0  s
-  chaptersIntro: { from: 1441, duration: 271 }, // 24.0  – 28.5  s
-  chapter1:      { from: 1712, duration: 1124 },// 28.5  – 47.27 s
-  chapter2:      { from: 2836, duration: 848 }, // 47.27 – 61.40 s
-  chapter3:      { from: 3684, duration: 877 }, // 61.40 – 76.02 s
-  community:     { from: 4561, duration: 599 }, // 76.02 – 86.00 s
-  cta:           { from: 5160, duration: 482 }, // 86.00 – 94.03 s
-  outro:         { from: 5642, duration: 194 }, // 94.03 – 97.26 s
+  intro:         { from:    0, duration: 270 }, // 0      – 4.50 s
+  story:         { from:  270, duration: 750 }, // 4.50   – 17.00 s
+  hook:          { from: 1020, duration: 600 }, // 17.00  – 27.00 s
+  presentation:  { from: 1620, duration: 841 }, // 27.00  – 41.02 s
+  chaptersIntro: { from: 2461, duration: 271 }, // 41.02  – 45.53 s
+  chapter1:      { from: 2732, duration: 1124 },// 45.53  – 64.27 s
+  chapter2:      { from: 3856, duration: 848 }, // 64.27  – 78.40 s
+  chapter3:      { from: 4704, duration: 877 }, // 78.40  – 93.02 s
+  community:     { from: 5581, duration: 599 }, // 93.02  – 103.00 s
+  cta:           { from: 6180, duration: 482 }, // 103.00 – 111.03 s
+  outro:         { from: 6662, duration: 194 }, // 111.03 – 114.27 s
 } as const;
 
-export const TOTAL_FRAMES = 5836;
+export const TOTAL_FRAMES = 6856;

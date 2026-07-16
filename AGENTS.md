@@ -1,4 +1,4 @@
-# CLAUDE.md — Vidéo promo IMCP / DentalSynthesis
+# AGENTS.md — Vidéo promo IMCP / DentalSynthesis
 
 ## Qui je suis
 Guillaume, **non-développeur**. Je construis ce projet via l'IA, je ne code pas moi-même.
@@ -25,7 +25,7 @@ Chaque chose appartient à UN domaine. On range par domaine, pas par type techni
 - **Cible : 150–200 lignes.** On découpe **à 300 lignes** (limite dure).
 - Si un fichier grossit, on le **coupe en morceaux** avant d'ajouter du neuf.
 - Vérifier à tout moment : `npm run check:sizes` (vert = OK, rouge = un fichier trop gros).
-- Dette god-file réglée le 16/07/2026 : `HeroLoop.tsx` découpé en 6 modules (< 200 l. chacun).
+- Note : `src/hero/HeroLoop.tsx` (573 l.) dépasse déjà — à découper en priorité.
 
 ## RÈGLE de dépendance : le cœur ne dépend pas des détails
 - `src/theme/` (identité = le cœur) **ne doit JAMAIS importer** depuis `scenes/`, `components/`, `hero/`.
