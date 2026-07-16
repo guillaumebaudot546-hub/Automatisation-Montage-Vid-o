@@ -95,9 +95,9 @@ export const Presentation: React.FC = () => {
         <StillFrame
           src="photo-portrait.jpg"
           delay={37}
-          aspect={4 / 5}
+          aspect={4 / 3}
           caption="Bloc opératoire"
-          style={{ width: 520, flexShrink: 0 }}
+          style={{ width: 680, flexShrink: 0 }}
         />
       </AbsoluteFill>
     </SceneWrapper>
