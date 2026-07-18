@@ -1,7 +1,23 @@
 # PRD — Système vidéo Dr Baudot / IMCP (état de session & règles)
 
-**Version :** 2.0 · **Date :** 16/07/2026 · **Type :** document de reprise de contexte
-**Usage :** coller ce fichier (ou le pointer : `my-video-IMCP/SESSION-PRD.md`) au début d'une nouvelle session Claude Code pour reprendre le travail sans perte.
+**Version :** 2.1 · **Date :** 2026-07-17 · **Type :** document de reprise de contexte
+**Usage :** pointer ce fichier au début d'une session pour reprendre sans perte.
+Ne PAS tout coller par défaut — utiliser l'index ci-dessous pour n'ouvrir que la
+section utile à la tâche (charge à la demande).
+
+## Où regarder
+- **§1** projet · **§2** règle active (ne modifier que les 1 min) · **§3** compositions
+- **§4** charte graphique (`src/theme/baudot.ts`) · **§5** templates architecture
+- **§6** props éditables · **§7** audio · **§8** sources & assets · **§9** règles de travail
+- **§10** commandes · **§11** livrables produits · **§12** backlog
+- **ANNEXE A** audit archi (fait) · **ANNEXE B** texte défilant (à faire)
+
+## ⚠️ Direction en cours — NON encore reflétée dans les sections ci-dessous
+Ce PRD décrit le **montage manuel dans le Studio**. La cible a pivoté (2026-07-17)
+vers un **service cloud automatisé** : Telegram → images clés → IA choisit les
+timestamps → rendu → validation praticien. Voir **[decisions/](decisions/README.md)**
+(001 Telegram · 002 cloud · 003 skill 3 couches · 004 spike · 005 IA/code).
+Les sections §1-§12 restent la vérité sur le **code actuel**.
 
 ---
 
@@ -81,7 +97,7 @@ Schémas zod → contrôles UI. Props des compos 1 min :
 
 ```
 public/clinical/vestibulaire.mp4  (5:01, 1080p30, muet — rush approfondissement)
-public/clinical/serdat.mov        (5:45, 540p25, AVEC audio — retrait implant laser)
+public/clinical/serdat.mov        (5:45, 540p25 — retrait implant laser. ⚠️ piste audio PRÉSENTE mais SILENCIEUSE, mean -90 dB, constaté au spike du 18/07 — voir decisions/004)
 public/intro-imcp.mp4             sting logo (trim : long 165f@30, court 210f@30)
 public/logo-mark.png              wordmark IMCP détouré
 public/music/concerto.mp3         musique

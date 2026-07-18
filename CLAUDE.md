@@ -1,5 +1,13 @@
 # CLAUDE.md — Vidéo promo IMCP / DentalSynthesis
 
+## Où regarder (mémoire du projet)
+- **[decisions/](decisions/README.md)** — décisions d'architecture, une par fichier.
+  À lire avant toute reprise : la cible a pivoté vers un service cloud automatisé.
+- **[SESSION-PRD.md](SESSION-PRD.md)** — état détaillé du code actuel (index en tête).
+- Ce fichier = règles de travail. `AGENTS.md` pointe ici (source unique).
+- **Rituel de clôture** : toute décision se note dans `decisions/` au moment où
+  elle est prise ; tout état de code se note dans `SESSION-PRD.md`. Jamais en double.
+
 ## Qui je suis
 Guillaume, **non-développeur**. Je construis ce projet via l'IA, je ne code pas moi-même.
 Explique-moi tout en langage simple, pas de jargon. Quand tu modifies, dis ce que tu fais et pourquoi.

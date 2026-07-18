@@ -22,3 +22,6 @@ IMCP/*.mov
 IMCP/.next/
 Saint-Preux*.mp3
 IMCP/
+
+# Livrables 1 min a la racine (67-102 Mo, >limite GitHub) — locaux seulement.
+*-1MIN.mp4
