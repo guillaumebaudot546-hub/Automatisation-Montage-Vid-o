@@ -17,3 +17,4 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [009](009-pipeline-unifie.md) | Pipeline unifié : détection auto, options composables, ligne édito hebdo | Actif |
 | [010](010-descriptions-posts.md) | Descriptions par réseau, double proposition A/B sur mots clés | Planifié |
 | [011](011-module-images-ia.md) | Module images IA + garde-fou déontologique | Estimé |
+| [012](012-go-palier-1.md) | GO palier 1 — cadré par SPEC-PALIER-1.md, implémentation en session neuve | Actif |
