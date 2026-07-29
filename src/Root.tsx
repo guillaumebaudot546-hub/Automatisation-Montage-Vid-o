@@ -5,6 +5,10 @@ import { FPS, TOTAL_FRAMES } from "./lib/timing";
 import { HeroLoop, HeroLoopMobile } from "./hero/HeroLoop";
 import { ClinicalWrap, clinicalSchema, wrapDuration, FPS as CLINICAL_FPS } from "./clinical/ClinicalWrap";
 import { ClinicalHighlights, highlightsSchema, highlightsDuration } from "./clinical/ClinicalHighlights";
+import { CapsuleV2, capsuleV2Schema, capsuleV2Duration } from "./capsule/CapsuleV2";
+import { CAPSULE1_PROPS } from "./capsule/capsule1-props";
+import { TEASER4_PROPS } from "./capsule/teaser4-props";
+import { SUTURE_PROPS } from "./capsule/suture-props";
 
 // Cas cliniques — durées sources en frames @30fps
 const VESTIBULAIRE_FRAMES = 9056; // 301.87 s
@@ -147,6 +151,44 @@ export const RemotionRoot: React.FC = () => {
           musicBedVol: 0.06,
           sourceVol: 1,
         }}
+      />
+      {/* Capsule verticale 9:16 v2 — voix continue + calques (Commande 1) */}
+      <Composition
+        id="CapsuleLaserErYag"
+        component={CapsuleV2}
+        schema={capsuleV2Schema}
+        fps={30}
+        width={1080}
+        height={1920}
+        durationInFrames={3573}
+        calculateMetadata={({ props }) => ({
+          durationInFrames: capsuleV2Duration(props.spans),
+        })}
+        defaultProps={CAPSULE1_PROPS}
+      />
+      {/* Capsule 1 min du cours — passage continu cohérent (moteur capsule) */}
+      <Composition
+        id="TeaserLaserErYag"
+        component={CapsuleV2}
+        schema={capsuleV2Schema}
+        fps={30}
+        width={1080}
+        height={1920}
+        durationInFrames={1590}
+        calculateMetadata={({ props }) => ({ durationInFrames: capsuleV2Duration(props.spans) })}
+        defaultProps={TEASER4_PROPS}
+      />
+      {/* Capsule « Fils de suture & aiguilles » — rush IMG_3181, span unique continu */}
+      <Composition
+        id="CapsuleSutures"
+        component={CapsuleV2}
+        schema={capsuleV2Schema}
+        fps={30}
+        width={1080}
+        height={1920}
+        durationInFrames={2420}
+        calculateMetadata={({ props }) => ({ durationInFrames: capsuleV2Duration(props.spans) })}
+        defaultProps={SUTURE_PROPS}
       />
       {/* Cas cliniques — environnement de marque IMCP */}
       <Composition

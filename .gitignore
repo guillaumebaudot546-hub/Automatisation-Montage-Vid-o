@@ -38,3 +38,10 @@ public/capsule/
 public/teaser-*.mp4
 imcp-hyperframes/**/snapshots/
 imcp-hyperframes/**/.hyperframes/
+
+# Médias lourds supplémentaires + musique commerciale (locaux seulement)
+Vidéos Test/
+Vidéo 1 - IMCP/
+Higgsfield/
+musique/*.mp3
+musique/*.wav

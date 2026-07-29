@@ -1,0 +1,61 @@
+{
+  "praticien": "Dr Fabrice BAUDOT",
+  "structure": "IMCP — Institut Microchirurgie Parodontale",
+  "charte": {
+    "source": "src/theme/baudot.ts",
+    "accent": "#49B6C9",
+    "nomToujoursEnMajuscules": true
+  },
+  "preferences": {
+    "transitions": "Toujours le langage zoom/flash IMCP — jamais de jump-cut sec (arbitrage 2026-07-18)",
+    "voix": "JAMAIS hachée : coupes uniquement aux fins de phrases de la transcription",
+    "miseEnAvantDesPropos": "Points importants affichés en texte animé (listes en cascade) quand il les énumère",
+    "visuels": "Illustrer ce qu'il dit avec SES images (B-roll de ses cas cliniques, ses slides)",
+    "sousTitres": "Transcription intégrale nettoyée, mot pour mot, pas de résumé",
+    "titreCapsules": "Fourni par le praticien dans sa commande — reprendre tel quel",
+    "renduMinimum": "1080p toujours ; 4K si la source le permet. Source basse résolution → prétraitement (débruitage + lanczos + netteté) AVANT montage",
+    "infographies": "L'IA RÉFLÉCHIT sur la transcription et matérialise chaque promesse en visuel qui vend (style Instagram) : chiffre cité → chiffre-choc animé ; 'mon site' → carte site avec bouton ; 'progresser' → graphique flèche montante. Le spectateur doit se projeter et avoir envie d'acheter",
+    "lienSite": "Site de vente de formations : https://www.imcpformations.fr/ (confirmé par Guillaume le 2026-07-18) — à afficher quand il mentionne son site",
+    "musique": "Lit classique discret sous la voix (volume ~0,08, fondus entrée/sortie). Morceau fourni par Guillaume : Pace_pace_nel_mio_sen.mp3 (public/music/pace-capsule.wav, 117 s préparées). ⚠️ Vérifier que l'ENREGISTREMENT est bien libre de droit (l'œuvre classique est domaine public, l'interprétation a ses propres droits). Jamais de Saint-Preux (SACEM)",
+    "phrasesCles": "Toute phrase-structure du discours ('3 sur la machine, 3 dans vos mains') → carte punch : écran noir, texte cyan fluo (#5FE8FF) avec glow, même palette",
+    "sousTitresMotsCles": "Les mots importants de CHAQUE sous-titre en cyan fluo (balisage **mot** dans les props)",
+    "dureeInfographies": "Une infographie ne s'attarde JAMAIS : graphique ≤ 5-6 s, puis retour à l'image ou B-roll",
+    "videosDeContexte": "Chaque promesse incarnée par une VIDÉO de lui en situation ('je vous guide au laser' → B-roll de lui utilisant le laser), pas seulement des graphiques",
+    "stingIntro": "TOUJOURS l'animation logo originale (intro-imcp.mp4) ajustée au format — contenue entière, fond flouté. JAMAIS une nouvelle animation, JAMAIS recadrée",
+    "slidesFournies": "Extraire le CONTENU des slides et le ré-animer en cascade dans la charte — ne pas afficher l'image statique",
+    "outilAnimations": "Animations codées Remotion (gratuites, reproductibles, retouchables à la seconde). Pas de Higgsfield tant que pas d'abonnement payant — crédits gratuits non brûlés"
+  },
+  "corrections": [
+    {
+      "date": "2026-07-18",
+      "video": "Capsule 1 — laser Er-Yag",
+      "retour": "Format cassé (sting 16:9), qualité dégradée (double encodage), voix hachée (doctrine clinique appliquée à un talking-head), propos pas mis en avant, pas de visuels d'illustration",
+      "action": "CapsuleV2 : voix continue + calques — voir decisions/013"
+    },
+    {
+      "date": "2026-07-18",
+      "video": "Capsule 1 — v2",
+      "retour": "Qualité perçue insuffisante (source WhatsApp 464×832 : compression destructrice) ; pas assez d'animations ; l'IA doit raisonner sur la transcription et matérialiser les propos (site → carte site, progression → graphe flèche)",
+      "action": "V3 : source prétraitée HD (débruitage+lanczos+netteté), BigStat 6, ProgressChart, SiteCard. Racine du problème qualité : demander les rushes SANS compression (mode document Telegram/WhatsApp) — le Bot API local Telegram du palier 1 règle ça nativement"
+    },
+    {
+      "date": "2026-07-19",
+      "video": "Teaser — trailer v5 (final)",
+      "retour": "Il faut MONTRER le praticien qui parle (pas que des slides), avec fondu enchaîné entre lui qui commence à parler et le visuel qu'il affiche. Appliquer la boucle d'auto-critique. Essayer une autre musique",
+      "action": "TeaserTrailer : bookend visage (intro + clôture, crop) + fondus enchaînés 0,4s vers les slides ; audio pré-assemblé 7 soundbites (ffmpeg acrossfade) + musique Afternoon ; boucle appliquée (stills→critique→fix cadrage slides trop petites + collision kickers→re-render). Skill montage-imcp mis à jour (règles 3bis présence praticien+fondu, 3ter audio pré-assemblé, format 9:16/16:9)"
+    },
+    {
+      "date": "2026-07-19",
+      "video": "Teaser 1 — cours long 13 min → short",
+      "retour": "v1 ratée : voix hachée, format non respecté, propos disparates, message illisible. MÊME erreur que la capsule v1 : j'avais pioché 5 timestamps épars sans lire le sens",
+      "action": "v2 : LIRE la transcription d'abord, choisir UN fil narratif unique, couper UNIQUEMENT aux frontières de phrases (SRT), vérifier le type de contenu (slide/visage) image par image AVANT de fixer le recadrage (slide=fit, visage=crop). Règle générale pour tout teaser : voix = colonne vertébrale, phrases entières, une seule histoire, mots-clés fluo"
+    },
+    {
+      "date": "2026-07-18",
+      "video": "Capsule 1 — v3",
+      "retour": "Phrases-clés pas repérées (3+3 → carte punch noir/fluo attendue) ; mots importants des sous-titres à mettre en cyan fluo ; graphique trop long ; promesses à incarner par des vidéos de contexte (lui au laser) ; sting = animation originale ajustée, pas une nouvelle ; contenu des slides à extraire et animer ; qualité perçue toujours insuffisante (source WhatsApp 464×832 — l'original 4K n'a jamais été reçu)",
+      "action": "V4 : PunchCard, balisage **mot** fluo dans captions, chart 10,6→5,2 s + B-roll 'Guidé pas à pas', PortraitSting = intro-imcp.mp4 original contenu + fond flouté, SlideAnimated remplace le JPEG statique. Style codifié dans les préférences ci-dessus"
+    }
+  ],
+  "exemplesValides": []
+}
