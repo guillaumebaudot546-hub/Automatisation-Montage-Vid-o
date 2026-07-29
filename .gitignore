@@ -25,3 +25,16 @@ IMCP/
 
 # Livrables 1 min a la racine (67-102 Mo, >limite GitHub) — locaux seulement.
 *-1MIN.mp4
+
+# === Médias lourds HyperFrames + cours (locaux seulement, hors GitHub) ===
+CAPSULES COURS IMCP/
+imcp-hyperframes/**/*.mp4
+imcp-hyperframes/**/*.mov
+imcp-hyperframes/**/*.wav
+imcp-hyperframes/**/renders/
+imcp-hyperframes/imcp3181-loud.mp4
+IMG_*.mov
+public/capsule/
+public/teaser-*.mp4
+imcp-hyperframes/**/snapshots/
+imcp-hyperframes/**/.hyperframes/

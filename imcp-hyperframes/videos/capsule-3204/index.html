@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="fr" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0; width: 1080px; height: 1920px;
+        overflow: hidden; background: #060d18;
+      }
+      body { font-family: Roboto, sans-serif; }
+
+      :root {
+        --bg: #060d18;
+        --fluo: #5fe8ff;
+        --ivory: #f4f1ea;
+        --slate: #8fa3b8;
+        --champagne: #d8c7a8;
+      }
+
+      .fill { position: absolute; inset: 0; }
+      #shot { width: 100%; height: 100%; object-fit: cover;
+              transform-origin: 50% 42%; will-change: transform; }
+
+      /* Voile bas : le couloir de cabinet est clair, sans lui ni les cartons
+         ni les sous-titres ne tiennent les 3:1. */
+      #scrim {
+        position: absolute; left: 0; right: 0; bottom: 0; height: 56%;
+        background: linear-gradient(
+          to bottom,
+          rgba(6, 13, 24, 0) 0%,
+          rgba(6, 13, 24, 0.55) 34%,
+          rgba(6, 13, 24, 0.90) 72%,
+          rgba(6, 13, 24, 0.96) 100%
+        );
+      }
+      #scrim-top {
+        position: absolute; left: 0; right: 0; top: 0; height: 15%;
+        background: linear-gradient(to bottom, rgba(6,13,24,0.66) 0%, rgba(6,13,24,0) 100%);
+      }
+
+      #mark {
+        position: absolute; top: 44px; right: 50px;
+        padding: 10px 20px; border-radius: 12px;
+        background: rgba(6, 13, 24, 0.62);
+        font-size: 30px; font-weight: 800; letter-spacing: 0.16em; color: var(--fluo);
+      }
+
+      /* ---- Cartons ---- */
+      .slot { position: absolute; left: 58px; right: 58px; bottom: 430px; }
+      .wrap { position: relative; }
+      .glow {
+        position: absolute; inset: -150px; z-index: 1; opacity: 0;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.60) 0%,
+          rgba(95, 232, 255, 0.20) 52%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      .card {
+        position: relative; z-index: 2; overflow: hidden;
+        padding: 40px 46px 44px;
+        background: rgba(6, 13, 24, 0.93);
+        border: 1.5px solid rgba(95, 232, 255, 0.55);
+        border-radius: 22px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      }
+      .sweep {
+        position: absolute; top: 0; bottom: 0; left: 0; width: 260px; z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(105deg,
+          rgba(95,232,255,0) 0%, rgba(95,232,255,0.20) 50%, rgba(95,232,255,0) 100%);
+      }
+      .kicker {
+        font-size: 23px; font-weight: 800; letter-spacing: 0.2em;
+        text-transform: uppercase; color: var(--champagne); margin-bottom: 24px;
+      }
+      .lede {
+        font-family: "EB Garamond", serif;
+        font-size: 62px; line-height: 1.12; color: var(--ivory);
+      }
+      .sub { font-size: 30px; font-weight: 500; color: var(--slate); margin-top: 18px; }
+      .row { display: flex; align-items: center; gap: 18px; margin-bottom: 17px; }
+      .row:last-child { margin-bottom: 0; }
+      .dot {
+        width: 11px; height: 11px; border-radius: 6px; flex: none;
+        background: var(--fluo); box-shadow: 0 0 16px rgba(95,232,255,0.75);
+      }
+      .row span { font-size: 33px; font-weight: 600; color: var(--ivory); }
+      .kw { color: var(--fluo); }
+
+      /* Chiffre-clé */
+      .stat { display: flex; align-items: baseline; gap: 18px; }
+      .stat .n {
+        font-size: 104px; font-weight: 800; color: var(--fluo); line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      .stat .u { font-size: 38px; font-weight: 700; color: var(--ivory); }
+
+      /* Objection barrée */
+      .obj { position: relative; display: inline-block; margin-bottom: 14px; }
+      .obj span { font-size: 44px; font-weight: 700; color: var(--slate); }
+      .obj i {
+        position: absolute; left: -4px; right: -4px; top: 52%; height: 3px;
+        background: #ff6b6b; transform: scaleX(0); transform-origin: 0 50%;
+        display: block; border-radius: 2px;
+      }
+      .flip {
+        font-family: "EB Garamond", serif;
+        font-size: 66px; line-height: 1.1; color: var(--ivory); margin-top: 20px;
+      }
+
+      /* ---- Barre de recherche ---- */
+      .searchbar {
+        display: flex; align-items: center; gap: 20px;
+        padding: 26px 32px; border-radius: 100px;
+        background: rgba(2, 7, 13, 0.92);
+        border: 2px solid rgba(95, 232, 255, 0.7);
+      }
+      .searchbar .mag { flex: none; }
+      .searchbar .txt {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 38px; color: var(--ivory); letter-spacing: -0.01em;
+      }
+      .caret {
+        display: inline-block; width: 16px; height: 40px;
+        background: var(--fluo); vertical-align: -6px; margin-left: 3px;
+      }
+
+      /* ---- Sous-titres ---- */
+      #subs {
+        position: absolute; left: 70px; right: 70px; bottom: 165px;
+        display: flex; justify-content: center;
+      }
+      #subs .pill {
+        padding: 20px 34px; border-radius: 18px;
+        background: rgba(2, 7, 13, 0.86);
+        border: 1px solid rgba(143, 163, 184, 0.28);
+        font-size: 40px; font-weight: 600; line-height: 1.28;
+        color: var(--ivory); text-align: center;
+      }
+
+      /* ---- Carton de fin ---- */
+      #end { display: flex; flex-direction: column; align-items: center;
+             justify-content: center; background: var(--bg); text-align: center; }
+      #end .stack { position: relative; display: inline-block; }
+      #end-glow {
+        position: absolute; inset: -190px; z-index: 1; opacity: 0;
+        background: radial-gradient(closest-side,
+          rgba(95,232,255,0.55) 0%, rgba(95,232,255,0.18) 54%, rgba(95,232,255,0) 78%);
+      }
+      #end img { position: relative; z-index: 2; width: 330px; display: block; }
+      #end .u {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 40px; color: var(--fluo); margin-top: 40px;
+      }
+      #end .n {
+        font-family: "EB Garamond", serif; font-style: italic;
+        font-size: 40px; color: var(--ivory); margin-top: 22px;
+      }
+      svg { display: block; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Capsule 3204 — « Microchirurgie orale », Dr Fabrice Baudot.
+      Recut talking-head 9:16. Source IMG_3204.mov (3840×2160, rotation -90°)
+      redressée en 1080×1920, audio normalisé à -16,8 dB.
+
+      PAROLE CONTINUE (-31,8 dB de moyenne, aucune zone morte) : les cartons se
+      calent sur les fins de phrase, aucun réordonnancement possible sans casser
+      le sens. C'est l'inverse de la capsule `publication`, muette, où les plans
+      pouvaient être librement remontés.
+
+      COUPE À 66,3 s : le transcript porte un dernier segment
+      « Sous-titrage Société Radio-Canada » à 65,97 s — hallucination de Whisper
+      sur le silence de fin, jamais prononcée.
+
+      Le beat 4 (31–41 s) est le pivot du discours : l'objection retournée.
+      Il reçoit le traitement le plus marqué — barré rouge puis punch-in.
+    -->
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="66.3"
+      data-width="1080"
+      data-height="1920"
+      data-fps="30"
+    >
+      <!-- ═══ piste 0 : le rush, intact ═══ -->
+      <!-- data-has-audio : c'est un talking-head, la voix EST le contenu. -->
+      <video id="shot" class="clip fill" src="source.mp4" playsinline data-has-audio="true"
+             data-start="0" data-duration="66.3" data-media-start="0" data-track-index="0"></video>
+
+      <!-- ═══ pistes 1 et 6 : voiles (une piste chacun, sinon chevauchement) ═══ -->
+      <div id="scrim" class="clip" data-start="0" data-duration="66.3" data-track-index="1"></div>
+      <div id="scrim-top" class="clip" data-start="0" data-duration="66.3" data-track-index="6"></div>
+
+      <!-- ═══ piste 2 : cartons ═══ -->
+      <div id="c1" class="slot clip" data-start="0.8" data-duration="3.7" data-track-index="2">
+        <div class="wrap">
+          <div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">Institut de microchirurgie</div>
+            <div class="lede">Microchirurgie<br />orale</div>
+            <div class="sub">Dr Fabrice Baudot</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="c2" class="slot clip" data-start="5.2" data-duration="9.4" data-track-index="2">
+        <div class="wrap">
+          <div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">La pratique</div>
+            <div class="stat"><span class="n">30</span><span class="u">ans de chirurgie orale</span></div>
+            <div class="sub">Au quotidien, sous <span class="kw">microscope opératoire</span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="c3" class="slot clip" data-start="15.6" data-duration="15.2" data-track-index="2">
+        <div class="wrap">
+          <div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">Ce que ça change</div>
+            <div class="row"><i class="dot"></i><span>Respect des <span class="kw">tissus</span></span></div>
+            <div class="row"><i class="dot"></i><span>Respect de la <span class="kw">vascularisation</span></span></div>
+            <div class="row"><i class="dot"></i><span>Confort opératoire</span></div>
+            <div class="row"><i class="dot"></i><span>De meilleurs résultats</span></div>
+            <div class="row"><i class="dot"></i><span><span class="kw">Prévisibilité</span></span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="c4" class="slot clip" data-start="31.5" data-duration="9.9" data-track-index="2">
+        <div class="wrap">
+          <div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">L'objection</div>
+            <div class="obj" id="obj-a"><span>Complexe. Élitiste.</span><i></i></div><br />
+            <div class="obj" id="obj-b"><span>« Du show business. »</span><i></i></div>
+            <div class="flip">C'est tout à fait <span class="kw">l'inverse</span>.</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="c5" class="slot clip" data-start="46.9" data-duration="7.0" data-track-index="2">
+        <div class="wrap">
+          <div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">Ce que vous y gagnez</div>
+            <div class="row"><i class="dot"></i><span>Une <span class="kw">satisfaction</span> opératoire réelle</span></div>
+            <div class="row"><i class="dot"></i><span>La qualité de vie de <span class="kw">vos patients</span></span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="c6" class="slot clip" data-start="54.5" data-duration="10.3" data-track-index="2">
+        <div class="wrap">
+          <div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">Les formations</div>
+            <div class="searchbar">
+              <svg class="mag" width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="7" stroke="#5FE8FF" stroke-width="2.4" />
+                <path d="M16.5 16.5L21 21" stroke="#5FE8FF" stroke-width="2.4" stroke-linecap="round" />
+              </svg>
+              <span class="txt" id="typed"></span><span class="caret" id="caret"></span>
+            </div>
+            <div class="sub">Microchirurgie orale · sessions dédiées</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ piste 3 : sous-titres ═══ -->
+      <div id="subs" class="clip" data-start="0" data-duration="66.3" data-track-index="3">
+        <div class="pill" id="sub-pill"></div>
+      </div>
+
+      <!-- ═══ piste 4 : filigrane ═══ -->
+      <div id="mark" class="clip" data-start="0" data-duration="64.6" data-track-index="4">IMCP</div>
+
+      <!-- ═══ piste 5 : carton de fin ═══ -->
+      <div id="end" class="clip fill" data-start="64.6" data-duration="1.7" data-track-index="5">
+        <div class="stack">
+          <div id="end-glow" data-layout-allow-overflow></div>
+          <img src="logo-mark.png" alt="IMCP" />
+        </div>
+        <div class="u">imcpformations.fr</div>
+        <div class="n">Dr Fabrice Baudot</div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const DUR = 66.3;
+
+      /* ═══ Caméra multi-phase ═══════════════════════════════════════════
+         Poussée lente sur toute la durée + micro-dérive en Lissajous
+         (rapport 1.3, donc jamais de cycle qui se referme sur lui-même).
+         Origine à 42 % de hauteur : le visage reste le point fixe. */
+      const cam = { p: 0 };
+      tl.fromTo(cam, { p: 0 }, {
+        p: 1, duration: DUR, ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#shot");
+          if (!el) return;
+          const p = cam.p;
+          /* trois phases d'échelle, pas une rampe linéaire */
+          const s = p < 0.34 ? 1.0 + p * 0.132
+                  : p < 0.70 ? 1.045 + (p - 0.34) * 0.125
+                             : 1.09 - (p - 0.70) * 0.10;
+          const dx = Math.sin(p * Math.PI * 2 * 1.3) * 6;
+          const dy = Math.cos(p * Math.PI * 2) * 4;
+          el.style.transform = `translate(${dx}px, ${dy}px) scale(${s})`;
+        },
+      }, 0);
+
+      /* ═══ Sous-titres ══════════════════════════════════════════════════
+         Un seul tween sur toute la durée : la cue active se déduit du temps,
+         donc n'importe quel point d'atterrissage du seek donne le même état.
+         148 mots horodatés → 28 cues. */
+      const CUES = [{s:0.59,e:2.69,t:"Mes chers amis, je voudrais vous parler"},{s:2.69,e:3.99,t:"de microchirurgie."},{s:4.86,e:6.93,t:"J'ai cette approche dans ma pratique"},{s:6.93,e:9.65,t:"quotidienne en chirurgie orale depuis"},{s:9.65,e:12.21,t:"une trentaine d'années maintenant, car"},{s:12.21,e:14.39,t:"je travaille sous microscope opératoire."},{s:15.29,e:19.19,t:"C'est une approche qui est respectueuse"},{s:19.19,e:21.59,t:"des tissus, respectueuse de la"},{s:21.59,e:24.87,t:"vascularisation, qui apporte du confort"},{s:24.87,e:27.45,t:"opératoire, qui apporte de meilleurs"},{s:27.45,e:30.05,t:"résultats, de la prévisibilité dans tout"},{s:30.05,e:30.63,t:"ce que vous faites."},{s:31.17,e:33.37,t:"Alors oui, la microchirurgie peut"},{s:33.37,e:36.13,t:"paraître complexe, élitiste."},{s:37.13,e:38.85,t:"Certains me disent que c'est du"},{s:38.85,e:39.27,t:"show business."},{s:39.61,e:41.17,t:"C'est tout à fait l'inverse."},{s:41.31,e:44.23,t:"Je vous engage à vous intéresser à"},{s:44.23,e:46.35,t:"cette voie dans vos interventions."},{s:46.71,e:49.01,t:"La microchirurgie va vous apporter"},{s:49.01,e:51.25,t:"énormément de satisfaction et va"},{s:51.25,e:53.19,t:"permettre d'améliorer la qualité de vie"},{s:53.19,e:53.69,t:"de vos patients."},{s:54.21,e:56.41,t:"Alors venez nous rejoindre dans nos"},{s:56.41,e:58.63,t:"formations dédiées à cette approche"},{s:58.63,e:61.15,t:"microchirurgie orale sur microchirurgie."},{s:61.17,e:64.63,t:"imcpformations.fr"},{s:64.63,e:65.97,t:"À très bientôt."}];
+
+      const subState = { t: 0 };
+      tl.fromTo(subState, { t: 0 }, {
+        t: DUR, duration: DUR, ease: "none",
+        onUpdate: () => {
+          const pill = document.querySelector("#sub-pill");
+          if (!pill) return;
+          const now = subState.t;
+          let active = null;
+          for (let i = 0; i < CUES.length; i++) {
+            if (now >= CUES[i].s && now < CUES[i].e) { active = CUES[i]; break; }
+          }
+          /* Le carton de fin porte déjà l'URL : pas de doublon par-dessus. */
+          if (active && now < 64.6) {
+            pill.textContent = active.t;
+            pill.style.opacity = "1";
+          } else {
+            pill.textContent = "";
+            pill.style.opacity = "0";
+          }
+        },
+      }, 0);
+
+      /* ═══ Cartons ══════════════════════════════════════════════════════
+         Sélecteurs GSAP, jamais de nœuds capturés au chargement : le moteur
+         réarrange les sous-arbres de clip, une référence prise trop tôt se
+         retrouve détachée et le tween devient un no-op silencieux.
+         Aura : pic + amplitude ≤ 0.45, plafond ambient-glow-bloom. */
+      const G_PEAK = 0.38, G_AMP = 0.04;
+      const CARDS = [
+        { id: "#c1", at: 0.8,  dur: 3.7,  cyc: 1 },
+        { id: "#c2", at: 5.2,  dur: 9.4,  cyc: 2 },
+        { id: "#c3", at: 15.6, dur: 15.2, cyc: 2 },
+        { id: "#c4", at: 31.5, dur: 9.9,  cyc: 2 },
+        { id: "#c5", at: 46.9, dur: 7.0,  cyc: 1 },
+        { id: "#c6", at: 54.5, dur: 10.3, cyc: 2 },
+      ];
+      const SWEEP_FROM = -300, SWEEP_TO = 1010;
+
+      CARDS.forEach(function (c) {
+        const box = c.id + " .card";
+        const gsel = c.id + " .glow";
+        const BLOOM = 0.45;
+        const OUT = c.at + c.dur - 0.35;
+
+        tl.fromTo(box, { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, c.at);
+        if (document.querySelectorAll(c.id + " .row").length) {
+          tl.fromTo(c.id + " .row", { opacity: 0, x: 32 },
+            { opacity: 1, x: 0, duration: 0.36, ease: "power3.out", stagger: 0.13 }, c.at + 0.18);
+        }
+        tl.fromTo(gsel, { opacity: 0, scale: 0.86 },
+          { opacity: G_PEAK, scale: 1, duration: BLOOM, ease: "power2.out" }, c.at);
+
+        /* Respiration bornée par un tween de phase fini — ni yoyo ni
+           repeat:-1, qui cassent le seek. */
+        const ph = { v: 0 };
+        tl.to(ph, {
+          v: Math.PI * 2 * c.cyc,
+          duration: Math.max(0.1, c.dur - BLOOM - 0.35),
+          ease: "none",
+          onUpdate: () => {
+            const el = document.querySelector(gsel);
+            if (!el) return;
+            const k = Math.sin(ph.v);
+            el.style.opacity = String(G_PEAK + k * G_AMP);
+            el.style.transform = `scale(${1 + k * 0.022})`;
+          },
+        }, c.at + BLOOM);
+
+        tl.fromTo(c.id + " .sweep", { x: SWEEP_FROM }, { x: SWEEP_TO, duration: 1.2, ease: "none" }, c.at + 0.4);
+        tl.set(c.id + " .sweep", { x: SWEEP_FROM }, c.at + c.dur);
+
+        tl.to(box, { opacity: 0, duration: 0.35 }, OUT);
+        tl.to(gsel, { opacity: 0, duration: 0.35 }, OUT);
+        tl.set(box, { opacity: 0 }, c.at + c.dur);
+        tl.set(gsel, { opacity: 0 }, c.at + c.dur);
+      });
+
+      /* ═══ C2 · le chiffre monte ═══ */
+      const cnt = { v: 0 };
+      tl.fromTo(cnt, { v: 0 }, {
+        v: 30, duration: 1.1, ease: "power2.out",
+        onUpdate: () => {
+          const el = document.querySelector("#c2 .stat .n");
+          if (el) el.textContent = String(Math.round(cnt.v));
+        },
+      }, 5.5);
+
+      /* ═══ C4 · le pivot ═══
+         L'objection s'installe, se fait barrer, puis le retournement arrive.
+         Punch-in plus sec que les autres cartons — courbe différente, sinon
+         la succession prend un roulis mécanique. */
+      tl.fromTo("#c4 .obj", { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power3.out", stagger: 0.5 }, 31.8);
+      /* Identifiants explicites, pas :first-of-type — celui-ci porte sur le
+         type d'élément (div), et le premier div de la carte est .kicker : le
+         sélecteur ne matchait rien et les barrés ne se jouaient jamais. */
+      tl.fromTo("#obj-a i", { scaleX: 0 },
+        { scaleX: 1, duration: 0.45, ease: "power2.inOut" }, 34.6);
+      tl.fromTo("#obj-b i", { scaleX: 0 },
+        { scaleX: 1, duration: 0.45, ease: "power2.inOut" }, 38.9);
+      tl.fromTo("#c4 .flip", { opacity: 0, y: 26, scale: 0.94 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.9)" }, 39.6);
+
+      /* ═══ C6 · l'URL se tape ═══
+         Découpe déterministe par tween de phase couvrant TOUTE la fenêtre du
+         carton : aucun état résiduel, quel que soit le point de seek. */
+      const URL = "imcpformations.fr";
+      const C6_AT = 54.5, C6_DUR = 10.3;
+      const LEAD = 0.09, SPAN = 0.20;
+      const typeState = { p: 0 };
+      tl.fromTo(typeState, { p: 0 }, {
+        p: 1, duration: C6_DUR, ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#typed");
+          if (!el) return;
+          const k = Math.min(1, Math.max(0, (typeState.p - LEAD) / SPAN));
+          el.textContent = URL.slice(0, Math.round(k * URL.length));
+        },
+      }, C6_AT);
+
+      /* Curseur : 13 cycles finis, jamais repeat:-1. */
+      const caret = { v: 0 };
+      tl.to(caret, {
+        v: 13, duration: 9.6, ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#caret");
+          if (el) el.style.opacity = (caret.v % 1) < 0.5 ? "1" : "0.12";
+        },
+      }, 54.8);
+      tl.set("#caret", { opacity: 1 }, C6_AT + C6_DUR);
+
+      /* ═══ Carton de fin ═══ */
+      tl.fromTo("#end-glow", { opacity: 0, scale: 0.88 },
+        { opacity: 0.28, scale: 1, duration: 0.7, ease: "power2.out" }, 64.75);
+      tl.fromTo("#end img", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 64.75);
+      tl.fromTo("#end .u", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 65.0);
+      tl.fromTo("#end .n", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 65.25);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

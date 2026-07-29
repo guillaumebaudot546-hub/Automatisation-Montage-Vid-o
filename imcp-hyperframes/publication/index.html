@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="fr" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0; width: 1080px; height: 1920px;
+        overflow: hidden; background: #060d18;
+      }
+      body { font-family: Roboto, sans-serif; }
+
+      :root {
+        --fluo: #5fe8ff;
+        --ivory: #f4f1ea;
+        --slate: #8fa3b8;
+        --champagne: #d8c7a8;
+        --bg: #060d18;
+      }
+
+      .fill { position: absolute; inset: 0; }
+      .cover { width: 100%; height: 100%; object-fit: cover; }
+      .contain { width: 100%; height: 100%; object-fit: contain; }
+
+      /* Chaque plan porte sa propre poussée. Échelle toujours ≥ 1 avec
+         object-fit cover → aucun bord découvert. */
+      .seg { transform-origin: 50% 50%; will-change: transform; }
+
+      #sting-bg { filter: blur(46px) brightness(0.45); transform: scale(1.6); }
+
+      /* Voile bas continu : le papier est clair et très contrasté, sans lui
+         aucun texte ne tient les 3:1 par-dessus. */
+      #scrim {
+        position: absolute; left: 0; right: 0; bottom: 0; height: 52%;
+        background: linear-gradient(
+          to bottom,
+          rgba(6, 13, 24, 0) 0%,
+          rgba(6, 13, 24, 0.62) 38%,
+          rgba(6, 13, 24, 0.93) 100%
+        );
+      }
+      /* Voile haut : le filigrane se pose sur des pages blanches. */
+      #scrim-top {
+        position: absolute; left: 0; right: 0; top: 0; height: 16%;
+        background: linear-gradient(
+          to bottom,
+          rgba(6, 13, 24, 0.72) 0%,
+          rgba(6, 13, 24, 0) 100%
+        );
+      }
+
+      #mark {
+        position: absolute; top: 40px; right: 48px;
+        padding: 10px 18px; border-radius: 12px;
+        background: rgba(6, 13, 24, 0.62);
+        font-size: 30px; font-weight: 800; letter-spacing: 0.16em;
+        color: var(--fluo);
+      }
+
+      /* ---- Panneaux ----
+         .slot = clip (le moteur gère la visibilité)
+         .panel = calque animé (fondus + hard kill GSAP) */
+      .slot { position: absolute; left: 52px; right: 52px; bottom: 104px; }
+      .wrap { position: relative; }
+      .panel-glow {
+        position: absolute; inset: -140px; z-index: 1; opacity: 0;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.62) 0%,
+          rgba(95, 232, 255, 0.22) 52%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      .panel {
+        position: relative; z-index: 2; overflow: hidden;
+        padding: 40px 46px 44px;
+        background: rgba(6, 13, 24, 0.93);
+        border: 1.5px solid rgba(95, 232, 255, 0.55);
+        border-radius: 22px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      }
+      .sweep {
+        position: absolute; top: 0; bottom: 0; left: 0; width: 260px; z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(
+          105deg,
+          rgba(95, 232, 255, 0) 0%,
+          rgba(95, 232, 255, 0.2) 50%,
+          rgba(95, 232, 255, 0) 100%
+        );
+      }
+      .panel .kicker {
+        font-size: 23px; font-weight: 800; letter-spacing: 0.2em;
+        text-transform: uppercase; color: var(--champagne); margin-bottom: 24px;
+      }
+      .panel .lede {
+        font-family: "EB Garamond", serif;
+        font-size: 58px; line-height: 1.16; color: var(--ivory); margin-bottom: 10px;
+      }
+      .panel .sub {
+        font-size: 30px; font-weight: 500; color: var(--slate); margin-top: 16px;
+      }
+      .panel .quote {
+        font-size: 36px; line-height: 1.3; font-weight: 600; color: var(--ivory);
+      }
+      .panel .row { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; }
+      .panel .row:last-child { margin-bottom: 0; }
+      .panel .dot {
+        width: 11px; height: 11px; border-radius: 6px; flex: none;
+        background: var(--fluo); box-shadow: 0 0 16px rgba(95, 232, 255, 0.75);
+      }
+      .panel .row span { font-size: 33px; font-weight: 600; color: var(--ivory); }
+      .panel .kw { color: var(--fluo); }
+
+      /* ---- Carton de fin ---- */
+      #end-card {
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        background: var(--bg); text-align: center;
+      }
+      #end-card .logo-stack { position: relative; display: inline-block; }
+      #end-logo-glow {
+        position: absolute; inset: -190px; z-index: 1; opacity: 0;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.55) 0%,
+          rgba(95, 232, 255, 0.18) 54%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      #end-card img { position: relative; z-index: 2; width: 340px; display: block; }
+      #end-card .name {
+        font-family: "EB Garamond", serif; font-style: italic;
+        font-size: 46px; color: var(--ivory); margin-top: 36px;
+      }
+      #end-card .disc {
+        font-size: 21px; letter-spacing: 0.24em; text-transform: uppercase;
+        color: var(--slate); margin-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Capsule « Publication » — moteur HyperFrames.
+      Source : WhatsApp Video 2026-07-21 09.38.06 → pub-source.mp4
+      (576×1024 redressé et remonté en 1080×1920 ; l'original est passé par la
+      compression WhatsApp, l'image reste molle — c'est la limite du rush.)
+
+      AUCUNE VOIX sur la source : profil audio entre -49 et -65 dB sur toute la
+      durée, c'est-à-dire du bruit de manipulation. La piste est donc écartée et
+      la capsule est MUETTE — il lui faut un lit musical avant diffusion.
+      Pas de sous-titres non plus : il n'y a rien à sous-titrer.
+
+      Les six plans sont RÉORDONNÉS (la couverture ouvre, alors qu'elle arrive à
+      5 s dans le rush). Sans voix, une coupe ne détruit aucun sens — la
+      contrainte de continuité qui s'appliquait à la capsule sutures ne vaut pas ici.
+
+      Tous les libellés proviennent du texte lisible à l'image ; rien n'est
+      inventé sur le plan clinique.
+    -->
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="30.7"
+      data-width="1080"
+      data-height="1920"
+      data-fps="30"
+    >
+      <!-- ===== piste 0 : plans ===== -->
+      <video
+        id="sting-bg" class="clip fill" src="intro-imcp.mp4" muted playsinline
+        data-start="0" data-duration="2.5" data-media-start="7" data-track-index="0"
+        style="object-fit: cover"
+      ></video>
+      <video
+        id="seg-cover" class="clip fill cover seg" src="pub-source.mp4" muted playsinline
+        data-start="2.5" data-duration="3" data-media-start="5.3" data-track-index="0"
+      ></video>
+      <video
+        id="seg-title" class="clip fill cover seg" src="pub-source.mp4" muted playsinline
+        data-start="5.5" data-duration="4" data-media-start="0.2" data-track-index="0"
+      ></video>
+      <video
+        id="seg-case" class="clip fill cover seg" src="pub-source.mp4" muted playsinline
+        data-start="9.5" data-duration="4.5" data-media-start="12" data-track-index="0"
+      ></video>
+      <video
+        id="seg-implant" class="clip fill cover seg" src="pub-source.mp4" muted playsinline
+        data-start="14" data-duration="6" data-media-start="21" data-track-index="0"
+      ></video>
+      <video
+        id="seg-prosth" class="clip fill cover seg" src="pub-source.mp4" muted playsinline
+        data-start="20" data-duration="3.5" data-media-start="27" data-track-index="0"
+      ></video>
+      <video
+        id="seg-author" class="clip fill cover seg" src="pub-source.mp4" muted playsinline
+        data-start="23.5" data-duration="3.7" data-media-start="31.8" data-track-index="0"
+      ></video>
+
+      <!-- ===== piste 1 : sting premier plan + carton de fin ===== -->
+      <video
+        id="sting" class="clip fill contain" src="intro-imcp.mp4" muted playsinline
+        data-start="0" data-duration="2.5" data-media-start="7" data-track-index="1"
+      ></video>
+      <div id="end-card" class="clip fill" data-start="27.2" data-duration="3.5" data-track-index="1">
+        <div class="logo-stack">
+          <div id="end-logo-glow" data-layout-allow-overflow></div>
+          <img src="logo-mark.png" alt="IMCP" />
+        </div>
+        <div class="name">Dr Fabrice Baudot</div>
+        <div class="disc">CI ceramic implants · 1/26</div>
+      </div>
+
+      <!-- ===== piste 2 : voiles ===== -->
+      <div id="scrim" class="clip" data-start="2.5" data-duration="24.7" data-track-index="2"></div>
+
+      <!-- ===== piste 3 : panneaux ===== -->
+      <div id="pan-cover" class="slot clip" data-start="2.5" data-duration="3" data-track-index="3">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">Publication</div>
+            <div class="lede">CI — ceramic implants</div>
+            <div class="sub">International magazine of ceramic implant technology · 1/26</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pan-title" class="slot clip" data-start="5.5" data-duration="4" data-track-index="3">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">Case report</div>
+            <div class="quote">A modern approach to implantology with the <span class="kw">TBR Z1 hybrid implant</span></div>
+            <div class="sub">Dr Fabrice Baudot — France</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pan-case" class="slot clip" data-start="9.5" data-duration="4.5" data-track-index="3">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">Le cas</div>
+            <div class="row"><i class="dot"></i><span><span class="kw">Implantation immédiate</span></span></div>
+            <div class="row"><i class="dot"></i><span>Implants céramiques deux pièces</span></div>
+            <div class="row"><i class="dot"></i><span>Secteur antérieur</span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pan-implant" class="slot clip" data-start="14" data-duration="6" data-track-index="3">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">L'implant</div>
+            <div class="row"><i class="dot"></i><span>Implant hybride <span class="kw">TBR Z1</span></span></div>
+            <div class="row"><i class="dot"></i><span>Col zircone transgingival</span></div>
+            <div class="row"><i class="dot"></i><span>Stabilité péri-implantaire</span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pan-prosth" class="slot clip" data-start="20" data-duration="3.5" data-track-index="3">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">La prothèse</div>
+            <div class="row"><i class="dot"></i><span>Connexion <span class="kw">vissée</span></span></div>
+            <div class="row"><i class="dot"></i><span>Espace biologique sécurisé par le col</span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pan-author" class="slot clip" data-start="23.5" data-duration="3.7" data-track-index="3">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">Article complet</div>
+            <div class="lede">Dr Fabrice Baudot</div>
+            <div class="sub">IMCP · Formations microchirurgie</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== piste 4 : filigrane + voile haut ===== -->
+      <div id="scrim-top" class="clip" data-start="2.5" data-duration="24.7" data-track-index="4"></div>
+
+      <!-- ===== piste 5 : filigrane ===== -->
+      <div id="mark" class="clip" data-start="2.5" data-duration="24.7" data-track-index="5">IMCP</div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      const PANEL_W = 976; /* 1080 − 2 × 52 */
+      const SWEEP_START_X = -300;
+      const SWEEP_END_X = PANEL_W + 40;
+
+      /* ── Plans ────────────────────────────────────────────────────────────
+         Poussée lente sur chaque plan, sens alterné : à sens constant la
+         succession prend un roulis mécanique. Départ à 1.03 et non 1.0 —
+         à l'échelle neutre un arrondi sous-pixel peut laisser filtrer un bord. */
+      const SEGS = [
+        { sel: "#seg-cover", at: 2.5, dur: 3.0, from: 1.03, to: 1.1 },
+        { sel: "#seg-title", at: 5.5, dur: 4.0, from: 1.12, to: 1.03 },
+        { sel: "#seg-case", at: 9.5, dur: 4.5, from: 1.03, to: 1.12 },
+        { sel: "#seg-implant", at: 14.0, dur: 6.0, from: 1.14, to: 1.03 },
+        { sel: "#seg-prosth", at: 20.0, dur: 3.5, from: 1.03, to: 1.1 },
+        { sel: "#seg-author", at: 23.5, dur: 3.7, from: 1.12, to: 1.03 },
+      ];
+      SEGS.forEach(function (s) {
+        tl.fromTo(s.sel, { scale: s.from }, { scale: s.to, duration: s.dur, ease: "none" }, s.at);
+      });
+
+      /* ── Panneaux ─────────────────────────────────────────────────────────
+         Les fondus portent sur .panel (calque interne), jamais sur l'élément
+         `clip` : chaque sortie se clôt par un tl.set, sinon un seek non-linéaire
+         atterrit après le fondu et laisse un état fantôme.
+         Aura : pic + amplitude ≤ 0.45 (plafond ambient-glow-bloom). */
+      /* 0,42 + 0,03 = 0,45, exactement le plafond ambient-glow-bloom. Il faut
+         ce niveau ici : le voile bas est dense et écrase un halo plus discret. */
+      const GLOW_PEAK = 0.42, OPACITY_AMP = 0.03, SCALE_AMP = 0.022;
+      const PANELS = [
+        { sel: "#pan-cover", at: 2.5, dur: 3.0, cycles: 1 },
+        { sel: "#pan-title", at: 5.5, dur: 4.0, cycles: 1 },
+        { sel: "#pan-case", at: 9.5, dur: 4.5, cycles: 1 },
+        { sel: "#pan-implant", at: 14.0, dur: 6.0, cycles: 2 },
+        { sel: "#pan-prosth", at: 20.0, dur: 3.5, cycles: 1 },
+        { sel: "#pan-author", at: 23.5, dur: 3.7, cycles: 1 },
+      ];
+
+      PANELS.forEach(function (p) {
+        const box = p.sel + " .panel";
+        /* Sélecteur et non noeud capturé : le moteur réarrange les sous-arbres
+           de clip, une référence prise au chargement se retrouve détachée et
+           les tweens de halo deviennent des no-op silencieux. */
+        const glowSel = p.sel + " .panel-glow";
+        const BLOOM_DUR = 0.45;
+        const OUT_AT = p.at + p.dur - 0.35;
+
+        tl.fromTo(box, { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, p.at);
+        /* Trois panneaux n'ont pas de puces : sans ce garde, GSAP avertit sur
+           une cible absente à chaque build. */
+        if (document.querySelectorAll(p.sel + " .row").length) {
+          tl.fromTo(
+            p.sel + " .row",
+            { opacity: 0, x: 32 },
+            { opacity: 1, x: 0, duration: 0.36, ease: "power3.out", stagger: 0.12 },
+            p.at + 0.18
+          );
+        }
+        tl.fromTo(
+          glowSel,
+          { opacity: 0, scale: 0.86 },
+          { opacity: GLOW_PEAK, scale: 1, duration: BLOOM_DUR, ease: "power2.out" },
+          p.at
+        );
+
+        /* Respiration bornée par un tween de phase fini — jamais de yoyo ni de
+           repeat:-1, qui cassent le seek. */
+        const phase = { p: 0 };
+        tl.to(
+          phase,
+          {
+            p: Math.PI * 2 * p.cycles,
+            duration: p.dur - BLOOM_DUR - 0.35,
+            ease: "none",
+            onUpdate: () => {
+              const el = document.querySelector(glowSel);
+              if (!el) return;
+              const s = Math.sin(phase.p);
+              el.style.opacity = String(GLOW_PEAK + s * OPACITY_AMP);
+              el.style.transform = `scale(${1 + s * SCALE_AMP})`;
+            },
+          },
+          p.at + BLOOM_DUR
+        );
+
+        /* Balayage : une passe, hors surface aux deux bouts. */
+        tl.fromTo(p.sel + " .sweep", { x: SWEEP_START_X }, { x: SWEEP_END_X, duration: 1.2, ease: "none" }, p.at + 0.4);
+        tl.set(p.sel + " .sweep", { x: SWEEP_START_X }, p.at + p.dur);
+
+        tl.to(box, { opacity: 0, duration: 0.35 }, OUT_AT);
+        tl.to(glowSel, { opacity: 0, duration: 0.35 }, OUT_AT);
+        tl.set(box, { opacity: 0 }, p.at + p.dur);
+        tl.set(glowSel, { opacity: 0 }, p.at + p.dur);
+      });
+
+      /* ── Carton de fin ── entrées uniquement (la sortie appartient au clip) */
+      tl.fromTo("#end-logo-glow", { opacity: 0, scale: 0.88 }, { opacity: 0.26, scale: 1, duration: 0.8, ease: "power2.out" }, 27.35);
+      tl.fromTo("#end-card img", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55 }, 27.35);
+      tl.fromTo("#end-card .name", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55 }, 27.7);
+      tl.fromTo("#end-card .disc", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55 }, 28.05);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

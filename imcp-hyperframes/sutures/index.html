@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="fr" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/TextPlugin.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0; width: 1080px; height: 1920px;
+        overflow: hidden; background: #060d18;
+      }
+      /* Polices nommées telles que le moteur les rend (évite la substitution
+         entre preview et render signalée par `hyperframes check`). */
+      body { font-family: Roboto, sans-serif; }
+
+      :root {
+        --fluo: #5fe8ff;        /* cyan fluo : mots-clés */
+        --ivory: #f4f1ea;
+        --slate: #8fa3b8;
+        --champagne: #d8c7a8;
+        --bg: #060d18;
+      }
+
+      .fill { position: absolute; inset: 0; }
+      .cover { width: 100%; height: 100%; object-fit: cover; }
+      .contain { width: 100%; height: 100%; object-fit: contain; }
+
+      /* Caméra : scale ≥ 1 en permanence + object-fit cover → jamais de bord exposé. */
+      #a-roll { transform-origin: 50% 50%; will-change: transform; }
+
+      #sting-bg { filter: blur(46px) brightness(0.45); transform: scale(1.6); }
+
+      #scrim {
+        position: absolute; left: 0; right: 0; bottom: 0; height: 46%;
+        background: linear-gradient(
+          to bottom,
+          rgba(6, 13, 24, 0) 0%,
+          rgba(6, 13, 24, 0.55) 42%,
+          rgba(6, 13, 24, 0.88) 100%
+        );
+      }
+
+      /* ---- Carton titre ---- */
+      #title-card {
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        background: var(--bg); text-align: center; padding: 0 90px;
+      }
+      #title-card .eyebrow {
+        font-size: 27px; letter-spacing: 0.22em; text-transform: uppercase;
+        font-weight: 700; color: var(--fluo); margin-bottom: 34px;
+      }
+      #title-card .headline {
+        font-family: "EB Garamond", serif;
+        font-size: 78px; line-height: 1.16; color: var(--ivory);
+      }
+      #title-card .rule {
+        width: 190px; height: 1px; background: var(--champagne);
+        opacity: 0.55; margin-top: 44px;
+      }
+
+      #mark {
+        position: absolute; top: 40px; right: 48px;
+        padding: 10px 18px; border-radius: 12px;
+        background: rgba(6, 13, 24, 0.62);
+        font-size: 30px; font-weight: 800; letter-spacing: 0.16em;
+        color: var(--fluo);
+      }
+
+      /* ---- Panneaux bas ----
+         .slot  = élément `clip` (visibilité gérée par le moteur)
+         .wrap  = pile de composition (halo derrière, panneau devant)
+         .panel = calque animé (fondus + hard kill GSAP) */
+      .slot { position: absolute; left: 52px; right: 52px; bottom: 96px; }
+      .wrap { position: relative; }
+
+      /* Aura cyan : couche dédiée DERRIÈRE le panneau (jamais un box-shadow
+         sur le panneau lui-même — les deux se concurrencent et rendent boueux). */
+      .panel-glow {
+        position: absolute; inset: -140px; z-index: 1; opacity: 0;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.62) 0%,
+          rgba(95, 232, 255, 0.22) 52%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      .panel {
+        position: relative; z-index: 2; overflow: hidden;
+        padding: 40px 46px 44px;
+        background: rgba(6, 13, 24, 0.92);
+        border: 1.5px solid rgba(95, 232, 255, 0.6);
+        border-radius: 22px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); /* profondeur, pas une lueur */
+      }
+      /* Balayage lumineux : une seule passe, entièrement hors surface aux deux bouts. */
+      .sweep {
+        position: absolute; top: 0; bottom: 0; left: 0; width: 260px; z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(
+          105deg,
+          rgba(95, 232, 255, 0) 0%,
+          rgba(95, 232, 255, 0.2) 50%,
+          rgba(95, 232, 255, 0) 100%
+        );
+      }
+      .panel .kicker {
+        font-size: 23px; font-weight: 800; letter-spacing: 0.2em;
+        text-transform: uppercase; color: var(--champagne); margin-bottom: 26px;
+      }
+      .panel .row { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+      .panel .row:last-child { margin-bottom: 0; }
+      .panel .dot {
+        width: 11px; height: 11px; border-radius: 6px; flex: none;
+        background: var(--fluo); box-shadow: 0 0 16px rgba(95, 232, 255, 0.75);
+      }
+      .panel .row span { font-size: 34px; font-weight: 600; color: var(--ivory); }
+
+      .cols { display: flex; gap: 34px; }
+      .col { flex: 1; min-width: 0; }
+      .col .head {
+        font-size: 23px; font-weight: 800; letter-spacing: 0.16em;
+        text-transform: uppercase; margin-bottom: 22px;
+      }
+      .col.yes .head { color: var(--fluo); }
+      .col.no .head { color: var(--champagne); }
+      .col .row span { font-size: 29px; }
+      .col.no .dot { background: var(--champagne); box-shadow: none; opacity: 0.85; }
+
+      /* ---- Schémas SVG ----
+         Dessinés à la main, pas générés : contenu médical signé par un
+         praticien, l'exactitude prime. Couleurs = charte du logo. */
+      .dia { display: block; width: 100%; height: auto; margin-bottom: 22px; }
+      .panel .dia { max-width: 300px; }
+      /* Aiguille à droite des puces : centrée au-dessus d'un texte aligné à
+         gauche, elle flottait sans ancrage. */
+      .needle-row { display: flex; align-items: center; gap: 40px; }
+      .needle-row .rows { flex: 1; min-width: 0; }
+      .needle-row .dia { flex: none; width: 300px; margin-bottom: 0; }
+      #needle-glint { transform-box: fill-box; transform-origin: center; }
+      /* fill-box : sans lui, un scale GSAP sur un noeud SVG pivote autour de
+         l'origine du viewBox et le germe part en diagonale. */
+      .germ { transform-box: fill-box; transform-origin: center; }
+
+      /* Plaque de fond générée + voile : les blooms cyan des bords montent haut
+         en luminance, le voile central garde le texte lisible par-dessus.
+         overflow hidden sur le conteneur → la poussée ne découvre aucun bord. */
+      .plate-wrap { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+      .plate { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .plate-veil {
+        position: absolute; inset: 0;
+        background: radial-gradient(
+          64% 48% at 50% 50%,
+          rgba(6, 13, 24, 0.74) 0%,
+          rgba(6, 13, 24, 0.36) 78%
+        );
+      }
+      #title-card > *:not(.plate-wrap),
+      #end-card > *:not(.plate-wrap) { position: relative; z-index: 1; }
+
+      /* Insert matière : la photo remplace le schéma vectoriel du fil.
+         Échelle toujours ≥ 1 avec object-fit cover → poussée sans bord exposé. */
+      .shot {
+        position: relative; overflow: hidden; border-radius: 14px;
+        height: 170px; margin-bottom: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.10);
+      }
+      .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      /* Le fond de la photo tressé sort plus clair que celui du monofilament :
+         côte à côte, la carte de droite paraît délavée. On rapproche les
+         densités pour que l'œil compare les matières, pas les expositions. */
+      #shot-tresse { filter: brightness(0.8) saturate(1.06); }
+
+      /* ---- Barre de recherche animée (CTA) ---- */
+      #search-cta {
+        position: absolute; left: 0; right: 0; top: 150px;
+        display: flex; justify-content: center;
+      }
+      .cta-stack { position: relative; }
+      .cta-glow {
+        position: absolute; inset: -120px; z-index: 1; opacity: 0;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.6) 0%,
+          rgba(95, 232, 255, 0.2) 54%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      .cta-inner { position: relative; z-index: 2; text-align: center; }
+      /* Fond sombre : sans lui le champagne tombe à 2,68:1 sur l'image. */
+      .cta-kicker {
+        display: inline-block; padding: 9px 20px; border-radius: 10px;
+        background: rgba(2, 7, 13, 0.72);
+        font-size: 25px; font-weight: 700; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--champagne); margin-bottom: 20px;
+      }
+      /* Halo cyan + anneau noir autour de la barre. */
+      .search-bar {
+        display: flex; align-items: center; gap: 18px;
+        padding: 20px 34px; border-radius: 999px;
+        background: rgba(2, 7, 13, 0.94);
+        border: 2px solid rgba(95, 232, 255, 0.6);
+        box-shadow: 0 0 0 7px rgba(0, 0, 0, 0.42);
+      }
+      .search-bar .mag { flex: none; }
+      .typed {
+        /* Chasse fixe : une police proportionnelle fait dériver le curseur en
+           cours de frappe. JetBrains Mono est auto-résolue par le moteur —
+           Roboto Mono ne l'est pas et tombe en fallback générique. */
+        font-family: "JetBrains Mono", monospace;
+        white-space: pre;
+        font-size: 36px; font-weight: 500; color: var(--ivory);
+      }
+      .caret {
+        display: inline-block; width: 14px; height: 36px;
+        background: var(--fluo); /* curseur = bloc coloré : background, pas color */
+        vertical-align: -6px; margin-left: 5px;
+      }
+
+      /* ---- Sous-titres ---- */
+      .cap {
+        position: absolute; left: 70px; right: 70px; bottom: 132px;
+        text-align: center; font-size: 41px; line-height: 1.32; font-weight: 600;
+        color: #fff; text-shadow: 0 3px 20px rgba(0, 0, 0, 0.9);
+      }
+      .cap-in { display: inline-block; }
+      .cap .kw { color: var(--fluo); }
+
+      /* ---- Carton de fin ---- */
+      #end-card {
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        background: var(--bg); text-align: center;
+      }
+      #end-card .logo-stack { position: relative; display: inline-block; }
+      #end-logo-glow {
+        position: absolute; inset: -190px; z-index: 1; opacity: 0;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.55) 0%,
+          rgba(95, 232, 255, 0.18) 54%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      #end-card img { position: relative; z-index: 2; width: 340px; display: block; }
+      #end-card .name {
+        font-family: "EB Garamond", serif; font-style: italic;
+        font-size: 46px; color: var(--ivory); margin-top: 36px;
+      }
+      #end-card .disc {
+        font-size: 21px; letter-spacing: 0.28em; text-transform: uppercase;
+        color: var(--slate); margin-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      Capsule « Fils de suture & aiguilles » — moteur HyperFrames.
+      Source : imcp3181-loud.mp4 (rush IMG_3181, audio normalisé -14,9 dB).
+      UN SEUL span continu : contenu source 0 → 71,15 s, aucune coupe de voix.
+      Timeline absolue : sting 0-2,5 | titre 2,5-5,5 | parole 5,5-76,65 | fin 76,65-80,65.
+      Décalage contenu → absolu : +5,5 s.
+      Motion : caméra multi-phases + micro-dérive sur le rush, aura cyan bornée
+      derrière chaque panneau, balayage une passe, barre de recherche dactylographiée.
+      Une piste par famille de calques — deux clips ne se recouvrent jamais sur une même piste.
+    -->
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="80.65"
+      data-width="1080"
+      data-height="1920"
+      data-fps="30"
+    >
+      <!-- ===== piste 0 : fond ===== -->
+      <video
+        id="sting-bg" class="clip fill" src="intro-imcp.mp4" muted playsinline
+        data-start="0" data-duration="2.5" data-media-start="7" data-track-index="0"
+        style="object-fit: cover"
+      ></video>
+      <video
+        id="a-roll" class="clip fill cover" src="imcp3181-loud.mp4" muted playsinline
+        data-start="5.5" data-duration="71.15" data-media-start="0" data-track-index="0"
+      ></video>
+
+      <!-- ===== piste 1 : sting premier plan, carton titre, voile bas ===== -->
+      <div id="scrim" class="clip" data-start="5.5" data-duration="71.15" data-track-index="1"></div>
+      <video
+        id="sting" class="clip fill contain" src="intro-imcp.mp4" muted playsinline
+        data-start="0" data-duration="2.5" data-media-start="7" data-track-index="1"
+      ></video>
+      <div id="title-card" class="clip fill" data-start="2.5" data-duration="3" data-track-index="1">
+        <div class="plate-wrap">
+          <img class="plate" id="plate-title" src="bg-studio.png" alt="" />
+          <div class="plate-veil"></div>
+        </div>
+        <div class="eyebrow">IMCP · Microchirurgie</div>
+        <div class="headline">Fils de suture &amp; aiguilles :<br />les bons critères</div>
+        <div class="rule"></div>
+      </div>
+
+      <!-- ===== piste 2 : la voix, jamais coupée ===== -->
+      <audio
+        id="a-roll-audio" src="imcp3181-loud.mp4"
+        data-start="5.5" data-duration="71.15" data-media-start="0"
+        data-track-index="2" data-volume="1"
+      ></audio>
+
+      <!-- ===== piste 3 : sous-titres (mot-clé = cyan fluo) ===== -->
+      <div id="cap-01" class="cap clip" data-start="5.65" data-duration="3.15" data-track-index="3">
+        <span class="cap-in">Aujourd'hui, je voudrais vous parler des <span class="kw">fils de suture</span> et des <span class="kw">aiguilles</span>.</span>
+      </div>
+      <div id="cap-02" class="cap clip" data-start="8.9" data-duration="3.7" data-track-index="3">
+        <span class="cap-in">Sur quels <span class="kw">critères</span> choisissez-vous vos fils de suture et vos aiguilles ?</span>
+      </div>
+      <div id="cap-03" class="cap clip" data-start="19.55" data-duration="6.75" data-track-index="3">
+        <span class="cap-in">Il faut être <span class="kw">efficace</span>, aller vite pour réduire les <span class="kw">suites opératoires</span>.</span>
+      </div>
+      <div id="cap-04" class="cap clip" data-start="26.45" data-duration="3.05" data-track-index="3">
+        <span class="cap-in">Il y a donc des <span class="kw">critères de choix</span> des fils de suture.</span>
+      </div>
+      <div id="cap-05" class="cap clip" data-start="29.65" data-duration="4.2" data-track-index="3">
+        <span class="cap-in">Premièrement, le fil : on parle de fil <span class="kw">monofilament</span>.</span>
+      </div>
+      <div id="cap-06" class="cap clip" data-start="47.45" data-duration="5.45" data-track-index="3">
+        <span class="cap-in">Concernant les aiguilles, on préfère des aiguilles très précises, avec des <span class="kw">angles aigus</span> :</span>
+      </div>
+      <div id="cap-07" class="cap clip" data-start="59.1" data-duration="2.9" data-track-index="3">
+        <span class="cap-in">Si vous voulez en savoir plus, je développe tous ces concepts dans mon <span class="kw">enseignement</span></span>
+      </div>
+      <div id="cap-08" class="cap clip" data-start="62.1" data-duration="7.4" data-track-index="3">
+        <span class="cap-in">que je propose <span class="kw">online</span>, sur des vidéos beaucoup plus longues où l'on pourra discuter de tout cela.</span>
+      </div>
+      <div id="cap-09" class="cap clip" data-start="69.8" data-duration="6.1" data-track-index="3">
+        <span class="cap-in">Je vous engage à suivre tout ça sur <span class="kw">mon site</span>.</span>
+      </div>
+      <div id="cap-10" class="cap clip" data-start="76" data-duration="0.6" data-track-index="3">
+        <span class="cap-in"><span class="kw">À très vite.</span></span>
+      </div>
+
+      <!-- ===== piste 4 : panneaux, chacun auréolé de cyan ===== -->
+      <div id="panel-a" class="slot clip" data-start="12.9" data-duration="6.3" data-track-index="4">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">En microchirurgie</div>
+            <div class="row"><i class="dot"></i><span>Respecter les tissus</span></div>
+            <div class="row"><i class="dot"></i><span>Préserver la vascularisation</span></div>
+            <div class="row"><i class="dot"></i><span>Éviter les tensions</span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-b" class="slot clip" data-start="33.9" data-duration="13.4" data-track-index="4">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">Le premier critère : la structure du fil</div>
+            <div class="cols">
+              <div class="col yes">
+                <div class="head">Oui — monofilament</div>
+                <div class="shot"><img id="shot-mono" src="insert-mono.png" alt="" /></div>
+                <div class="row"><i class="dot"></i><span>Surface lisse</span></div>
+                <div class="row"><i class="dot"></i><span>Aucune rétention</span></div>
+                <div class="row"><i class="dot"></i><span>Passage atraumatique</span></div>
+              </div>
+              <div class="col no">
+                <div class="head">Non — tressé</div>
+                <!-- Même hauteur, même cadre que la colonne « Oui » : seule la
+                     matière change. L'écart de lumière (cyan / champagne) suit
+                     le codage couleur déjà en place dans la composition. -->
+                <div class="shot"><img id="shot-tresse" src="insert-tresse.png" alt="" /></div>
+                <div class="row"><i class="dot"></i><span>Retient les bactéries</span></div>
+                <div class="row"><i class="dot"></i><span>Inflammation post-op</span></div>
+                <div class="row"><i class="dot"></i><span>Effet scie</span></div>
+              </div>
+            </div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-c" class="slot clip" data-start="53" data-duration="6" data-track-index="4">
+        <div class="wrap">
+          <div class="panel-glow" data-layout-allow-overflow></div>
+          <div class="panel">
+            <div class="kicker">Les aiguilles</div>
+            <div class="needle-row">
+              <div class="rows">
+                <div class="row"><i class="dot"></i><span>Angles aigus</span></div>
+                <div class="row"><i class="dot"></i><span>Taper cut</span></div>
+                <div class="row"><i class="dot"></i><span>Geste précis et rapide</span></div>
+              </div>
+              <!-- Croissant 3/8 de cercle : arc externe plein, arête interne
+                   qui converge vers la pointe. Le corps s'affine de lui-même
+                   au lieu de porter un triangle rapporté — un corps d'épaisseur
+                   constante avec une pointe collée se lit comme une flèche. -->
+              <svg class="dia" id="dia-needle" viewBox="0 0 300 200" fill="none" aria-hidden="true">
+                <path d="M46 115 C 30 126, 20 112, 4 124" stroke="#8fa3b8"
+                      stroke-width="3.5" stroke-linecap="round" opacity="0.85" />
+                <!-- Les points de contrôle passent au-dessus de l'arc externe :
+                     c'est ce qui tire l'arête interne assez haut pour garder le
+                     corps élancé. Plus bas, la forme devient un croissant. -->
+                <path id="needle-body"
+                      d="M43.6 113.2 A 108 108 0 0 1 256.4 113.2 C 215 4, 88 8, 54.5 115.1 Z"
+                      fill="#5fe8ff" />
+                <circle id="needle-glint" cx="254" cy="112" r="8" fill="#eafcff" opacity="0" />
+              </svg>
+            </div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== piste 5 : barre de recherche qui tape l'adresse ===== -->
+      <div id="search-cta" class="clip" data-start="63.5" data-duration="13.15" data-track-index="5">
+        <div class="cta-stack">
+          <div class="cta-glow" data-layout-allow-overflow></div>
+          <div class="cta-inner">
+            <div class="cta-kicker">Formations microchirurgie</div>
+            <div class="search-bar">
+              <svg class="mag" width="38" height="38" viewBox="0 0 24 24" fill="none"
+                   stroke="#5fe8ff" stroke-width="2.2" stroke-linecap="round">
+                <circle cx="10.5" cy="10.5" r="6.5"></circle>
+                <line x1="15.4" y1="15.4" x2="21" y2="21"></line>
+              </svg>
+              <span class="typed" id="typed-url"></span><span class="caret" id="url-caret"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== piste 6 : filigrane ===== -->
+      <div id="mark" class="clip" data-start="5.5" data-duration="71.15" data-track-index="6">IMCP</div>
+
+      <!-- ===== piste 7 : carton de fin ===== -->
+      <div id="end-card" class="clip fill" data-start="76.65" data-duration="4" data-track-index="7">
+        <div class="plate-wrap">
+          <img class="plate" id="plate-end" src="bg-studio.png" alt="" />
+          <div class="plate-veil"></div>
+        </div>
+        <div class="logo-stack">
+          <div id="end-logo-glow" data-layout-allow-overflow></div>
+          <img src="logo-mark.png" alt="IMCP" />
+        </div>
+        <div class="name">Dr Fabrice Baudot</div>
+        <div class="disc">Microchirurgie · Laser Er-YAG</div>
+      </div>
+    </div>
+
+    <script>
+      gsap.registerPlugin(TextPlugin);
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* Constantes de layout pré-calculées — jamais de getBoundingClientRect()
+         au moment du tween (le rendu échantillonne en parallèle et désynchronise). */
+      const PANEL_W = 976;            /* 1080 − 2 × 52 */
+      const SWEEP_START_X = -300;     /* hors surface à gauche */
+      const SWEEP_END_X = PANEL_W + 40;
+
+      const AROLL_AT = 5.5;
+      const AROLL_DUR = 71.15;
+
+      /* ── Caméra multi-phases sur le rush ──────────────────────────────────
+         Un SEUL écrivain de a-roll.style.transform : l'échelle de phase et la
+         dérive se composent dans l'onUpdate du driver. Échelle toujours ≥ 1
+         (avec object-fit: cover) → aucun bord exposé. */
+      const aroll = document.getElementById("a-roll");
+      const cam = { scale: 1.0 };
+      tl.to(cam, { scale: 1.045, duration: 8, ease: "power2.out" }, AROLL_AT + 14);
+      tl.to(cam, { scale: 1.09, duration: 14, ease: "power2.inOut" }, AROLL_AT + 44);
+
+      const drift = { p: 0 };
+      const DRIFT_AMP_X = 5, DRIFT_AMP_Y = 3, DRIFT_FREQ_RATIO = 1.3, DRIFT_CYCLES = 2;
+      tl.to(
+        drift,
+        {
+          p: Math.PI * 2 * DRIFT_CYCLES,
+          duration: AROLL_DUR,
+          ease: "none",
+          onUpdate: () => {
+            const dx = Math.sin(drift.p) * DRIFT_AMP_X;
+            const dy = Math.sin(drift.p * DRIFT_FREQ_RATIO) * DRIFT_AMP_Y;
+            aroll.style.transform = `scale(${cam.scale}) translate(${dx}px, ${dy}px)`;
+          },
+        },
+        AROLL_AT
+      );
+
+      /* ── Carton titre ── entrées uniquement (la sortie appartient au clip) */
+      tl.fromTo("#title-card .eyebrow", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5 }, 2.6);
+      tl.fromTo("#title-card .headline", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6 }, 2.8);
+      tl.fromTo("#title-card .rule", { opacity: 0, scaleX: 0 }, { opacity: 0.55, scaleX: 1, duration: 0.6 }, 3.2);
+
+      /* ── Panneaux ─────────────────────────────────────────────────────────
+         Les fondus portent sur les calques INTERNES, jamais sur l'élément
+         `clip` : chaque sortie se clôt par un tl.set (hard kill), sinon un seek
+         non-linéaire atterrit après le fondu et laisse un état fantôme.
+         L'aura suit ambient-glow-bloom : pic ≤ 0.45, respiration bornée
+         (tween de phase fini), jamais de yoyo ni de repeat:-1. */
+      /* Pic + amplitude ≤ 0.45 (plafond ambient-glow-bloom) : 0,38 + 0,04 = 0,42. */
+      const GLOW_PEAK = 0.38, OPACITY_AMP = 0.04, SCALE_AMP = 0.022;
+      const panels = [
+        { sel: "#panel-a", at: 12.9, dur: 6.3, breatheCycles: 2 },
+        { sel: "#panel-b", at: 33.9, dur: 13.4, breatheCycles: 4 },
+        { sel: "#panel-c", at: 53.0, dur: 6.0, breatheCycles: 2 },
+      ];
+
+      panels.forEach(function (p) {
+        const box = p.sel + " .panel";
+        const glowEl = document.querySelector(p.sel + " .panel-glow");
+        const BLOOM_DUR = 0.5;
+        const OUT_AT = p.at + p.dur - 0.4;
+
+        /* Panneau : montée + cascade des lignes */
+        tl.fromTo(box, { opacity: 0, y: 46 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, p.at);
+        tl.fromTo(
+          p.sel + " .row",
+          { opacity: 0, x: 34 },
+          { opacity: 1, x: 0, duration: 0.4, ease: "power3.out", stagger: 0.13 },
+          p.at + 0.2
+        );
+
+        /* Aura : le halo et le panneau se posent comme UN seul temps */
+        tl.fromTo(
+          glowEl,
+          { opacity: 0, scale: 0.86 },
+          { opacity: GLOW_PEAK, scale: 1, duration: BLOOM_DUR, ease: "power2.out" },
+          p.at
+        );
+
+        /* Respiration bornée pendant le maintien */
+        const phase = { p: 0 };
+        const breatheDur = p.dur - BLOOM_DUR - 0.4;
+        tl.to(
+          phase,
+          {
+            p: Math.PI * 2 * p.breatheCycles,
+            duration: breatheDur,
+            ease: "none",
+            onUpdate: () => {
+              const s = Math.sin(phase.p);
+              glowEl.style.opacity = String(GLOW_PEAK + s * OPACITY_AMP);
+              glowEl.style.transform = `scale(${1 + s * SCALE_AMP})`;
+            },
+          },
+          p.at + BLOOM_DUR
+        );
+
+        /* Balayage : une seule passe, hors surface aux deux extrémités */
+        tl.fromTo(
+          p.sel + " .sweep",
+          { x: SWEEP_START_X },
+          { x: SWEEP_END_X, duration: 1.3, ease: "none" },
+          p.at + 0.45
+        );
+        tl.set(p.sel + " .sweep", { x: SWEEP_START_X }, p.at + p.dur);
+
+        /* Sorties + hard kills */
+        tl.to(box, { opacity: 0, duration: 0.4 }, OUT_AT);
+        tl.to(glowEl, { opacity: 0, duration: 0.4 }, OUT_AT);
+        tl.set(box, { opacity: 0 }, p.at + p.dur);
+        tl.set(glowEl, { opacity: 0 }, p.at + p.dur);
+      });
+
+      /* ── Schémas ──────────────────────────────────────────────────────────
+         Les deux fils entrent l'un après l'autre (34,25 puis 34,50) : l'œil
+         lit « lisse » avant « tressé », donc la comparaison dans le bon sens.
+         Les germes n'arrivent qu'une fois le tressage posé — la cause avant
+         la conséquence. Pas de hard kill : ces noeuds sont enfants de .panel,
+         dont l'opacité est déjà remise à zéro à la fin du clip. */
+      tl.fromTo("#panel-b .col.yes .shot", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 34.25);
+      tl.fromTo("#panel-b .col.no .shot", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 34.5);
+      /* Poussées opposées sur les deux matières : à vitesse et sens identiques
+         elles bougeraient au garde-à-vous. Départ à 1.02 et non 1.0 — un arrondi
+         sous-pixel à l'échelle neutre peut laisser filtrer un bord. */
+      tl.fromTo("#shot-mono", { scale: 1.02 }, { scale: 1.12, duration: 11, ease: "none" }, 34.25);
+      tl.fromTo("#shot-tresse", { scale: 1.12 }, { scale: 1.02, duration: 11, ease: "none" }, 34.5);
+
+      /* Plaques de fond : poussée lente sur toute la durée du carton. */
+      tl.fromTo("#plate-title", { scale: 1 }, { scale: 1.07, duration: 3, ease: "none" }, 2.5);
+      tl.fromTo("#plate-end", { scale: 1 }, { scale: 1.06, duration: 4, ease: "none" }, 76.65);
+
+      tl.fromTo("#dia-needle", { opacity: 0, scale: 0.92 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power2.out" }, 53.35);
+      /* Éclat unique sur la pointe : souligne « angles aigus » sans boucler. */
+      tl.fromTo("#needle-glint", { opacity: 0, scale: 0.6 }, { opacity: 0.95, scale: 1.25, duration: 0.25, ease: "power2.out" }, 54.0);
+      tl.to("#needle-glint", { opacity: 0, scale: 1, duration: 0.55, ease: "power2.in" }, 54.25);
+
+      /* ── Sous-titres : légère montée à l'apparition ── */
+      const CAPS = [
+        ["#cap-01", 5.65], ["#cap-02", 8.9], ["#cap-03", 19.55], ["#cap-04", 26.45],
+        ["#cap-05", 29.65], ["#cap-06", 47.45], ["#cap-07", 59.1], ["#cap-08", 62.1],
+        ["#cap-09", 69.8], ["#cap-10", 76.0],
+      ];
+      CAPS.forEach(function (c) {
+        tl.fromTo(c[0] + " .cap-in", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" }, c[1]);
+      });
+
+      /* ── Barre de recherche dactylographiée ───────────────────────────────
+         Le curseur est un bloc coloré : sa couleur vit sur `background`.
+         Clignotement = onde carrée pilotée par la timeline (sin), sans aucun
+         tracker mutable — identique quel que soit le sens du seek. Le nombre de
+         cycles est ENTIER, sinon le curseur « pope » sur la dernière frame. */
+      const CTA_AT = 63.5, CTA_DUR = 13.15;
+      const URL_TEXT = "www.imcpformations.fr";
+      const TYPE_AT = 1.5;                     /* relatif au clip → absolu 65,0 */
+      const TYPE_DUR = URL_TEXT.length / 7.5;  /* ≈ 2,8 s — frappe naturelle */
+      const BLINK_CYCLES = 15;                 /* entier : période ≈ 0,88 s */
+      const caret = document.getElementById("url-caret");
+
+      tl.fromTo(".cta-glow", { opacity: 0, scale: 0.86 }, { opacity: 0.38, scale: 1, duration: 0.6, ease: "power2.out" }, CTA_AT);
+      tl.fromTo(".cta-inner", { opacity: 0, y: -30 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, CTA_AT);
+      tl.fromTo("#typed-url", { text: { value: "" } }, { text: { value: URL_TEXT }, duration: TYPE_DUR, ease: "none" }, CTA_AT + TYPE_AT);
+
+      const driver = { t: 0 };
+      tl.to(
+        driver,
+        {
+          t: CTA_DUR,
+          duration: CTA_DUR,
+          ease: "none",
+          onUpdate: () => {
+            const t = driver.t;
+            const typing = t >= TYPE_AT && t <= TYPE_AT + TYPE_DUR;
+            const phase = (t / CTA_DUR) * Math.PI * 2 * BLINK_CYCLES;
+            caret.style.opacity = typing ? "1" : Math.sin(phase) > 0 ? "1" : "0";
+          },
+        },
+        CTA_AT
+      );
+
+      /* Petite pulsation « validé » une fois l'adresse tapée */
+      tl.to(".search-bar", { scale: 1.035, duration: 0.18, ease: "power2.out" }, CTA_AT + TYPE_AT + TYPE_DUR + 0.25);
+      tl.to(".search-bar", { scale: 1, duration: 0.5, ease: "power2.out" }, CTA_AT + TYPE_AT + TYPE_DUR + 0.43);
+
+      tl.to(".cta-inner", { opacity: 0, duration: 0.45 }, CTA_AT + CTA_DUR - 0.45);
+      tl.to(".cta-glow", { opacity: 0, duration: 0.45 }, CTA_AT + CTA_DUR - 0.45);
+      tl.set(".cta-inner", { opacity: 0 }, CTA_AT + CTA_DUR);
+      tl.set(".cta-glow", { opacity: 0 }, CTA_AT + CTA_DUR);
+
+      /* ── Carton de fin ── entrées uniquement */
+      tl.fromTo("#end-logo-glow", { opacity: 0, scale: 0.88 }, { opacity: 0.26, scale: 1, duration: 0.8, ease: "power2.out" }, 76.8);
+      tl.fromTo("#end-card img", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6 }, 76.8);
+      tl.fromTo("#end-card .name", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6 }, 77.2);
+      tl.fromTo("#end-card .disc", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6 }, 77.6);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

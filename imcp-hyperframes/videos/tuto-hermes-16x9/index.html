@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="fr" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0; width: 1920px; height: 1080px;
+        overflow: hidden; background: #060d18;
+      }
+      body { font-family: Roboto, sans-serif; }
+
+      :root {
+        --bg: #060d18;
+        --fluo: #5fe8ff;
+        --ivory: #f4f1ea;
+        --slate: #8fa3b8;
+        --amber: #ffb454;
+        --champagne: #d8c7a8;
+      }
+
+      /* ---- Structure ----
+         .scene = clip (le moteur gère la visibilité)
+         .cam   = calque de caméra (dérive lente, sens alterné)
+         .stage = contenu, centré */
+      .scene { position: absolute; inset: 0; background: var(--bg); }
+      .cam {
+        position: absolute; inset: 0;
+        transform-origin: 50% 50%; will-change: transform;
+      }
+      .stage {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 0 200px; text-align: center;
+      }
+
+      /* Aura : calque dédié derrière le contenu. Jamais un box-shadow sur
+         l'élément lui-même — les deux se disputent la profondeur. */
+      .aura {
+        position: absolute; left: 50%; top: 50%; z-index: 0;
+        width: 1500px; height: 900px; margin: -450px 0 0 -750px;
+        opacity: 0; pointer-events: none;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.30) 0%,
+          rgba(95, 232, 255, 0.10) 52%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      .aura.warn {
+        background: radial-gradient(
+          closest-side,
+          rgba(255, 180, 84, 0.30) 0%,
+          rgba(255, 180, 84, 0.10) 52%,
+          rgba(255, 180, 84, 0) 78%
+        );
+      }
+      .stage > *:not(.aura) { position: relative; z-index: 1; }
+
+      /* ---- Typographie ---- */
+      .kicker {
+        font-size: 26px; font-weight: 800; letter-spacing: 0.28em;
+        text-transform: uppercase; color: var(--champagne);
+      }
+      .h1 {
+        font-size: 104px; font-weight: 800; line-height: 1.06;
+        color: var(--ivory); letter-spacing: -0.02em;
+      }
+      .h2 {
+        font-size: 76px; font-weight: 800; line-height: 1.1;
+        color: var(--ivory); letter-spacing: -0.015em;
+      }
+      .sub {
+        font-size: 34px; font-weight: 400; color: var(--slate); line-height: 1.4;
+      }
+      .kw { color: var(--fluo); }
+      .kw-warn { color: var(--amber); }
+
+      /* Pastille d'étape */
+      .badge {
+        display: inline-flex; align-items: center; gap: 16px;
+        padding: 12px 28px; border-radius: 100px;
+        border: 1.5px solid rgba(95, 232, 255, 0.45);
+        background: rgba(95, 232, 255, 0.07);
+      }
+      .badge .num {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 30px; font-weight: 700; color: var(--fluo);
+      }
+      .badge .lbl {
+        font-size: 24px; font-weight: 700; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--slate);
+      }
+
+      /* Liste de specs */
+      .specs { display: flex; gap: 22px; justify-content: center; }
+      .spec {
+        padding: 20px 34px; border-radius: 16px;
+        background: rgba(255, 255, 255, 0.045);
+        border: 1px solid rgba(143, 163, 184, 0.22);
+        font-size: 32px; font-weight: 600; color: var(--ivory);
+      }
+      .spec b { color: var(--fluo); font-weight: 800; }
+
+      /* ---- Fenêtre terminal ---- */
+      .term {
+        width: 1420px; border-radius: 18px; overflow: hidden;
+        background: #040a12;
+        border: 1.5px solid rgba(95, 232, 255, 0.32);
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
+        text-align: left;
+      }
+      .term-bar {
+        display: flex; align-items: center; gap: 12px;
+        padding: 18px 26px; background: rgba(255, 255, 255, 0.045);
+        border-bottom: 1px solid rgba(143, 163, 184, 0.18);
+      }
+      .term-bar i {
+        width: 14px; height: 14px; border-radius: 8px;
+        background: rgba(143, 163, 184, 0.4); display: block;
+      }
+      .term-bar span {
+        margin-left: 12px; font-family: "JetBrains Mono", monospace;
+        font-size: 20px; color: var(--slate);
+      }
+      .term-body {
+        padding: 40px 40px 46px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 32px; line-height: 1.5;
+      }
+      .term-body .prompt { color: var(--fluo); }
+      .term-body .cmd { color: var(--ivory); }
+      .caret {
+        display: inline-block; width: 15px; height: 34px;
+        background: var(--fluo); vertical-align: -5px; margin-left: 4px;
+      }
+
+      /* ---- Bulles de conversation ---- */
+      .chat { display: flex; flex-direction: column; gap: 20px; width: 1100px; }
+      .bub {
+        max-width: 78%; padding: 26px 34px; border-radius: 22px;
+        font-size: 32px; line-height: 1.35; text-align: left;
+      }
+      .bub.me {
+        align-self: flex-end; background: rgba(95, 232, 255, 0.14);
+        border: 1px solid rgba(95, 232, 255, 0.4); color: var(--ivory);
+      }
+      .bub.bot {
+        align-self: flex-start; background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(143, 163, 184, 0.25); color: var(--ivory);
+      }
+      .bub .mono {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 28px; color: var(--fluo);
+      }
+
+      /* ---- Encart avertissement ---- */
+      .warnbox {
+        width: 1360px; padding: 44px 52px; border-radius: 20px;
+        background: rgba(255, 180, 84, 0.07);
+        border: 1.5px solid rgba(255, 180, 84, 0.5);
+        text-align: left;
+      }
+      .warnbox .line {
+        font-size: 36px; line-height: 1.4; color: var(--ivory);
+      }
+      .warnbox .line + .line { margin-top: 20px; }
+      .warnbox .mono {
+        font-family: "JetBrains Mono", monospace; color: var(--amber);
+      }
+
+      /* ---- Barre de progression ---- */
+      #prog-track {
+        position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+        background: rgba(143, 163, 184, 0.16);
+      }
+      #prog-fill {
+        position: absolute; inset: 0;
+        transform: scaleX(0); transform-origin: 0 50%;
+        background: linear-gradient(90deg, #2f8fa8 0%, var(--fluo) 100%);
+      }
+
+      svg { display: block; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Tuto — Installer Hermes Agent sur un VPS Hetzner. Format maître 16:9.
+
+      MUET, tout le texte à l'écran : HeyGen non connecté, et le français chez
+      Kokoro exige espeak-ng en installation système — dépendance écartée.
+      Les trois destinations (YouTube, Reels, feed) se lisent sans son.
+
+      Doctrine de montage appliquée (mémoire de session) :
+        · caméra multi-phase, SENS ALTERNÉ d'une scène à l'autre
+        · zoom punch-in sur les beats clés, COURBES VARIÉES
+        · aura cyan sur les panneaux, respiration bornée
+        · révélation typewriter sur la commande d'installation
+
+      Bascule sémantique scène 5 : ambre, pas cyan. Un avertissement ne doit
+      pas se lire comme une quatrième étape.
+    -->
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="65"
+      data-width="1920"
+      data-height="1080"
+      data-fps="30"
+    >
+      <!-- ═══ S1 · Accroche ═══ -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="8" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="kicker" style="margin-bottom: 40px">Hermes Agent · Nous Research</div>
+            <div class="h1">Un agent IA qui travaille<br />pendant que vous dormez</div>
+            <div class="sub" style="margin-top: 40px">
+              Sur un serveur à <span class="kw">4 € par mois</span>. Rien sur votre ordinateur.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S2 · Le VPS ═══ -->
+      <div id="s2" class="clip scene" data-start="8" data-duration="12" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="badge" style="margin-bottom: 46px">
+              <span class="num">01</span><span class="lbl">Le serveur</span>
+            </div>
+            <svg id="ico-srv" width="150" height="150" viewBox="0 0 100 100" fill="none" style="margin-bottom: 40px">
+              <rect class="d" x="14" y="18" width="72" height="20" rx="5" stroke="#5FE8FF" stroke-width="3" />
+              <rect class="d" x="14" y="44" width="72" height="20" rx="5" stroke="#5FE8FF" stroke-width="3" />
+              <rect class="d" x="14" y="70" width="72" height="20" rx="5" stroke="#5FE8FF" stroke-width="3" />
+              <circle class="p" cx="26" cy="28" r="3.4" fill="#5FE8FF" />
+              <circle class="p" cx="26" cy="54" r="3.4" fill="#5FE8FF" />
+              <circle class="p" cx="26" cy="80" r="3.4" fill="#5FE8FF" />
+            </svg>
+            <div class="h2">Un VPS chez Hetzner</div>
+            <div class="specs" style="margin-top: 44px">
+              <div class="spec">2 vCPU · <b>2 Go</b> RAM</div>
+              <div class="spec"><b>~4 €</b> / mois</div>
+              <div class="spec">Ubuntu <b>24.04 LTS</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S3 · L'installation ═══ -->
+      <div id="s3" class="clip scene" data-start="20" data-duration="15" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="badge" style="margin-bottom: 40px">
+              <span class="num">02</span><span class="lbl">L'installation</span>
+            </div>
+            <div class="h2" style="margin-bottom: 46px">Une seule commande</div>
+            <div class="term">
+              <div class="term-bar">
+                <i></i><i></i><i></i><span>hermes@vps — bash</span>
+              </div>
+              <div class="term-body">
+                <span class="prompt">$ </span><span class="cmd" id="typed"></span><span class="caret" id="caret"></span>
+              </div>
+            </div>
+            <div class="sub" style="margin-top: 42px">
+              Python, Node, ffmpeg, ripgrep — <span class="kw">tout est installé pour vous</span>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S4 · Telegram ═══ -->
+      <div id="s4" class="clip scene" data-start="35" data-duration="12" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="badge" style="margin-bottom: 44px">
+              <span class="num">03</span><span class="lbl">La messagerie</span>
+            </div>
+            <div class="h2" style="margin-bottom: 48px">Vous lui parlez sur Telegram</div>
+            <div class="chat">
+              <div class="bub bot"><span class="mono">hermes gateway setup</span> — le jeton via @BotFather</div>
+              <div class="bub me">Fais-moi un point sur les rendez-vous de demain</div>
+              <div class="bub bot">3 rendez-vous. Le premier à 9 h, dossier déjà préparé.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S5 · Sécurité ═══ -->
+      <div id="s5" class="clip scene" data-start="47" data-duration="10" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura warn" data-layout-allow-overflow></div>
+            <svg id="ico-lock" width="118" height="118" viewBox="0 0 100 100" fill="none" style="margin-bottom: 34px">
+              <rect class="d" x="22" y="44" width="56" height="42" rx="8" stroke="#FFB454" stroke-width="3.4" />
+              <path class="d" d="M34 44V32a16 16 0 0 1 32 0v12" stroke="#FFB454" stroke-width="3.4" stroke-linecap="round" />
+              <circle class="p" cx="50" cy="63" r="5" fill="#FFB454" />
+            </svg>
+            <div class="h2" style="margin-bottom: 42px">
+              La <span class="kw-warn">liste blanche</span> n'est pas optionnelle
+            </div>
+            <div class="warnbox">
+              <div class="line">
+                Sans <span class="mono">TELEGRAM_ALLOWED_USERS</span>, n'importe qui trouvant votre bot
+                obtient un <span class="kw-warn">accès shell</span> sur le serveur.
+              </div>
+              <div class="line">
+                Testez-la : écrivez au bot depuis un compte non autorisé.
+                <b>Il ne doit rien répondre.</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S6 · Fin ═══ -->
+      <div id="s6" class="clip scene" data-start="57" data-duration="8" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="kicker" style="margin-bottom: 40px">Les 10 phases en détail</div>
+            <div class="h1">Le guide complet<br />est en description</div>
+            <div class="sub" style="margin-top: 44px">
+              Durcissement SSH · pare-feu · sauvegardes · restauration
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ Barre de progression, continue ═══ -->
+      <div id="prog-track" class="clip" data-start="0" data-duration="65" data-track-index="1">
+        <div id="prog-fill"></div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* ═══ Caméra ═══════════════════════════════════════════════════════
+         Dérive lente sur chaque scène, SENS ALTERNÉ : à sens constant, la
+         succession prend un roulis mécanique. Échelle toujours > 1 — à
+         l'échelle neutre un arrondi sous-pixel laisse filtrer un bord. */
+      const SCENES = [
+        { id: "#s1", at: 0,  dur: 8,  from: 1.05, to: 1.00, dx:  22, dy: -12 },
+        { id: "#s2", at: 8,  dur: 12, from: 1.00, to: 1.06, dx: -26, dy:  14 },
+        { id: "#s3", at: 20, dur: 15, from: 1.06, to: 1.01, dx:  18, dy:  16 },
+        { id: "#s4", at: 35, dur: 12, from: 1.01, to: 1.07, dx: -20, dy: -14 },
+        { id: "#s5", at: 47, dur: 10, from: 1.07, to: 1.01, dx:  16, dy:  12 },
+        { id: "#s6", at: 57, dur: 8,  from: 1.00, to: 1.06, dx: -18, dy: -10 },
+      ];
+      SCENES.forEach(function (s) {
+        tl.fromTo(
+          s.id + " .cam",
+          { scale: s.from, x: 0, y: 0 },
+          { scale: s.to, x: s.dx, y: s.dy, duration: s.dur, ease: "none" },
+          s.at
+        );
+      });
+
+      /* ═══ Aura ═════════════════════════════════════════════════════════
+         Sélecteurs, jamais de nœuds capturés au chargement : le moteur
+         réarrange les sous-arbres de clip et une référence prise trop tôt
+         se retrouve détachée — les tweens deviennent des no-op silencieux.
+         Pic + amplitude ≤ 0.45, plafond ambient-glow-bloom. */
+      const A_PEAK = 0.40, A_AMP = 0.045;
+      SCENES.forEach(function (s) {
+        const sel = s.id + " .aura";
+        const BLOOM = 0.6;
+        tl.fromTo(sel, { opacity: 0, scale: 0.9 }, { opacity: A_PEAK, scale: 1, duration: BLOOM, ease: "power2.out" }, s.at);
+
+        /* Respiration bornée par un tween de phase fini — jamais de yoyo
+           ni de repeat:-1, qui cassent le seek. */
+        const ph = { v: 0 };
+        tl.to(ph, {
+          v: Math.PI * 2,
+          duration: Math.max(0.1, s.dur - BLOOM - 0.4),
+          ease: "none",
+          onUpdate: () => {
+            const el = document.querySelector(sel);
+            if (!el) return;
+            const k = Math.sin(ph.v);
+            el.style.opacity = String(A_PEAK + k * A_AMP);
+            el.style.transform = `scale(${1 + k * 0.02})`;
+          },
+        }, s.at + BLOOM);
+
+        tl.to(sel, { opacity: 0, duration: 0.4 }, s.at + s.dur - 0.4);
+        tl.set(sel, { opacity: 0 }, s.at + s.dur);
+      });
+
+      /* ═══ S1 · Accroche ═══ */
+      tl.fromTo("#s1 .kicker", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.25);
+      tl.fromTo("#s1 .h1", { opacity: 0, y: 46 }, { opacity: 1, y: 0, duration: 0.85, ease: "power3.out" }, 0.5);
+      tl.fromTo("#s1 .sub", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 1.05);
+
+      /* ═══ S2 · VPS — punch-in franc sur l'icône, puis specs en cascade ═══ */
+      tl.fromTo("#s2 .badge", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 8.2);
+      tl.fromTo("#ico-srv", { opacity: 0, scale: 0.55 }, { opacity: 1, scale: 1, duration: 0.62, ease: "back.out(2.2)" }, 8.4);
+      tl.fromTo("#ico-srv .d", { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.42, ease: "power2.out", stagger: 0.1 }, 8.5);
+      tl.fromTo("#ico-srv .p", { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.1 }, 8.9);
+      tl.fromTo("#s2 .h2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 9.3);
+      tl.fromTo("#s2 .spec", { opacity: 0, y: 30, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out", stagger: 0.14 }, 9.8);
+
+      /* ═══ S3 · Installation — typewriter ═══
+         Découpe déterministe d'une chaîne par tween de phase : aucun état
+         mutable, donc rejouable à n'importe quel point de la timeline. */
+      const CMD = "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash";
+      const S3_AT = 20, S3_DUR = 15;
+      const TYPE_LEAD = 0.093; /* frappe commencée à ~1,4 s dans le plan */
+      const TYPE_SPAN = 0.28;  /* frappe étalée sur 28 % de la fenêtre */
+      const typeState = { p: 0 };
+
+      tl.fromTo("#s3 .badge", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 20.2);
+      tl.fromTo("#s3 .h2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 20.45);
+      tl.fromTo("#s3 .term", { opacity: 0, y: 42, scale: 0.965 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" }, 20.8);
+
+      /* Un seul tween couvrant TOUTE la fenêtre du plan : la longueur de la
+         chaîne se déduit de la progression, donc aucun état résiduel possible
+         quel que soit le point d'atterrissage du seek. Pas de TextPlugin. */
+      tl.fromTo(typeState, { p: 0 }, {
+        p: 1,
+        duration: S3_DUR,
+        ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#typed");
+          if (!el) return;
+          const k = Math.min(1, Math.max(0, (typeState.p - TYPE_LEAD) / TYPE_SPAN));
+          el.textContent = CMD.slice(0, Math.round(k * CMD.length));
+        },
+      }, S3_AT);
+
+      /* Curseur : 14 cycles finis, pas de repeat:-1. */
+      const caretPhase = { v: 0 };
+      tl.to(caretPhase, {
+        v: 14,
+        duration: 11.6,
+        ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#caret");
+          if (el) el.style.opacity = (caretPhase.v % 1) < 0.5 ? "1" : "0.12";
+        },
+      }, 20.9);
+      tl.set("#caret", { opacity: 1 }, 35);
+
+      tl.fromTo("#s3 .sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 26);
+
+      /* ═══ S4 · Telegram — bulles décalées ═══ */
+      tl.fromTo("#s4 .badge", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 35.2);
+      tl.fromTo("#s4 .h2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 35.45);
+      tl.fromTo("#s4 .bub.bot:first-of-type", { opacity: 0, y: 30, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 36.1);
+      tl.fromTo("#s4 .bub.me", { opacity: 0, y: 30, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 37.6);
+      tl.fromTo("#s4 .bub.bot:last-of-type", { opacity: 0, y: 30, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 39.3);
+
+      /* ═══ S5 · Sécurité — punch-in plus sec, courbe différente des autres ═══ */
+      tl.fromTo("#ico-lock", { opacity: 0, scale: 0.62 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(3)" }, 47.25);
+      tl.fromTo("#ico-lock .d", { opacity: 0 }, { opacity: 1, duration: 0.34, stagger: 0.12 }, 47.35);
+      tl.fromTo("#ico-lock .p", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, 47.75);
+      tl.fromTo("#s5 .h2", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 47.7);
+      tl.fromTo("#s5 .warnbox", { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 48.15);
+      tl.fromTo("#s5 .warnbox .line", { opacity: 0, x: 26 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out", stagger: 0.3 }, 48.45);
+
+      /* ═══ S6 · Fin ═══ */
+      tl.fromTo("#s6 .kicker", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 57.25);
+      tl.fromTo("#s6 .h1", { opacity: 0, y: 42 }, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }, 57.5);
+      tl.fromTo("#s6 .sub", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.65, ease: "power3.out" }, 58.05);
+
+      /* ═══ Progression — scaleX, jamais un tween de width ═══ */
+      tl.fromTo("#prog-fill", { scaleX: 0 }, { scaleX: 1, duration: 65, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

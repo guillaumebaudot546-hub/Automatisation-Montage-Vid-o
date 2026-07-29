@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #050b14; }
+      body { font-family: Roboto, sans-serif; }
+      :root { --bg:#050b14; --fluo:#5fe8ff; --ivory:#f4f1ea; --slate:#90a4b8; --champagne:#d8c7a8; }
+      .fill { position:absolute; inset:0; }
+      #bg { width:100%; height:100%; object-fit:cover; filter:blur(48px) brightness(0.34) saturate(1.1); transform:scale(1.5); }
+      #bg-tint { position:absolute; inset:0; background:radial-gradient(120% 80% at 50% 30%, rgba(95,232,255,0.10), rgba(5,11,20,0.6) 70%); }
+      #screen-wrap { position:absolute; left:48px; right:48px; top:214px; height:558px; border-radius:26px; overflow:hidden;
+        border:2px solid rgba(95,232,255,0.55); box-shadow:0 30px 90px rgba(0,0,0,0.6),0 0 60px rgba(95,232,255,0.12); background:#000; }
+      #screen { width:100%; height:100%; object-fit:contain; transform-origin:50% 50%; will-change:transform; }
+      #screen-glow { position:absolute; inset:-80px; z-index:-1; opacity:0.5; background:radial-gradient(closest-side, rgba(95,232,255,0.4), rgba(95,232,255,0) 72%); }
+      #topbar { position:absolute; left:48px; right:48px; top:74px; display:flex; align-items:center; justify-content:space-between; }
+      #topbar .brand { font-size:34px; font-weight:800; letter-spacing:0.18em; color:var(--fluo); }
+      #topbar .mod { font-size:20px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:var(--slate); padding:8px 18px; border-radius:100px; border:1px solid rgba(143,163,184,0.35); }
+      .slot { position:absolute; left:60px; right:60px; top:830px; }
+      .wrap { position:relative; }
+      .glow { position:absolute; inset:-120px; z-index:1; opacity:0; background:radial-gradient(closest-side, rgba(95,232,255,0.55) 0%, rgba(95,232,255,0.18) 52%, rgba(95,232,255,0) 78%); }
+      .card { position:relative; z-index:2; overflow:hidden; padding:38px 44px 42px; text-align:center; background:rgba(5,11,20,0.92); border:1.5px solid rgba(95,232,255,0.5); border-radius:22px; box-shadow:0 24px 70px rgba(0,0,0,0.55); }
+      .kicker { font-size:22px; font-weight:800; letter-spacing:0.22em; text-transform:uppercase; color:var(--champagne); margin-bottom:20px; }
+      .big { font-family:"EB Garamond", serif; font-size:72px; line-height:1.05; color:var(--ivory); }
+      .big .kw { color:var(--fluo); }
+      .three { display:flex; flex-direction:column; gap:10px; }
+      .three .l { font-size:44px; font-weight:800; color:var(--slate); line-height:1.12; }
+      .three .l.on { color:var(--fluo); }
+      .sweep { position:absolute; top:0; bottom:0; left:0; width:240px; z-index:3; pointer-events:none; background:linear-gradient(105deg, rgba(95,232,255,0) 0%, rgba(95,232,255,0.18) 50%, rgba(95,232,255,0) 100%); }
+      #subs { position:absolute; left:70px; right:70px; bottom:150px; display:flex; justify-content:center; }
+      #subs .pill b { color: var(--fluo); font-weight: 700; text-shadow: 0 0 16px rgba(95,232,255,0.8), 0 0 5px rgba(95,232,255,0.6); }
+      #subs .pill { padding:20px 32px; border-radius:18px; background:rgba(2,7,13,0.86); border:1px solid rgba(143,163,184,0.28); font-size:38px; font-weight:600; line-height:1.26; color:var(--ivory); text-align:center; }
+      #end { display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--bg); text-align:center; }
+      #end .stack { position:relative; display:inline-block; }
+      #end-glow { position:absolute; inset:-190px; z-index:1; opacity:0; background:radial-gradient(closest-side, rgba(95,232,255,0.55), rgba(95,232,255,0.18) 54%, rgba(95,232,255,0) 78%); }
+      #end img { position:relative; z-index:2; width:320px; display:block; }
+      #end .t { font-family:"EB Garamond", serif; font-size:58px; color:var(--ivory); margin-top:34px; line-height:1.1; }
+      #end .u { font-family:"JetBrains Mono", monospace; font-size:36px; color:var(--fluo); margin-top:26px; }
+      #end .caret { display:inline-block; width:15px; height:36px; background:var(--fluo); vertical-align:-6px; margin-left:3px; }
+      svg { display:block; }
+    </style>
+  </head>
+  <body>
+    <!-- Teaser généré depuis le template validé (cours 1). Letterbox 16:9,
+         source floutée en fond, cartons + sous-titres autour. Muet côté cartons,
+         voix conservée sur le cadre. Doctrine de montage appliquée. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="68.0"
+         data-width="1080" data-height="1920" data-fps="30">
+      <video id="bg" class="clip fill" src="teaser-src.mp4" muted playsinline
+             data-start="0" data-duration="64.0" data-media-start="0" data-track-index="0"></video>
+      <div id="bg-tint" class="clip fill" data-start="0" data-duration="64.0" data-track-index="6" style="z-index:1"></div>
+      <div id="screen-wrap" class="clip" data-start="0" data-duration="64.0" data-track-index="1">
+        <div id="screen-glow"></div>
+        <video id="screen" src="teaser-src.mp4" playsinline data-has-audio="true"
+               data-start="0" data-duration="64.0" data-media-start="0"></video>
+      </div>
+      <div id="topbar" class="clip" data-start="0" data-duration="64.0" data-track-index="2">
+        <span class="brand">IMCP</span><span class="mod">Module 2 · Revue de littérature</span>
+      </div>
+      <div id="k1" class="slot clip" data-start="0.5" data-duration="8.5" data-track-index="3">
+        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
+          <div class="card"><div class="kicker">Ce que dit la littérature</div><div class="big">Cinq points, une<br /><span class='kw'>preuve solide</span></div><div class="sweep" data-layout-allow-overflow></div></div>
+        </div>
+      </div>
+      <div id="k2" class="slot clip" data-start="19.2" data-duration="9.0" data-track-index="3">
+        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
+          <div class="card"><div class="kicker">Le LASER Er-YAG</div><div class="three"><div class="l">Un laser de surface</div><div class="l">Micro-ablation = microchirurgie</div><div class="l">Effet bactéricide</div><div class="l">Zéro effet thermique</div><div class="l on">Meilleure cicatrisation</div></div><div class="sweep" data-layout-allow-overflow></div></div>
+        </div>
+      </div>
+      <div id="k3" class="slot clip" data-start="42.2" data-duration="9.5" data-track-index="3">
+        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
+          <div class="card"><div class="kicker">La conclusion</div><div class="big">Un outil <span class='kw'>fiable et sûr</span><br />pour le mini-invasif</div><div class="sweep" data-layout-allow-overflow></div></div>
+        </div>
+      </div>
+
+      <div id="subs" class="clip" data-start="0" data-duration="64.0" data-track-index="4">
+        <div class="pill" id="sub-pill"></div>
+      </div>
+      <div id="end" class="clip fill" data-start="64.0" data-duration="4" data-track-index="5">
+        <div class="stack"><div id="end-glow" data-layout-allow-overflow></div><img src="logo-mark.png" alt="IMCP" /></div>
+        <div class="t">Revue de<br />littérature</div>
+        <div class="u"><span id="typed"></span><span class="caret" id="caret"></span></div>
+      </div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const VID = 64.0;
+
+      const cam = { p: 0 };
+      tl.fromTo(cam, { p: 0 }, { p: 1, duration: VID, ease: "none", onUpdate: () => {
+        const el = document.querySelector("#screen"); if (!el) return;
+        const p = cam.p; const s = 1.02 + p * 0.06; const dy = Math.sin(p * Math.PI * 2) * 4;
+        el.style.transform = `translateY(${dy}px) scale(${s})`; } }, 0);
+
+      const CUES = [{s:0.28,e:2.24,t:"Il y a cinq points fondamentaux.",h:"Il y a cinq points fondamentaux."},{s:2.66,e:4.66,t:"Premièrement, le laser Er-YAG",h:"Premièrement, le laser <b>Er-YAG</b>"},{s:4.66,e:5.94,t:"est un laser de surface.",h:"est un <b>laser</b> de surface."},{s:6.66,e:9.86,t:"Il va permettre d'opérer par microablation,",h:"Il va permettre d'opérer par <b>microablation</b>,"},{s:10.04,e:12.52,t:"donc c'est un outil de microchirurgie.",h:"donc c'est un outil de <b>microchirurgie</b>."},{s:12.58,e:15.74,t:"On opère dans des dimensions qui sont de l",h:"On opère dans des dimensions qui sont de l"},{s:15.74,e:19.3,t:"'ordre de la centaine de microns à la seconde.",h:"'ordre de la centaine de <b>microns</b> à la seconde."},{s:19.84,e:23.08,t:"Il va avoir des effets bactéricides contre",h:"Il va avoir des effets <b>bactéricides</b> contre"},{s:23.08,e:25.58,t:"les biofilms et les bactéries en surface.",h:"les <b>biofilms</b> et les bactéries en surface."},{s:26.58,e:29.18,t:"Il ne va pas avoir d'effets thermiques collatéraux,",h:"Il ne va pas avoir d'effets thermiques collatéraux,"},{s:29.18,e:31.18,t:"donc il est respectueux des tissus",h:"donc il est respectueux des <b>tissus</b>"},{s:31.18,e:33.68,t:"et il nous permet à la fois de travailler",h:"et il nous permet à la fois de travailler"},{s:33.68,e:36.18,t:"sur les tissus durs et sur les tissus mous.",h:"sur les <b>tissus</b> durs et sur les <b>tissus</b> mous."},{s:36.38,e:38.1,t:"Et enfin, il va",h:"Et enfin, il va"},{s:38.1,e:40.76,t:"permettre une meilleure cicatrisation.",h:"permettre une meilleure <b>cicatrisation</b>."},{s:41.08,e:45.16,t:"On pourrait dire qu'il stimule la cicatrisation.",h:"On pourrait dire qu'il stimule la <b>cicatrisation</b>."},{s:45.18,e:46.2,t:"En fait, je ne pense",h:"En fait, je ne pense"},{s:46.2,e:48.2,t:"pas qu'il stimule la cicatrisation,",h:"pas qu'il stimule la <b>cicatrisation</b>,"},{s:48.2,e:51.72,t:"mais il n'altère pas les processus de cicatrisation.",h:"mais il n'altère pas les processus de <b>cicatrisation</b>."},{s:52.0,e:54.86,t:"Donc, le laser Er-YAG, c'est",h:"Donc, le laser <b>Er-YAG</b>, c'est"},{s:54.86,e:57.96,t:"un outil qui est fiable et sûr",h:"un outil qui est fiable et sûr"},{s:57.96,e:60.78,t:"pour faire des interventions de",h:"pour faire des interventions de"},{s:60.78,e:63.78,t:"chirurgie mini-invasive en dentisterie.",h:"chirurgie <b>mini-invasive</b> en dentisterie."}];
+      const st = { t: 0 };
+      tl.fromTo(st, { t: 0 }, { t: VID, duration: VID, ease: "none", onUpdate: () => {
+        const pill = document.querySelector("#sub-pill"); if (!pill) return;
+        const now = st.t; let a = null;
+        for (let i = 0; i < CUES.length; i++) { if (now >= CUES[i].s && now < CUES[i].e) { a = CUES[i]; break; } }
+        if (a && now < VID - 1) { pill.innerHTML = a.h; pill.style.opacity = "1"; } else { pill.textContent = ""; pill.style.opacity = "0"; } } }, 0);
+
+      const G_PEAK = 0.38, G_AMP = 0.04;
+      const K = [{id:"#k1",at:0.5,dur:8.5,cyc:1},{id:"#k2",at:19.2,dur:9.0,cyc:2},{id:"#k3",at:42.2,dur:9.5,cyc:2}];
+      const SW_A = -280, SW_B = 1000;
+      K.forEach(function (c) {
+        const box = c.id + " .card", g = c.id + " .glow", BLOOM = 0.45, OUT = c.at + c.dur - 0.35;
+        tl.fromTo(box, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, c.at);
+        if (document.querySelectorAll(c.id + " .l").length) {
+          tl.fromTo(c.id + " .l", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out", stagger: 0.28 }, c.at + 0.3);
+        }
+        tl.fromTo(g, { opacity: 0, scale: 0.86 }, { opacity: G_PEAK, scale: 1, duration: BLOOM, ease: "power2.out" }, c.at);
+        const ph = { v: 0 };
+        tl.to(ph, { v: Math.PI * 2 * c.cyc, duration: Math.max(0.1, c.dur - BLOOM - 0.35), ease: "none", onUpdate: () => {
+          const el = document.querySelector(g); if (!el) return; const k = Math.sin(ph.v);
+          el.style.opacity = String(G_PEAK + k * G_AMP); el.style.transform = `scale(${1 + k * 0.022})`; } }, c.at + BLOOM);
+        tl.fromTo(c.id + " .sweep", { x: SW_A }, { x: SW_B, duration: 1.2, ease: "none" }, c.at + 0.4);
+        tl.set(c.id + " .sweep", { x: SW_A }, c.at + c.dur);
+        tl.to(box, { opacity: 0, duration: 0.35 }, OUT);
+        tl.to(g, { opacity: 0, duration: 0.35 }, OUT);
+        tl.set(box, { opacity: 0 }, c.at + c.dur);
+        tl.set(g, { opacity: 0 }, c.at + c.dur);
+      });
+
+      tl.fromTo("#end-glow", { opacity: 0, scale: 0.88 }, { opacity: 0.28, scale: 1, duration: 0.7, ease: "power2.out" }, VID + 0.2);
+      tl.fromTo("#end img", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, VID + 0.2);
+      tl.fromTo("#end .t", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, VID + 0.45);
+      tl.fromTo("#end .u", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4 }, VID + 0.8);
+      const URL = "imcpformations.fr", LEAD = 0.05, SPAN = 0.5; const ty = { p: 0 };
+      tl.fromTo(ty, { p: 0 }, { p: 1, duration: 3.1, ease: "none", onUpdate: () => {
+        const el = document.querySelector("#typed"); if (!el) return;
+        const k = Math.min(1, Math.max(0, (ty.p - LEAD) / SPAN)); el.textContent = URL.slice(0, Math.round(k * URL.length)); } }, VID + 0.9);
+      const car = { v: 0 };
+      tl.to(car, { v: 6, duration: 3.0, ease: "none", onUpdate: () => {
+        const el = document.querySelector("#caret"); if (el) el.style.opacity = (car.v % 1) < 0.5 ? "1" : "0.12"; } }, VID + 0.9);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

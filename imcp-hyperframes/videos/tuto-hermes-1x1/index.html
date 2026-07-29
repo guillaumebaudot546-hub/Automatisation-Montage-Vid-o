@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="fr" data-resolution="square">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        margin: 0; width: 1080px; height: 1080px;
+        overflow: hidden; background: #060d18;
+      }
+      body { font-family: Roboto, sans-serif; }
+
+      :root {
+        --bg: #060d18;
+        --fluo: #5fe8ff;
+        --ivory: #f4f1ea;
+        --slate: #8fa3b8;
+        --amber: #ffb454;
+        --champagne: #d8c7a8;
+      }
+
+      .scene { position: absolute; inset: 0; background: var(--bg); }
+      .cam { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
+      .stage {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 90px 76px; text-align: center;
+      }
+
+      .aura {
+        position: absolute; left: 50%; top: 50%; z-index: 0;
+        width: 1000px; height: 900px; margin: -450px 0 0 -500px;
+        opacity: 0; pointer-events: none;
+        background: radial-gradient(
+          closest-side,
+          rgba(95, 232, 255, 0.30) 0%,
+          rgba(95, 232, 255, 0.10) 52%,
+          rgba(95, 232, 255, 0) 78%
+        );
+      }
+      .aura.warn {
+        background: radial-gradient(
+          closest-side,
+          rgba(255, 180, 84, 0.30) 0%,
+          rgba(255, 180, 84, 0.10) 52%,
+          rgba(255, 180, 84, 0) 78%
+        );
+      }
+      .stage > *:not(.aura) { position: relative; z-index: 1; }
+
+      .kicker {
+        font-size: 22px; font-weight: 800; letter-spacing: 0.26em;
+        text-transform: uppercase; color: var(--champagne);
+      }
+      .h1 {
+        font-size: 72px; font-weight: 800; line-height: 1.08;
+        color: var(--ivory); letter-spacing: -0.02em;
+      }
+      .h2 {
+        font-size: 56px; font-weight: 800; line-height: 1.12;
+        color: var(--ivory); letter-spacing: -0.015em;
+      }
+      .sub { font-size: 28px; font-weight: 400; color: var(--slate); line-height: 1.42; }
+      .kw { color: var(--fluo); }
+      .kw-warn { color: var(--amber); }
+
+      .badge {
+        display: inline-flex; align-items: center; gap: 13px;
+        padding: 10px 24px; border-radius: 100px;
+        border: 1.5px solid rgba(95, 232, 255, 0.45);
+        background: rgba(95, 232, 255, 0.07);
+      }
+      .badge .num { font-family: "JetBrains Mono", monospace; font-size: 25px; font-weight: 700; color: var(--fluo); }
+      .badge .lbl { font-size: 20px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--slate); }
+
+      /* Carré : deux specs en rangée + une dessous tient mieux qu'une
+         rangée de trois (qui comprime) ou qu'une colonne (qui étire). */
+      .specs { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+      .spec {
+        padding: 17px 26px; border-radius: 14px;
+        background: rgba(255, 255, 255, 0.045);
+        border: 1px solid rgba(143, 163, 184, 0.22);
+        font-size: 28px; font-weight: 600; color: var(--ivory);
+      }
+      .spec b { color: var(--fluo); font-weight: 800; }
+
+      .term {
+        width: 100%; border-radius: 15px; overflow: hidden;
+        background: #040a12;
+        border: 1.5px solid rgba(95, 232, 255, 0.32);
+        box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
+        text-align: left;
+      }
+      .term-bar {
+        display: flex; align-items: center; gap: 9px;
+        padding: 14px 20px; background: rgba(255, 255, 255, 0.045);
+        border-bottom: 1px solid rgba(143, 163, 184, 0.18);
+      }
+      .term-bar i { width: 11px; height: 11px; border-radius: 6px; background: rgba(143, 163, 184, 0.4); display: block; }
+      .term-bar span { margin-left: 9px; font-family: "JetBrains Mono", monospace; font-size: 17px; color: var(--slate); }
+      .term-body {
+        padding: 26px 24px 30px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 23px; line-height: 1.55;
+        white-space: pre-wrap; word-break: break-word;
+      }
+      .term-body .prompt { color: var(--fluo); }
+      .term-body .cmd { color: var(--ivory); }
+      .caret { display: inline-block; width: 12px; height: 25px; background: var(--fluo); vertical-align: -4px; margin-left: 3px; }
+
+      .chat { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+      .bub { max-width: 88%; padding: 20px 26px; border-radius: 18px; font-size: 27px; line-height: 1.35; text-align: left; }
+      .bub.me { align-self: flex-end; background: rgba(95, 232, 255, 0.14); border: 1px solid rgba(95, 232, 255, 0.4); color: var(--ivory); }
+      .bub.bot { align-self: flex-start; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(143, 163, 184, 0.25); color: var(--ivory); }
+      .bub .mono { font-family: "JetBrains Mono", monospace; font-size: 24px; color: var(--fluo); }
+
+      .warnbox {
+        width: 100%; padding: 30px 30px; border-radius: 16px;
+        background: rgba(255, 180, 84, 0.07);
+        border: 1.5px solid rgba(255, 180, 84, 0.5);
+        text-align: left;
+      }
+      .warnbox .line { font-size: 28px; line-height: 1.4; color: var(--ivory); }
+      .warnbox .line + .line { margin-top: 15px; }
+      .warnbox .mono { font-family: "JetBrains Mono", monospace; font-size: 25px; color: var(--amber); }
+
+      #prog-track { position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: rgba(143, 163, 184, 0.16); }
+      #prog-fill {
+        position: absolute; inset: 0;
+        transform: scaleX(0); transform-origin: 0 50%;
+        background: linear-gradient(90deg, #2f8fa8 0%, var(--fluo) 100%);
+      }
+
+      svg { display: block; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Tuto Hermes × Hetzner — déclinaison 1:1 (feed LinkedIn / Instagram), 52 s.
+      Dérivée du maître 16:9. Le carré est le compromis : specs en grille
+      souple plutôt qu'en rangée (qui comprime) ou en colonne (qui étire),
+      commande coupée sur deux lignes comme en vertical.
+    -->
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="52"
+      data-width="1080"
+      data-height="1080"
+      data-fps="30"
+    >
+      <!-- ═══ S1 · Accroche (0-6) ═══ -->
+      <div id="s1" class="clip scene" data-start="0" data-duration="6" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="kicker" style="margin-bottom: 30px">Hermes Agent · Nous Research</div>
+            <div class="h1">Un agent IA qui travaille<br />pendant que vous dormez</div>
+            <div class="sub" style="margin-top: 32px">
+              Sur un serveur à <span class="kw">4 € par mois</span>. Rien sur votre ordinateur.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S2 · VPS (6-16) ═══ -->
+      <div id="s2" class="clip scene" data-start="6" data-duration="10" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="badge" style="margin-bottom: 32px">
+              <span class="num">01</span><span class="lbl">Le serveur</span>
+            </div>
+            <svg id="ico-srv" width="112" height="112" viewBox="0 0 100 100" fill="none" style="margin-bottom: 28px">
+              <rect class="d" x="14" y="18" width="72" height="20" rx="5" stroke="#5FE8FF" stroke-width="3" />
+              <rect class="d" x="14" y="44" width="72" height="20" rx="5" stroke="#5FE8FF" stroke-width="3" />
+              <rect class="d" x="14" y="70" width="72" height="20" rx="5" stroke="#5FE8FF" stroke-width="3" />
+              <circle class="p" cx="26" cy="28" r="3.4" fill="#5FE8FF" />
+              <circle class="p" cx="26" cy="54" r="3.4" fill="#5FE8FF" />
+              <circle class="p" cx="26" cy="80" r="3.4" fill="#5FE8FF" />
+            </svg>
+            <div class="h2" style="margin-bottom: 32px">Un VPS chez Hetzner</div>
+            <div class="specs">
+              <div class="spec">2 vCPU · <b>2 Go</b> RAM</div>
+              <div class="spec"><b>~4 €</b> / mois</div>
+              <div class="spec">Ubuntu <b>24.04 LTS</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S3 · Installation (16-28) ═══ -->
+      <div id="s3" class="clip scene" data-start="16" data-duration="12" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="badge" style="margin-bottom: 28px">
+              <span class="num">02</span><span class="lbl">L'installation</span>
+            </div>
+            <div class="h2" style="margin-bottom: 32px">Une seule commande</div>
+            <div class="term">
+              <div class="term-bar"><i></i><i></i><i></i><span>hermes@vps — bash</span></div>
+              <div class="term-body"><span class="prompt">$ </span><span class="cmd" id="typed"></span><span class="caret" id="caret"></span></div>
+            </div>
+            <div class="sub" style="margin-top: 30px">
+              Python, Node, ffmpeg, ripgrep — <span class="kw">tout est installé</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S4 · Telegram (28-38) ═══ -->
+      <div id="s4" class="clip scene" data-start="28" data-duration="10" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="badge" style="margin-bottom: 30px">
+              <span class="num">03</span><span class="lbl">La messagerie</span>
+            </div>
+            <div class="h2" style="margin-bottom: 34px">Vous lui parlez sur Telegram</div>
+            <div class="chat">
+              <div class="bub bot"><span class="mono">hermes gateway setup</span> — jeton via @BotFather</div>
+              <div class="bub me">Point sur les rendez-vous de demain ?</div>
+              <div class="bub bot">3 rendez-vous. Le premier à 9 h, dossier déjà prêt.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S5 · Sécurité (38-46) ═══ -->
+      <div id="s5" class="clip scene" data-start="38" data-duration="8" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura warn" data-layout-allow-overflow></div>
+            <svg id="ico-lock" width="92" height="92" viewBox="0 0 100 100" fill="none" style="margin-bottom: 26px">
+              <rect class="d" x="22" y="44" width="56" height="42" rx="8" stroke="#FFB454" stroke-width="3.4" />
+              <path class="d" d="M34 44V32a16 16 0 0 1 32 0v12" stroke="#FFB454" stroke-width="3.4" stroke-linecap="round" />
+              <circle class="p" cx="50" cy="63" r="5" fill="#FFB454" />
+            </svg>
+            <div class="h2" style="margin-bottom: 30px">
+              La <span class="kw-warn">liste blanche</span> n'est pas optionnelle
+            </div>
+            <div class="warnbox">
+              <div class="line">
+                Sans <span class="mono">TELEGRAM_ALLOWED_USERS</span>, n'importe qui trouvant votre bot obtient un
+                <span class="kw-warn">accès shell</span> sur le serveur.
+              </div>
+              <div class="line">
+                Testez depuis un compte non autorisé. <b>Il ne doit rien répondre.</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ S6 · Fin (46-52) ═══ -->
+      <div id="s6" class="clip scene" data-start="46" data-duration="6" data-track-index="0">
+        <div class="cam">
+          <div class="stage">
+            <div class="aura" data-layout-allow-overflow></div>
+            <div class="kicker" style="margin-bottom: 30px">Les 10 phases en détail</div>
+            <div class="h1">Le guide complet<br />est en description</div>
+            <div class="sub" style="margin-top: 32px">
+              Durcissement SSH · pare-feu · sauvegardes
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="prog-track" class="clip" data-start="0" data-duration="52" data-track-index="1">
+        <div id="prog-fill"></div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* Caméra à sens alterné. Troisième jeu de directions : les trois
+         formats ne doivent pas dériver à l'identique. */
+      const SCENES = [
+        { id: "#s1", at: 0,  dur: 6,  from: 1.05, to: 1.00, dx:  18, dy:  14 },
+        { id: "#s2", at: 6,  dur: 10, from: 1.00, to: 1.06, dx: -16, dy: -15 },
+        { id: "#s3", at: 16, dur: 12, from: 1.06, to: 1.01, dx:  14, dy: -14 },
+        { id: "#s4", at: 28, dur: 10, from: 1.01, to: 1.07, dx: -18, dy:  15 },
+        { id: "#s5", at: 38, dur: 8,  from: 1.07, to: 1.01, dx:  13, dy: -12 },
+        { id: "#s6", at: 46, dur: 6,  from: 1.00, to: 1.06, dx: -15, dy:  11 },
+      ];
+      SCENES.forEach(function (s) {
+        tl.fromTo(s.id + " .cam", { scale: s.from, x: 0, y: 0 },
+          { scale: s.to, x: s.dx, y: s.dy, duration: s.dur, ease: "none" }, s.at);
+      });
+
+      /* Aura — sélecteurs, jamais de nœuds capturés au chargement. */
+      const A_PEAK = 0.40, A_AMP = 0.045;
+      SCENES.forEach(function (s) {
+        const sel = s.id + " .aura";
+        const BLOOM = 0.55;
+        tl.fromTo(sel, { opacity: 0, scale: 0.9 }, { opacity: A_PEAK, scale: 1, duration: BLOOM, ease: "power2.out" }, s.at);
+        const ph = { v: 0 };
+        tl.to(ph, {
+          v: Math.PI * 2,
+          duration: Math.max(0.1, s.dur - BLOOM - 0.4),
+          ease: "none",
+          onUpdate: () => {
+            const el = document.querySelector(sel);
+            if (!el) return;
+            const k = Math.sin(ph.v);
+            el.style.opacity = String(A_PEAK + k * A_AMP);
+            el.style.transform = `scale(${1 + k * 0.02})`;
+          },
+        }, s.at + BLOOM);
+        tl.to(sel, { opacity: 0, duration: 0.4 }, s.at + s.dur - 0.4);
+        tl.set(sel, { opacity: 0 }, s.at + s.dur);
+      });
+
+      /* S1 */
+      tl.fromTo("#s1 .kicker", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+      tl.fromTo("#s1 .h1", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.75, ease: "power3.out" }, 0.42);
+      tl.fromTo("#s1 .sub", { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.9);
+
+      /* S2 */
+      tl.fromTo("#s2 .badge", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 6.15);
+      tl.fromTo("#ico-srv", { opacity: 0, scale: 0.55 }, { opacity: 1, scale: 1, duration: 0.58, ease: "back.out(2.2)" }, 6.3);
+      tl.fromTo("#ico-srv .d", { opacity: 0, x: -16 }, { opacity: 1, x: 0, duration: 0.38, ease: "power2.out", stagger: 0.09 }, 6.4);
+      tl.fromTo("#ico-srv .p", { opacity: 0 }, { opacity: 1, duration: 0.28, stagger: 0.09 }, 6.78);
+      tl.fromTo("#s2 .h2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 7.1);
+      tl.fromTo("#s2 .spec", { opacity: 0, y: 24, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "power3.out", stagger: 0.12 }, 7.5);
+
+      /* S3 — typewriter, commande sur deux lignes (continuation bash valide) */
+      const CMD = "curl -fsSL \\\n    https://hermes-agent.nousresearch.com/install.sh \\\n    | bash";
+      const S3_AT = 16, S3_DUR = 12;
+      const TYPE_LEAD = 0.11, TYPE_SPAN = 0.36;
+      const typeState = { p: 0 };
+
+      tl.fromTo("#s3 .badge", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 16.15);
+      tl.fromTo("#s3 .h2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 16.35);
+      tl.fromTo("#s3 .term", { opacity: 0, y: 36, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.62, ease: "power3.out" }, 16.65);
+
+      tl.fromTo(typeState, { p: 0 }, {
+        p: 1,
+        duration: S3_DUR,
+        ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#typed");
+          if (!el) return;
+          const k = Math.min(1, Math.max(0, (typeState.p - TYPE_LEAD) / TYPE_SPAN));
+          el.textContent = CMD.slice(0, Math.round(k * CMD.length));
+        },
+      }, S3_AT);
+
+      const caretPhase = { v: 0 };
+      tl.to(caretPhase, {
+        v: 12,
+        duration: 10.2,
+        ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#caret");
+          if (el) el.style.opacity = (caretPhase.v % 1) < 0.5 ? "1" : "0.12";
+        },
+      }, 16.75);
+      tl.set("#caret", { opacity: 1 }, 28);
+
+      tl.fromTo("#s3 .sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 21.6);
+
+      /* S4 */
+      tl.fromTo("#s4 .badge", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 28.15);
+      tl.fromTo("#s4 .h2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 28.35);
+      tl.fromTo("#s4 .bub.bot:first-of-type", { opacity: 0, y: 26, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.46, ease: "back.out(1.6)" }, 28.9);
+      tl.fromTo("#s4 .bub.me", { opacity: 0, y: 26, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.46, ease: "back.out(1.6)" }, 30.3);
+      tl.fromTo("#s4 .bub.bot:last-of-type", { opacity: 0, y: 26, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.46, ease: "back.out(1.6)" }, 31.8);
+
+      /* S5 — punch-in plus sec */
+      tl.fromTo("#ico-lock", { opacity: 0, scale: 0.62 }, { opacity: 1, scale: 1, duration: 0.46, ease: "back.out(3)" }, 38.2);
+      tl.fromTo("#ico-lock .d", { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.11 }, 38.3);
+      tl.fromTo("#ico-lock .p", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.27, ease: "back.out(2)" }, 38.66);
+      tl.fromTo("#s5 .h2", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 38.6);
+      tl.fromTo("#s5 .warnbox", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.58, ease: "power3.out" }, 38.98);
+      tl.fromTo("#s5 .warnbox .line", { opacity: 0, x: 22 }, { opacity: 1, x: 0, duration: 0.46, ease: "power3.out", stagger: 0.28 }, 39.25);
+
+      /* S6 */
+      tl.fromTo("#s6 .kicker", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 46.2);
+      tl.fromTo("#s6 .h1", { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.72, ease: "power3.out" }, 46.42);
+      tl.fromTo("#s6 .sub", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.58, ease: "power3.out" }, 46.92);
+
+      tl.fromTo("#prog-fill", { scaleX: 0 }, { scaleX: 1, duration: 52, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

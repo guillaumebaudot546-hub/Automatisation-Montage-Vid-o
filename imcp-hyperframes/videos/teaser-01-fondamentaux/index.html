@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="fr" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #050b14; }
+      body { font-family: Roboto, sans-serif; }
+
+      :root {
+        --bg: #050b14;
+        --fluo: #5fe8ff;
+        --ivory: #f4f1ea;
+        --slate: #90a4b8;
+        --champagne: #d8c7a8;
+      }
+
+      .fill { position: absolute; inset: 0; }
+
+      /* Fond : la source floutée, agrandie, très sombre — remplit le vertical
+         sans bord noir mort derrière le letterbox. */
+      #bg { width: 100%; height: 100%; object-fit: cover;
+            filter: blur(48px) brightness(0.34) saturate(1.1); transform: scale(1.5); }
+      #bg-tint { position: absolute; inset: 0;
+        background: radial-gradient(120% 80% at 50% 30%, rgba(95,232,255,0.10), rgba(5,11,20,0.6) 70%); }
+
+      /* Cadre vidéo : la source 16:9 letterboxée, encadrée cyan, dans le
+         tiers supérieur. object-fit contain → aucune slide coupée. */
+      #screen-wrap {
+        position: absolute; left: 48px; right: 48px; top: 214px;
+        height: 558px; border-radius: 26px; overflow: hidden;
+        border: 2px solid rgba(95,232,255,0.55);
+        box-shadow: 0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(95,232,255,0.12);
+        background: #000;
+      }
+      #screen { width: 100%; height: 100%; object-fit: contain;
+                transform-origin: 50% 50%; will-change: transform; }
+      #screen-glow {
+        position: absolute; inset: -80px; z-index: -1; opacity: 0.5;
+        background: radial-gradient(closest-side, rgba(95,232,255,0.4), rgba(95,232,255,0) 72%);
+      }
+
+      /* Bandeau haut : marque + numéro de module */
+      #topbar {
+        position: absolute; left: 48px; right: 48px; top: 74px;
+        display: flex; align-items: center; justify-content: space-between;
+      }
+      #topbar .brand { font-size: 34px; font-weight: 800; letter-spacing: 0.18em; color: var(--fluo); }
+      #topbar .mod {
+        font-size: 22px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+        color: var(--slate); padding: 8px 18px; border-radius: 100px;
+        border: 1px solid rgba(143,163,184,0.35);
+      }
+
+      /* Cartons animés, sous le cadre vidéo */
+      .slot { position: absolute; left: 60px; right: 60px; top: 830px; }
+      .wrap { position: relative; }
+      .glow {
+        position: absolute; inset: -120px; z-index: 1; opacity: 0;
+        background: radial-gradient(closest-side, rgba(95,232,255,0.55) 0%, rgba(95,232,255,0.18) 52%, rgba(95,232,255,0) 78%);
+      }
+      .card {
+        position: relative; z-index: 2; overflow: hidden;
+        padding: 38px 44px 42px; text-align: center;
+        background: rgba(5,11,20,0.92);
+        border: 1.5px solid rgba(95,232,255,0.5);
+        border-radius: 22px; box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+      }
+      .kicker {
+        font-size: 22px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase;
+        color: var(--champagne); margin-bottom: 20px;
+      }
+      .big {
+        font-family: "EB Garamond", serif; font-size: 76px; line-height: 1.05; color: var(--ivory);
+      }
+      .big .kw { color: var(--fluo); }
+      .three { display: flex; flex-direction: column; gap: 12px; }
+      .three .l { font-size: 52px; font-weight: 800; color: var(--slate); line-height: 1.1; }
+      .three .l.on { color: var(--fluo); }
+      .sweep {
+        position: absolute; top: 0; bottom: 0; left: 0; width: 240px; z-index: 3; pointer-events: none;
+        background: linear-gradient(105deg, rgba(95,232,255,0) 0%, rgba(95,232,255,0.18) 50%, rgba(95,232,255,0) 100%);
+      }
+
+      /* Sous-titres, bas de cadre */
+      #subs { position: absolute; left: 70px; right: 70px; bottom: 150px; display: flex; justify-content: center; }
+      #subs .pill b { color: var(--fluo); font-weight: 700; text-shadow: 0 0 16px rgba(95,232,255,0.8), 0 0 5px rgba(95,232,255,0.6); }
+      #subs .pill {
+        padding: 20px 32px; border-radius: 18px; background: rgba(2,7,13,0.86);
+        border: 1px solid rgba(143,163,184,0.28);
+        font-size: 38px; font-weight: 600; line-height: 1.26; color: #f6fbff; text-align: center; text-shadow: 0 0 15px rgba(150,225,255,0.34), 0 2px 7px rgba(0,0,0,0.72);
+      }
+
+      /* Carton de fin */
+      #end { display: flex; flex-direction: column; align-items: center; justify-content: center;
+             background: var(--bg); text-align: center; }
+      #end .stack { position: relative; display: inline-block; }
+      #end-glow { position: absolute; inset: -190px; z-index: 1; opacity: 0;
+        background: radial-gradient(closest-side, rgba(95,232,255,0.55), rgba(95,232,255,0.18) 54%, rgba(95,232,255,0) 78%); }
+      #end img { position: relative; z-index: 2; width: 320px; display: block; }
+      #end .t { font-family: "EB Garamond", serif; font-size: 60px; color: var(--ivory); margin-top: 34px; line-height: 1.1; }
+      #end .u { font-family: "JetBrains Mono", monospace; font-size: 36px; color: var(--fluo); margin-top: 26px; }
+      #end .caret { display: inline-block; width: 15px; height: 36px; background: var(--fluo); vertical-align: -6px; margin-left: 3px; }
+      svg { display: block; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Teaser cours 1 « Fondamentaux LASER » — RÉFÉRENCE des 7 cours.
+      Extrait 555,6→625,6 s (métaphore du sculpteur + démo coquille d'œuf).
+
+      Problème résolu : la source est 16:9 pleine de slides — un recadrage
+      vertical les couperait. Solution : LETTERBOX dans un cadre cyan (object-fit
+      contain, aucune slide perdue), sur un fond = même source floutée assombrie.
+      Marque, cartons et sous-titres occupent l'espace autour du cadre.
+
+      Slides EN, audio FR : les cartons français doublent la slide anglaise au
+      bon moment (« No more cutting » ↔ « On ne coupe plus »), renfort bilingue.
+
+      Doctrine de montage : poussée caméra sur le cadre (sens unique ici, un
+      seul plan source), punch-in sur le carton pivot, aura cyan, typewriter URL.
+    -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="73"
+         data-width="1080" data-height="1920" data-fps="30">
+
+      <!-- piste 0 : fond flou (même source) -->
+      <video id="bg" class="clip fill" src="teaser-src.mp4" muted playsinline
+             data-start="0" data-duration="70" data-media-start="0" data-track-index="0"></video>
+      <div id="bg-tint" class="clip fill" data-start="0" data-duration="70" data-track-index="6"
+           style="z-index:1"></div>
+
+      <!-- piste 1 : cadre vidéo (audio ici) -->
+      <div id="screen-wrap" class="clip" data-start="0" data-duration="70" data-track-index="1">
+        <div id="screen-glow"></div>
+        <video id="screen" src="teaser-src.mp4" playsinline data-has-audio="true"
+               data-start="0" data-duration="70" data-media-start="0"></video>
+      </div>
+
+      <!-- piste 2 : bandeau haut -->
+      <div id="topbar" class="clip" data-start="0" data-duration="70" data-track-index="2">
+        <span class="brand">IMCP</span>
+        <span class="mod">Module 1 · Fondamentaux</span>
+      </div>
+
+      <!-- piste 3 : cartons -->
+      <div id="k1" class="slot clip" data-start="0.5" data-duration="8.6" data-track-index="3">
+        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">LASER Er-YAG · microchirurgie</div>
+            <div class="big">Vous allez opérer<br /><span class="kw">autrement</span></div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div></div>
+      </div>
+
+      <div id="k2" class="slot clip" data-start="9.2" data-duration="8.6" data-track-index="3">
+        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">Le geste change</div>
+            <div class="three">
+              <div class="l" id="l-coupe">On ne coupe plus.</div>
+              <div class="l" id="l-fraise">On ne fraise plus.</div>
+              <div class="l on" id="l-sculpte">On sculpte les tissus.</div>
+            </div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div></div>
+      </div>
+
+      <div id="k3" class="slot clip" data-start="24.3" data-duration="16.4" data-track-index="3">
+        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">La précision</div>
+            <div class="big">Découper une <span class="kw">coquille d'œuf</span><br />sans percer la membrane</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div></div>
+      </div>
+
+      <div id="k4" class="slot clip" data-start="55.5" data-duration="13.5" data-track-index="3">
+        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
+          <div class="card">
+            <div class="kicker">Sans contact</div>
+            <div class="big"><span class="kw">No touch.</span><br />À quelques microns près.</div>
+            <div class="sweep" data-layout-allow-overflow></div>
+          </div></div>
+      </div>
+
+      <!-- piste 4 : sous-titres -->
+      <div id="subs" class="clip" data-start="0" data-duration="70" data-track-index="4">
+        <div class="pill" id="sub-pill"></div>
+      </div>
+
+      <!-- piste 5 : carton de fin -->
+      <div id="end" class="clip fill" data-start="69" data-duration="4" data-track-index="5">
+        <div class="stack">
+          <div id="end-glow" data-layout-allow-overflow></div>
+          <img src="logo-mark.png" alt="IMCP" />
+        </div>
+        <div class="t">Fondamentaux<br />du LASER Er-YAG</div>
+        <div class="u"><span id="typed"></span><span class="caret" id="caret"></span></div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const VID = 70;
+
+      /* ═══ Caméra : poussée lente sur le cadre vidéo ═══
+         Un seul plan source (extrait continu) → pas d'alternance de sens ici ;
+         la variation vient des punch-in de cartons. Échelle > 1, jamais 1.0. */
+      const cam = { p: 0 };
+      tl.fromTo(cam, { p: 0 }, {
+        p: 1, duration: VID, ease: "none",
+        onUpdate: () => {
+          const el = document.querySelector("#screen");
+          if (!el) return;
+          const p = cam.p;
+          const s = 1.02 + p * 0.06;
+          const dy = Math.sin(p * Math.PI * 2) * 4;
+          el.style.transform = `translateY(${dy}px) scale(${s})`;
+        },
+      }, 0);
+
+      /* ═══ Sous-titres : un tween sur toute la durée, cue déduite du temps ═══ */
+      const CUES = [{s:0.71,e:3.27,t:"Qu'est-ce qui se passe dans vos mains ?",h:"Qu'est-ce qui se passe dans vos mains ?"},{s:3.27,e:4.87,t:"C'est qu'en fait, vous",h:"C'est qu'en fait, vous"},{s:4.87,e:7.01,t:"allez à l'image d'un sculpteur,",h:"allez à l'image d'un <b>sculpteur</b>,"},{s:7.01,e:9.51,t:"vous allez sculpter les tissus.",h:"vous allez <b>sculpter</b> les tissus."},{s:9.53,e:12.87,t:"On ne coupe plus, on ne fraise plus,",h:"On ne coupe plus, on ne fraise plus,"},{s:13.03,e:15.33,t:"on va sculpter les tissus.",h:"on va <b>sculpter</b> les tissus."},{s:15.37,e:18.13,t:"Les tissus sont opérés autrement.",h:"Les <b>tissus</b> sont opérés autrement."},{s:18.31,e:20.05,t:"C'est un outil qui arrive",h:"C'est un outil qui arrive"},{s:20.05,e:24.39,t:"en complément de l'instrumentation conventionnelle.",h:"en complément de l'instrumentation conventionnelle."},{s:24.63,e:27.69,t:"Et pour illustrer la précision de cet outil,",h:"Et pour illustrer la <b>précision</b> de cet outil,"},{s:27.73,e:31.05,t:"l'aspect totalement inédit de cet outil,",h:"l'aspect totalement inédit de cet outil,"},{s:31.09,e:33.87,t:"je vous présente cette petite vidéo",h:"je vous présente cette petite vidéo"},{s:33.87,e:36.89,t:"dans laquelle j'ai ouvert une coquille d'œuf,",h:"dans laquelle j'ai ouvert une coquille d'œuf,"},{s:37.01,e:37.69,t:"avec le laser.",h:"avec le <b>laser</b>."},{s:37.93,e:38.87,t:"Alors, elle est en",h:"Alors, elle est en"},{s:38.87,e:40.93,t:"accéléré, évidemment, sur cette vidéo.",h:"accéléré, évidemment, sur cette vidéo."},{s:41.35,e:45.17,t:"Mais vous pouvez percevoir la précision de l'outil.",h:"Mais vous pouvez percevoir la <b>précision</b> de l'outil."},{s:45.21,e:48.19,t:"Vous voyez, on arrive à découper la coquille.",h:"Vous voyez, on arrive à découper la coquille."},{s:48.27,e:50.19,t:"Alors là, évidemment, on est sous microscope.",h:"Alors là, évidemment, on est sous <b>microscope</b>."},{s:50.67,e:52.91,t:"On vient de découper précisément la coquille.",h:"On vient de découper <b>précis</b>ément la coquille."},{s:53.05,e:54.27,t:"Mais on va faire mieux que ça.",h:"Mais on va faire mieux que ça."},{s:54.45,e:56.21,t:"On va polir les parois.",h:"On va polir les parois."},{s:56.33,e:58.01,t:"Et le laser, vous voyez, c'est no touch.",h:"Et le laser, vous voyez, c'est <b>no touch</b>."},{s:58.19,e:61.07,t:"On travaille à quelques dixièmes de",h:"On travaille à quelques dixièmes de"},{s:61.07,e:63.67,t:"millimètre de la surface à traiter.",h:"<b>millimètre</b> de la surface à traiter."},{s:63.75,e:66.93,t:"Et on arrive même à nettoyer la membrane.",h:"Et on arrive même à nettoyer la membrane."},{s:67.01,e:69.07,t:"On protège la membrane de l'œuf.",h:"On protège la membrane de l'œuf."}];
+      const st = { t: 0 };
+      tl.fromTo(st, { t: 0 }, {
+        t: VID, duration: VID, ease: "none",
+        onUpdate: () => {
+          const pill = document.querySelector("#sub-pill");
+          if (!pill) return;
+          const now = st.t; let a = null;
+          for (let i = 0; i < CUES.length; i++) { if (now >= CUES[i].s && now < CUES[i].e) { a = CUES[i]; break; } }
+          if (a && now < 69) { pill.innerHTML = a.h; pill.style.opacity = "1"; }
+          else { pill.textContent = ""; pill.style.opacity = "0"; }
+        },
+      }, 0);
+
+      /* ═══ Cartons — sélecteurs GSAP, jamais de nœuds capturés au chargement.
+         Aura pic+amplitude ≤ 0.45. Respiration bornée par tween de phase fini. ═══ */
+      const G_PEAK = 0.38, G_AMP = 0.04;
+      const K = [
+        { id: "#k1", at: 0.5,  dur: 8.6,  cyc: 1 },
+        { id: "#k2", at: 9.2,  dur: 8.6,  cyc: 1 },
+        { id: "#k3", at: 24.3, dur: 16.4, cyc: 2 },
+        { id: "#k4", at: 55.5, dur: 13.5, cyc: 2 },
+      ];
+      const SW_A = -280, SW_B = 1000;
+      K.forEach(function (c) {
+        const box = c.id + " .card", g = c.id + " .glow", BLOOM = 0.45, OUT = c.at + c.dur - 0.35;
+        tl.fromTo(box, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" }, c.at);
+        tl.fromTo(g, { opacity: 0, scale: 0.86 }, { opacity: G_PEAK, scale: 1, duration: BLOOM, ease: "power2.out" }, c.at);
+        const ph = { v: 0 };
+        tl.to(ph, { v: Math.PI * 2 * c.cyc, duration: Math.max(0.1, c.dur - BLOOM - 0.35), ease: "none",
+          onUpdate: () => { const el = document.querySelector(g); if (!el) return;
+            const k = Math.sin(ph.v); el.style.opacity = String(G_PEAK + k * G_AMP); el.style.transform = `scale(${1 + k * 0.022})`; } }, c.at + BLOOM);
+        tl.fromTo(c.id + " .sweep", { x: SW_A }, { x: SW_B, duration: 1.2, ease: "none" }, c.at + 0.4);
+        tl.set(c.id + " .sweep", { x: SW_A }, c.at + c.dur);
+        tl.to(box, { opacity: 0, duration: 0.35 }, OUT);
+        tl.to(g, { opacity: 0, duration: 0.35 }, OUT);
+        tl.set(box, { opacity: 0 }, c.at + c.dur);
+        tl.set(g, { opacity: 0 }, c.at + c.dur);
+      });
+
+      /* ═══ K2 · le pivot : les trois lignes tombent, la 3e en punch-in cyan ═══ */
+      tl.fromTo("#l-coupe", { opacity: 0, x: -26 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 9.6);
+      tl.fromTo("#l-fraise", { opacity: 0, x: -26 }, { opacity: 1, x: 0, duration: 0.4, ease: "power3.out" }, 11.4);
+      tl.fromTo("#l-sculpte", { opacity: 0, scale: 0.9, y: 14 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: "back.out(2)" }, 13.2);
+
+      /* ═══ Carton de fin — typewriter URL ═══ */
+      tl.fromTo("#end-glow", { opacity: 0, scale: 0.88 }, { opacity: 0.28, scale: 1, duration: 0.7, ease: "power2.out" }, 69.2);
+      tl.fromTo("#end img", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 69.2);
+      tl.fromTo("#end .t", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, 69.45);
+      tl.fromTo("#end .u", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4 }, 69.8);
+
+      const URL = "imcpformations.fr", U_AT = 69.9, U_DUR = 3.1, LEAD = 0.05, SPAN = 0.5;
+      const ty = { p: 0 };
+      tl.fromTo(ty, { p: 0 }, { p: 1, duration: U_DUR, ease: "none",
+        onUpdate: () => { const el = document.querySelector("#typed"); if (!el) return;
+          const k = Math.min(1, Math.max(0, (ty.p - LEAD) / SPAN)); el.textContent = URL.slice(0, Math.round(k * URL.length)); } }, U_AT);
+      const car = { v: 0 };
+      tl.to(car, { v: 6, duration: 3.0, ease: "none",
+        onUpdate: () => { const el = document.querySelector("#caret"); if (el) el.style.opacity = (car.v % 1) < 0.5 ? "1" : "0.12"; } }, 69.9);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
