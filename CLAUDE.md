@@ -6,6 +6,8 @@
 | Fichier | À lire quand... |
 |---|---|
 | `decisions/014-hyperframes-moteur-officiel.md` | **AVANT tout montage** — quel moteur, et pourquoi |
+| `decisions/015-hermes-orchestrateur.md` | **AVANT de toucher au service cloud** — Hermes orchestre, pas de bot maison |
+| `../Déploiement Hermes IA/hermes-vps-runbook.md` | tu déploies ou administres le VPS (10 phases, sourcé) |
 | `.claude/skills/montage-imcp/SKILL.md` | tu montes une vidéo (doctrine — chargée comme skill) |
 | `praticiens/baudot.json` | tu montes pour le Dr Baudot : préférences, corrections passées, exemples validés |
 | `docs/gouvernance/architecture.md` | tu crées, déplaces ou fais grossir un fichier |

@@ -20,3 +20,4 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [012](012-go-palier-1.md) | GO palier 1 — cadré par SPEC-PALIER-1.md, implémentation en session neuve | Actif |
 | [013](013-doctrine-talking-head.md) | Doctrine par type de contenu — talking-head = voix continue + calques | Actif |
 | [014](014-hyperframes-moteur-officiel.md) | HyperFrames devient le moteur, Remotion passe en maintenance | Actif — remplace la RÈGLE 4 |
+| [015](015-hermes-orchestrateur.md) | Hermes Agent est l'orchestrateur — pas de bot Telegram maison | Actif — modifie SPEC-PALIER-1 |
