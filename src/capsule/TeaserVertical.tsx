@@ -157,7 +157,7 @@ export const TeaserVertical: React.FC<TeaserProps> = ({ src, eyebrow, title, hoo
 
       {music && (
         <Sequence>
-          <Audio src={staticFile(music.src)} volume={music.volume} />
+          <Audio src={staticFile(music.src)} volume={() => music.volume} />
         </Sequence>
       )}
     </AbsoluteFill>

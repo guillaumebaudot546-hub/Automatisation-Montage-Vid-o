@@ -160,7 +160,7 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
-        durationInFrames={3573}
+        durationInFrames={capsuleV2Duration(CAPSULE1_PROPS.spans)}
         calculateMetadata={({ props }) => ({
           durationInFrames: capsuleV2Duration(props.spans),
         })}
@@ -174,7 +174,7 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
-        durationInFrames={1590}
+        durationInFrames={capsuleV2Duration(TEASER4_PROPS.spans)}
         calculateMetadata={({ props }) => ({ durationInFrames: capsuleV2Duration(props.spans) })}
         defaultProps={TEASER4_PROPS}
       />
@@ -186,7 +186,7 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
-        durationInFrames={2420}
+        durationInFrames={capsuleV2Duration(SUTURE_PROPS.spans)}
         calculateMetadata={({ props }) => ({ durationInFrames: capsuleV2Duration(props.spans) })}
         defaultProps={SUTURE_PROPS}
       />

@@ -130,7 +130,7 @@ export const ClinicalWrap: React.FC<ClinicalWrapProps> = ({
   return (
     <AbsoluteFill style={{ backgroundColor: "#0A1A2F" }}>
       {/* Sting logo */}
-      <Sequence from={0} durationInFrames={INTRO} premountFor={30}>
+      <Sequence durationInFrames={INTRO} premountFor={30}>
         <AbsoluteFill style={{ backgroundColor: "#000" }}>
           <OffthreadVideo
             src={staticFile("intro-imcp.mp4")}
@@ -179,7 +179,7 @@ export const ClinicalWrap: React.FC<ClinicalWrapProps> = ({
       </Sequence>
       {[contentFrom, outroFrom].map((b) => (
         <Sequence key={`s${b}`} from={b - 7} durationInFrames={30}>
-          <Audio src={staticFile("sfx/swoosh.wav")} volume={sfxVol * 0.85} />
+          <Audio src={staticFile("sfx/swoosh.wav")} volume={() => sfxVol * 0.85} />
         </Sequence>
       ))}
 

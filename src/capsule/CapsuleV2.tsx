@@ -168,7 +168,7 @@ export const CapsuleV2: React.FC<CapsuleV2Props> = ({ src, eyebrow, title, spans
       {/* Lit musical — démarre avec la voix, fondus bakés dans le fichier */}
       {music && (
         <Sequence from={STING}>
-          <Audio src={staticFile(music.src)} volume={music.volume} />
+          <Audio src={staticFile(music.src)} volume={() => music.volume} />
         </Sequence>
       )}
 

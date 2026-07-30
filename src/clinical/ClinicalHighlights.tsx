@@ -146,7 +146,7 @@ export const ClinicalHighlights: React.FC<ClinicalHighlightsProps> = ({
   return (
     <AbsoluteFill style={{ backgroundColor: "#0A1A2F" }}>
       {/* Sting logo (compact) */}
-      <Sequence from={0} durationInFrames={STING} premountFor={30}>
+      <Sequence durationInFrames={STING} premountFor={30}>
         <AbsoluteFill style={{ backgroundColor: "#000" }}>
           <OffthreadVideo
             src={staticFile("intro-imcp.mp4")}
@@ -196,7 +196,7 @@ export const ClinicalHighlights: React.FC<ClinicalHighlightsProps> = ({
         <Sequence key={`c${i}`} from={Math.round(c.atSec * FPS)} durationInFrames={90}>
           <Audio
             src={staticFile(SFX_FILE[c.sound])}
-            volume={c.volume}
+            volume={() => c.volume}
             playbackRate={c.pitch}
           />
         </Sequence>
