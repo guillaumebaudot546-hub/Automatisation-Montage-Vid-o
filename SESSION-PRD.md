@@ -12,12 +12,29 @@ section utile à la tâche (charge à la demande).
 - **§10** commandes · **§11** livrables produits · **§12** backlog
 - **ANNEXE A** audit archi (fait) · **ANNEXE B** texte défilant (à faire)
 
-## ⚠️ Direction en cours — NON encore reflétée dans les sections ci-dessous
-Ce PRD décrit le **montage manuel dans le Studio**. La cible a pivoté (2026-07-17)
-vers un **service cloud automatisé** : Telegram → images clés → IA choisit les
-timestamps → rendu → validation praticien. Voir **[decisions/](decisions/README.md)**
-(001 Telegram · 002 cloud · 003 skill 3 couches · 004 spike · 005 IA/code).
-Les sections §1-§12 restent la vérité sur le **code actuel**.
+## ⛔ DOCUMENT PARTIELLEMENT PÉRIMÉ — lire ceci avant de s'y fier
+
+Ce PRD décrit l'état **Remotion** au 17/07/2026. Deux choses ont changé depuis :
+
+1. **Le moteur a changé.** La production est passée à HyperFrames le 19/07
+   (`decisions/014`). Les §1-§12 décrivent un moteur désormais **en maintenance**.
+   Pour monter une vidéo aujourd'hui : `decisions/014` puis la doctrine
+   `.claude/skills/montage-imcp/SKILL.md`.
+2. **Le chemin du §1 est mort.** `C:\Users\Guillaume\Desktop\my-video-IMCP`
+   n'existe plus ; le projet vit dans
+   `C:\Users\Guillaume\Desktop\LP MedStream DCA\MONTAGE-IA-IMCP`.
+
+Ce qui reste valable : **§4 la charte graphique** (source de vérité
+`src/theme/baudot.ts`, accent cyan `#49B6C9`) et **§7 l'audio**. Le reste est de
+l'archive Remotion.
+
+## ⚠️ Direction en cours
+La cible a pivoté (2026-07-17) vers un **service cloud automatisé** :
+Telegram → images clés → IA choisit les timestamps → rendu → validation
+praticien. Voir **[decisions/](decisions/README.md)** (001 Telegram · 002 cloud ·
+003 skill 3 couches · 004 spike · 005 IA/code · 014 moteur).
+`SPEC-PALIER-1.md` suppose encore `npx remotion render` : à réécrire sur
+HyperFrames avant toute implémentation.
 
 ---
 

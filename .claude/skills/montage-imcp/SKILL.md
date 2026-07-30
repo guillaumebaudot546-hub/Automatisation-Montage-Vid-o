@@ -1,8 +1,8 @@
 ---
 name: montage-imcp
-description: Doctrine de montage vidéo IMCP — capsules et teasers verticaux/horizontaux à partir des rushes du praticien. À charger AVANT tout montage. Encode les règles apprises au fil des corrections (voir praticiens/<nom>.json et decisions/013).
+description: Doctrine de montage vidéo IMCP — capsules, teasers et publications verticaux/horizontaux à partir des rushes du Dr Baudot. À charger AVANT tout montage, avant même de choisir des timestamps. Moteur = HyperFrames (decision 014). Encode les règles apprises au fil des corrections réelles du praticien (voir praticiens/<nom>.json, decisions/013 et 014).
 metadata:
-  tags: montage, remotion, vertical, teaser, capsule, IMCP
+  tags: montage, hyperframes, video, vertical, teaser, capsule, IMCP, doctrine
 ---
 
 # Doctrine de montage IMCP
@@ -70,24 +70,98 @@ Le praticien doit être PRÉSENT à l'écran, pas seulement en voix off sur des 
 
 ## RÈGLE 3ter — trailer d'un cours long : audio pré-assemblé
 Pour balayer les points majeurs d'un cours long sans voix hachée : NE PAS butter
-des clips bout à bout dans Remotion. Extraire les soundbites (phrases entières),
-les assembler en UNE piste audio avec `ffmpeg acrossfade` (+ lit musical), puis
-poser les visuels muets par-dessus, calés sur les temps de la piste. La musique
-lie les raccords. C'est la méthode trailer (TeaserTrailer.tsx).
+des clips bout à bout. Extraire les soundbites (phrases entières), les assembler
+en UNE piste audio avec `ffmpeg acrossfade` (+ lit musical), puis poser les
+visuels muets par-dessus, calés sur les temps de la piste. La musique lie les
+raccords.
 
-## RÈGLE 4 — moteur unique, pas de composition jetable
-Le montage repose sur `CapsuleV2` (voix continue + calques). Un teaser est une
-capsule COURTE bâtie sur le meilleur passage continu. Ne pas réécrire une
-composition « assemblage de clips » (erreur du teaser v1).
+**C'est la SEULE exception tolérée à la RÈGLE 0**, et elle est bornée : les
+raccords doivent être des `acrossfade` (jamais des cuts), un lit musical continu
+doit couvrir toute la piste, et l'assemblage se fait en amont dans ffmpeg — pas
+en posant des clips côte à côte dans la composition. Hors de ces trois
+conditions, la RÈGLE 0 s'applique sans discussion.
+
+## RÈGLE 4 — un socle partagé, pas une composition jetable par vidéo
+**Le moteur est HyperFrames** (decision 014). Remotion (`src/`) est en
+maintenance : on y corrige, on n'y construit plus.
+
+L'intention n'a pas changé : une nouvelle vidéo **part du socle commun** et
+n'invente pas sa propre structure. Un teaser est une capsule COURTE bâtie sur le
+meilleur passage continu — pas un assemblage de clips (erreur du teaser v1).
+
+En HyperFrames, cela veut dire concrètement :
+- Le tronc commun (chrome, sous-titres, sting, carte de fin, palette) vit dans
+  des **blocs et composants** partagés — `hyperframes.json` → `paths.blocks` et
+  `paths.components`. Voir `/hyperframes-registry`.
+- Un nouveau projet **installe** ces blocs, il ne recopie pas un `index.html`
+  voisin. Le copier-coller entre projets est la faute que cette règle interdit.
+- Une seule version de la CLI HyperFrames pour tout le dossier.
+
+*État au 29/07/2026 : cette règle est violée — 126 lignes sur 144 identiques
+entre les teasers 02 à 07, logo dupliqué 10 fois, trois versions de CLI. La
+factorisation est le premier chantier HyperFrames à mener.*
+
+## RÈGLE 4bis — l'identité passe par la charte, jamais par des valeurs à la main
+Toute couleur vient de `src/theme/baudot.ts`, seule source de vérité :
+`navy950 #060D18` · `ivory #EEF3FA` · `cream #DCE4EF` · `slate #9DB1C9` ·
+**`champagne #49B6C9` — le cyan IMCP, imposé par le client**.
+
+Le `#d8c7a8` beige est l'ANCIEN accent, remplacé. Le retrouver dans une
+composition est un bug, pas un choix esthétique. Seuls `--fluo` (cyan fluo des
+mots-clés) et `--amber` sont des tokens d'effet libres.
+
+Vérification : `npm run check:charte`. À lancer avant de livrer.
 
 ## RÈGLE 5 — qualité & technique
 - Source basse déf (WhatsApp) → demander l'original en mode document. Prétraiter si besoin.
 - **Un seul encodage** final CRF 18. Remux faststart en copie (pas de ré-encodage).
-- **Jamais deux rendus Remotion en parallèle** (conflit de cache → crash). Séquentiel.
-- Fichier source > ~1 Go dans public/ casse le bundler → recompresser d'abord.
-- Musique = lit discret (~0,03), fondus. Jamais de Saint-Preux (SACEM).
+- **Jamais deux rendus en parallèle** (conflit de cache → crash). Séquentiel.
+  Appliqué par le hook `guard-render` : une seconde commande de rendu est refusée.
+- Fichier source > ~1 Go dans `public/` casse le bundler → recompresser d'abord.
+- Musique = lit discret (~0,03), fondus.
+- **Aucune musique sous droits.** Jamais de Saint-Preux — l'œuvre classique est
+  dans le domaine public, l'ENREGISTREMENT ne l'est pas. Un renommage de fichier
+  ne règle rien : `concerto.mp3` était le fichier Saint-Preux à l'octet près et
+  s'est retrouvé poussé sur GitHub. Par défaut : `music/ambient-bed.wav`,
+  synthétisé par `scripts/make_music.py`. Toute autre piste demande une preuve
+  de licence avant d'entrer dans `public/`.
 
 ## RÈGLE 6 — la boucle d'apprentissage
-Chaque correction du praticien → l'écrire dans `praticiens/<nom>.json` (préférences
-+ corrections datées). La vidéo suivante part de ces règles. Ne jamais refaire
-deux fois la même erreur corrigée.
+Chaque correction du praticien → l'écrire dans `praticiens/<nom>.json`
+(préférences + corrections datées). La vidéo suivante part de ces règles. Ne
+jamais refaire deux fois la même erreur corrigée.
+
+**La boucle n'est bouclée que si les trois gestes sont faits :**
+1. La correction est écrite dans `corrections[]`, datée, avec la vidéo concernée.
+2. Si elle établit une règle générale, la préférence correspondante est mise à
+   jour dans `preferences` — sinon la leçon reste enterrée dans un historique.
+3. Le segment validé est ajouté à **`exemplesValides[]`**. C'est la couche 3 du
+   skill (decision 003) : les exemples few-shot qui montrent à quoi ressemble un
+   bon montage. *Un tableau vide veut dire que l'agent n'a jamais vu d'exemple
+   de réussite — seulement des descriptions d'échecs à éviter.*
+
+Sans le geste 3, l'agent apprend uniquement ce qu'il ne faut pas faire.
+
+## RÈGLE 7 — comment construire, concrètement
+1. **Lire d'abord.** Transcrire (whisper), lire la transcription en entier,
+   choisir UN fil narratif (RÈGLE 1). Rien ne commence avant.
+2. **Charger le contexte praticien** : `praticiens/<nom>.json` — préférences,
+   corrections passées, exemples validés. Ces règles ne se redemandent pas.
+3. **Router par `/hyperframes`.** C'est le point d'entrée qui choisit le
+   workflow et installe les skills nécessaires. Ne pas écrire une composition
+   HyperFrames à la main sans passer par lui.
+4. **Partir du socle** (RÈGLE 4), pas d'un `index.html` voisin copié.
+5. **Vérifier avant de livrer** : `npm run check` — lint, tests, tailles, charte.
+   Un rouge se répare avant d'aller plus loin.
+6. **Après le retour du praticien** : appliquer la RÈGLE 6, les trois gestes.
+
+### Ce qui n'est pas encore outillé
+Ces règles restent déclaratives — aucun script ne les vérifie aujourd'hui. Les
+mécaniser est le chantier suivant :
+- RÈGLE 0 : chaque coupe tombe-t-elle sur une frontière de phrase du SRT ?
+- RÈGLE 3 : le ratio de sortie correspond-il au réseau demandé ?
+- Durée des calques : une infographie ne dépasse pas 5-6 s (préférence
+  `dureeInfographies`).
+
+Une règle que rien ne vérifie est un vœu. Les RÈGLES 4bis et 5 ont franchi ce
+pas (`check:charte`, `guard-render`) ; les autres pas encore.

@@ -23,7 +23,9 @@
     "videosDeContexte": "Chaque promesse incarnée par une VIDÉO de lui en situation ('je vous guide au laser' → B-roll de lui utilisant le laser), pas seulement des graphiques",
     "stingIntro": "TOUJOURS l'animation logo originale (intro-imcp.mp4) ajustée au format — contenue entière, fond flouté. JAMAIS une nouvelle animation, JAMAIS recadrée",
     "slidesFournies": "Extraire le CONTENU des slides et le ré-animer en cascade dans la charte — ne pas afficher l'image statique",
-    "outilAnimations": "Animations codées Remotion (gratuites, reproductibles, retouchables à la seconde). Pas de Higgsfield tant que pas d'abonnement payant — crédits gratuits non brûlés"
+    "outilAnimations": "Animations codées en HyperFrames (decision 014, depuis le 19/07/2026) : gratuites, reproductibles, retouchables à la seconde. Remotion (src/) reste en maintenance pour les compositions déjà livrées. Pas de Higgsfield tant que pas d'abonnement payant — crédits gratuits non brûlés",
+    "charteVerrouillee": "Toute couleur vient de src/theme/baudot.ts. L'accent est le CYAN #49B6C9. Le beige #d8c7a8 est l'ancien accent remplacé par le client : le retrouver dans une composition est un bug. Vérifier avec npm run check:charte avant livraison",
+    "musiqueLicence": "Aucune piste sous droits. L'œuvre classique peut être dans le domaine public, l'ENREGISTREMENT ne l'est pas. Défaut : music/ambient-bed.wav (synthétisé par scripts/make_music.py). Toute autre piste exige une preuve de licence avant d'entrer dans public/"
   },
   "corrections": [
     {
@@ -55,7 +57,38 @@
       "video": "Capsule 1 — v3",
       "retour": "Phrases-clés pas repérées (3+3 → carte punch noir/fluo attendue) ; mots importants des sous-titres à mettre en cyan fluo ; graphique trop long ; promesses à incarner par des vidéos de contexte (lui au laser) ; sting = animation originale ajustée, pas une nouvelle ; contenu des slides à extraire et animer ; qualité perçue toujours insuffisante (source WhatsApp 464×832 — l'original 4K n'a jamais été reçu)",
       "action": "V4 : PunchCard, balisage **mot** fluo dans captions, chart 10,6→5,2 s + B-roll 'Guidé pas à pas', PortraitSting = intro-imcp.mp4 original contenu + fond flouté, SlideAnimated remplace le JPEG statique. Style codifié dans les préférences ci-dessus"
+    },
+    {
+      "date": "2026-07-29",
+      "video": "Audit du projet (aucune vidéo)",
+      "retour": "Constat d'audit, pas un retour praticien. La boucle d'apprentissage était déclarée mais pas bouclée : dernière correction datée du 19/07 alors que 13 projets HyperFrames ont été produits depuis, exemplesValides vide, et aucune ligne de code ne lit ce fichier. La doctrine n'était chargée par aucun mécanisme (jonction morte vers un dossier supprimé)",
+      "action": "Doctrine déplacée dans .claude/skills/ pour être réellement chargeable ; RÈGLE 4 réécrite sur HyperFrames (decision 014) ; RÈGLE 4bis (charte verrouillée) et RÈGLE 7 (procédure de construction) ajoutées ; exemplesValides rempli. Reste à faire : faire consommer ce fichier par le montage au lieu de coder l'identité praticien en dur"
     }
   ],
-  "exemplesValides": []
+  "exemplesValides": [
+    {
+      "quoi": "Capsule verticale, voix continue sur un seul span",
+      "ou": "imcp-hyperframes/videos/capsule-3204/",
+      "pourquoi": "Illustre la RÈGLE 0 dans sa forme la plus sûre : un unique passage continu, aucune jonction, donc aucun risque de voix hachée",
+      "format": "9:16"
+    },
+    {
+      "quoi": "Teaser de cours long, un fil narratif unique",
+      "ou": "imcp-hyperframes/videos/teaser-04-reglages/",
+      "pourquoi": "Le teaser part d'une analogie (le sculpteur) et la tient jusqu'au bout, au lieu d'enchaîner des punchlines éparses — la faute du teaser 01 v1",
+      "format": "9:16"
+    },
+    {
+      "quoi": "Capsule sutures, bookend visage + fondus vers les visuels",
+      "ou": "imcp-hyperframes/sutures/",
+      "pourquoi": "Applique la RÈGLE 3bis : le praticien ouvre et clôt à l'image, les slides arrivent en fondu enchaîné pendant que sa voix continue",
+      "format": "9:16"
+    },
+    {
+      "quoi": "Même contenu décliné en trois formats",
+      "ou": "imcp-hyperframes/videos/tuto-hermes-16x9|1x1|9x16/",
+      "pourquoi": "Montre la RÈGLE 3 en pratique : le format est un paramètre choisi selon le réseau, avec un recadrage adapté à chaque cible",
+      "format": "16:9, 1:1, 9:16"
+    }
+  ]
 }
