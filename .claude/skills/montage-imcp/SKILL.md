@@ -155,13 +155,38 @@ Sans le geste 3, l'agent apprend uniquement ce qu'il ne faut pas faire.
    Un rouge se répare avant d'aller plus loin.
 6. **Après le retour du praticien** : appliquer la RÈGLE 6, les trois gestes.
 
-### Ce qui n'est pas encore outillé
-Ces règles restent déclaratives — aucun script ne les vérifie aujourd'hui. Les
-mécaniser est le chantier suivant :
-- RÈGLE 0 : chaque coupe tombe-t-elle sur une frontière de phrase du SRT ?
-- RÈGLE 3 : le ratio de sortie correspond-il au réseau demandé ?
-- Durée des calques : une infographie ne dépasse pas 5-6 s (préférence
-  `dureeInfographies`).
+## RÈGLE 8 — le portail doctrine, avant de rendre
 
-Une règle que rien ne vérifie est un vœu. Les RÈGLES 4bis et 5 ont franchi ce
-pas (`check:charte`, `guard-render`) ; les autres pas encore.
+Une règle que rien ne vérifie est un vœu. Ces règles sont désormais **vérifiées
+par du code** — portail ① de la boucle auto-critique (`decisions/006`) :
+
+```bash
+npm run portail -- plan.json cues.json
+```
+
+Le plan de montage est un JSON : `format`, `reseau`, `spans[]`, `crossfades[]`,
+`overlays[]`, `captions[]`, `dureeTotaleSec`. `cues.json` est la transcription
+(`{s, e, t}` par phrase).
+
+Ce que le portail refuse, **sans appel API et sans avis** :
+- une coupe qui ne tombe pas sur une frontière de phrase (RÈGLE 0) ;
+- plus d'une coupure dans la voix — le best-of de punchlines éparses ;
+- un raccord en cut sec entre deux prises (fondu < 0,15 s) ;
+- un format qui ne correspond pas au réseau visé (RÈGLE 3) ;
+- un calque posé au-delà de la fin — il serait invisible, sans aucune erreur ;
+- un sous-titrage couvrant moins de 80 % de la voix.
+
+Il **avertit** sans bloquer sur une infographie qui s'attarde au-delà de 6 s.
+
+Sortie `0` = passe, `3` = rejet. **Plafond 3 essais** : au-delà, remonter à
+Guillaume plutôt que boucler.
+
+Ce portail rejette la faute historique du teaser v1 et de la capsule v1 —
+5 timestamps épars, voix hachée. Il ne juge pas le goût : ce qui passe va au
+portail ② (juge), puis au Dr Baudot, seul oracle du goût.
+
+### Ce qui n'est toujours pas outillé
+- Le portail ② (juge « l'histoire du geste est-elle claire ? ») reste à écrire.
+- RÈGLE 3bis : présence du praticien à l'image, bookend — non vérifiable sans
+  analyse d'image.
+- RÈGLE 2 : « les propos sont-ils mis en avant » relève du jugement.
