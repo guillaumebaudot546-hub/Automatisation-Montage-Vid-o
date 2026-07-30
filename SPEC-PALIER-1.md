@@ -46,8 +46,15 @@ modèle repose sur un prix d'appel bas qui grimpe au renouvellement, avec
 engagement long — exactement le « piège de renouvellement » que ce document
 écartait.
 
-**Configuration : 4 vCPU / 8 Go RAM / 80 Go SSD** — chez Hetzner, un **CPX31**
-(~15 €/mois), pas la config minimale à ~6 €.
+**Configuration : 4 vCPU / 8 Go RAM / 160 Go SSD** — chez Hetzner, un **CPX32**
+(gamme Regular Performance, AMD EPYC, ~13,49 €/mois — prix vérifié 2026 après la
+refonte de gamme de juin, `CPX31` n'existe plus). Pas la config minimale à ~6 €.
+
+*Option à budget serré :* **CX43** (Cost-Optimized, 8 vCPU / 16 Go / 160 Go,
+~11,99 €/mois) offre plus de ressources pour moins cher, mais avec un partage de
+vCPU plus agressif que CPX. Pour un rendu vidéo en navigateur headless, la
+régularité du CPU compte plus que le prix — CPX32 reste le choix par défaut,
+CX43 une option à considérer si le budget prime.
 
 Pourquoi plus que ce que dit `hermes-vps-runbook.md` : ce runbook dimensionne un
 agent qui **dialogue**. Celui-ci doit en plus :
@@ -131,7 +138,7 @@ Le portail ① existe, est testé, et rejette la faute historique du teaser v1 a
 
 ## Budget
 
-**Infrastructure :** ~15 €/mois (CPX31) + nom de domaine éventuel.
+**Infrastructure :** ~13,49 €/mois (CPX32) + nom de domaine éventuel.
 
 **Modèle**, sur `claude-opus-5` (5 $ / 25 $ par million de tokens) :
 
@@ -167,7 +174,7 @@ descriptions de posts, images IA, publication automatique sur les réseaux.
 
 ## Prérequis à fournir par Guillaume
 
-1. **Compte Hetzner** + CPX31 commandé (~15 €/mois)
+1. **Compte Hetzner** + CPX32 commandé (~13,49 €/mois)
 2. **Token de bot Telegram** : @BotFather → `/newbot`
 3. **Ton ID Telegram** : @userinfobot → pour l'allowlist
 4. **Clé API du modèle** (Anthropic, ou OpenRouter/Nous Portal selon le runbook)

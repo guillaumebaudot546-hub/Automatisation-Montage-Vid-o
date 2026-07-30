@@ -71,7 +71,10 @@ modules d'un pipeline que nous cadençons.
 `hermes-vps-runbook.md` dimensionne pour un agent qui dialogue (2 Go). Ce VPS
 doit en plus **rendre de la vidéo** (HyperFrames = navigateur headless) et
 héberger le **serveur Bot API local** qui bufferise des fichiers jusqu'à 2 Go.
-Cible : **4 vCPU / 8 Go / 80 Go SSD**, pas la configuration minimale du runbook.
+Cible : **CPX32** (4 vCPU / 8 Go / 160 Go, ~13,49 €/mois — gamme Regular
+Performance vérifiée après la refonte de gamme Hetzner de juin 2026 ;
+l'ancienne référence `CPX31` n'existe plus), pas la configuration minimale du
+runbook.
 
 ### Sur l'hébergeur
 
