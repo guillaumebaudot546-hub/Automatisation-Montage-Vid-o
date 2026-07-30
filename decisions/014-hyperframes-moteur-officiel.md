@@ -92,12 +92,23 @@ ont dérivé de la charte sans que rien ne le signale (voir « Conséquences »)
 
 ### Sur le palier 1
 
-`SPEC-PALIER-1.md` suppose `npx remotion render` et une limite Telegram de
-20 Mo, alors que les rushes réels dépassent 200 Mo (`IMG_3181.mov` = 217 Mo).
-Elle doit être réécrite sur HyperFrames avant toute implémentation. Le plus
-petit incrément utile reste un aller-retour Telegram avec un montage **figé** —
-sans IA, sans sonde, sans boucle — pour prouver la plomberie avant d'y mettre
-l'intelligence.
+`SPEC-PALIER-1.md` a été **réécrite sur HyperFrames le 29/07**. Elle est
+découpée en 4 étapes livrables séparément, la première étant un aller-retour
+Telegram avec un montage **figé** — sans IA, sans sonde, sans boucle — pour
+prouver la plomberie avant d'y mettre l'intelligence.
+
+Deux points que l'ancienne version escamotait sont désormais traités de face :
+
+- **La limite Telegram.** Les rushes réels font 217 Mo contre 20 Mo de limite
+  standard. L'ancienne SPEC écrivait « limite 20 Mo acceptée » — ce n'était pas
+  un arbitrage, c'était le problème repoussé. Trois options sont posées, avec
+  leur coût ; le serveur Bot API local (2 Go) est recommandé dès l'étape 2 parce
+  qu'il règle aussi la qualité, motif de rejet le plus constant du praticien.
+- **Le modèle et le budget.** L'audit soupçonnait `claude-opus-4-8` d'être un
+  identifiant invalide : **c'était faux**, le modèle existe. Il est simplement
+  remplacé par `claude-opus-5`, au même tarif (5 $ / 25 $ par million de tokens).
+  Le budget est chiffré poste par poste : ~0,54 $ la passe, ~1,62 $ le plafond
+  K=3, sous 1,20 $ avec le cache de prompt.
 
 ## Note de méthode
 
