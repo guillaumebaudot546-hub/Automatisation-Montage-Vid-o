@@ -1,0 +1,23 @@
+{
+  "eject": true,
+  "pourquoiEjecte": [
+    "teaser-01 fait 290 lignes contre 144 pour les autres, et son animation est",
+    "reellement sur mesure : trois lignes revelees individuellement (#l-coupe,",
+    "#l-fraise, #l-sculpte) a des temps propres, et une carte de fin qui CHEVAUCHE",
+    "la video (elle demarre a 69 alors que VID vaut 70).",
+    "",
+    "Le socle sait desormais gerer un nombre variable de cartes, une carte de fin",
+    "decalee (endAt) et une animation propre (extras) : sur ces trois axes, un",
+    "futur teaser de cette forme POURRAIT rejoindre le socle.",
+    "",
+    "Ce qui bloque teaser-01 precisement : le socle anime la carte de fin en",
+    "VID + 0.2, alors que teaser-01 ecrit 69.2 en dur. Les rendre compatibles",
+    "demanderait d'introduire un const END_AT et de reecrire ces expressions dans",
+    "les SIX teasers deja livres et verifies identiques a l'octet pres. Modifier",
+    "six fichiers eprouves pour absorber un cas isole, sans aucun gain sur le",
+    "rendu, est un mauvais echange.",
+    "",
+    "A rattacher seulement le jour ou teaser-01 doit etre retouche de toute facon.",
+    "Decide le 2026-07-29."
+  ]
+}

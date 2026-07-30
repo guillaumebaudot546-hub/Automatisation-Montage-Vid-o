@@ -60,26 +60,12 @@
       <div id="topbar" class="clip" data-start="0" data-duration="{{VID}}" data-track-index="2">
         <span class="brand">IMCP</span><span class="mod">{{MODULE}}</span>
       </div>
-      <div id="k1" class="slot clip" data-start="{{K1_AT}}" data-duration="{{K1_DUR}}" data-track-index="3">
-        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
-          <div class="card">{{K1_CARTE}}<div class="sweep" data-layout-allow-overflow></div></div>
-        </div>
-      </div>
-      <div id="k2" class="slot clip" data-start="{{K2_AT}}" data-duration="{{K2_DUR}}" data-track-index="3">
-        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
-          <div class="card">{{K2_CARTE}}<div class="sweep" data-layout-allow-overflow></div></div>
-        </div>
-      </div>
-      <div id="k3" class="slot clip" data-start="{{K3_AT}}" data-duration="{{K3_DUR}}" data-track-index="3">
-        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>
-          <div class="card">{{K3_CARTE}}<div class="sweep" data-layout-allow-overflow></div></div>
-        </div>
-      </div>
+{{CARTES}}
 
       <div id="subs" class="clip" data-start="0" data-duration="{{VID}}" data-track-index="4">
         <div class="pill" id="sub-pill"></div>
       </div>
-      <div id="end" class="clip fill" data-start="{{VID}}" data-duration="4" data-track-index="5">
+      <div id="end" class="clip fill" data-start="{{END_AT}}" data-duration="4" data-track-index="5">
         <div class="stack"><div id="end-glow" data-layout-allow-overflow></div><img src="logo-mark.png" alt="IMCP" /></div>
         <div class="t">{{END_TITLE}}</div>
         <div class="u"><span id="typed"></span><span class="caret" id="caret"></span></div>
@@ -138,6 +124,7 @@
       tl.to(car, { v: 6, duration: 3.0, ease: "none", onUpdate: () => {
         const el = document.querySelector("#caret"); if (el) el.style.opacity = (car.v % 1) < 0.5 ? "1" : "0.12"; } }, VID + 0.9);
 
+      {{EXTRAS}}
       window.__timelines["main"] = tl;
     </script>
   </body>

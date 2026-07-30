@@ -38,7 +38,9 @@
     "portail": "node scripts/portail-doctrine.mjs",
     "teasers:build": "node scripts/teasers-build.mjs",
     "teasers:check": "node scripts/teasers-build.mjs --check",
-    "check": "npm run lint && npm run test && npm run check:sizes && npm run check:charte && npm run teasers:check"
+    "socle:sync": "node scripts/socle-assets.mjs",
+    "socle:check": "node scripts/socle-assets.mjs --check",
+    "check": "npm run lint && npm run test && npm run check:sizes && npm run check:charte && npm run teasers:check && npm run socle:check"
   },
   "sideEffects": [
     "*.css"

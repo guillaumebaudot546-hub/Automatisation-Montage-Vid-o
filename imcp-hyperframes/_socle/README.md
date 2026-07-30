@@ -65,8 +65,26 @@ Le socle a été extrait des 6 teasers **déjà livrés**, et la régénération
 vérifiée **identique à l'octet près** sur les 6. La factorisation n'a donc rien
 changé au rendu : aucune vidéo livrée n'est affectée.
 
+## Version de CLI et assets
+
+`npm run socle:check` (inclus dans `npm run check`) vérifie que les 13 projets
+HyperFrames tournent sur **une seule version de CLI** et partagent les mêmes
+assets de référence. `npm run socle:sync` réaligne.
+
+Le logo canonique vit dans `_socle/assets/logo-mark.png` et est **copié** dans
+chaque projet, pas référencé en `../../`. Raison : chaque composition est rendue
+depuis son propre dossier, et un chemin remontant hors du projet n'est pas
+garanti d'être résolu par le renderer. Casser le rendu de 13 vidéos livrées pour
+économiser 2,5 Mo que git déduplique déjà serait un mauvais échange.
+
 ## Hors socle
 
-`teaser-01-fondamentaux` fait 290 lignes et suit une structure différente : il
-n'est pas rattaché au socle. Le rejoindre demanderait de le réécrire — à faire
-seulement si tu retouches ce teaser de toute façon.
+`teaser-01-fondamentaux` est **éjecté** — voir son `teaser.json`, qui documente
+pourquoi. Résumé : son animation est sur mesure (trois lignes révélées
+individuellement, carte de fin qui chevauche la vidéo à 69 s alors que la vidéo
+dure 70 s). Le socle sait maintenant gérer un nombre variable de cartes, une
+carte de fin décalée (`endAt`) et une animation propre (`extras`) — mais il anime
+la fin en `VID + 0.2` là où teaser-01 écrit `69.2` en dur. Les réconcilier
+imposerait de modifier les six teasers déjà vérifiés, sans aucun gain de rendu.
+
+À rattacher le jour où ce teaser doit être retouché de toute façon.

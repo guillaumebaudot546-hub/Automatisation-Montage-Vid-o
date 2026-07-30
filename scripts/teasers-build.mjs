@@ -29,19 +29,40 @@ const RACINE = "imcp-hyperframes/videos";
 const TEMPLATE = "imcp-hyperframes/_socle/teaser.template.html";
 const verifieSeulement = process.argv.includes("--check");
 
+/**
+ * Les cartes sont un NOMBRE VARIABLE : le premier socle en figeait trois, ce
+ * qui excluait d'office tout teaser qui n'en a pas exactement trois.
+ */
+const blocCartes = (cartes, nl) =>
+  cartes
+    .map(
+      (c, i) =>
+        `      <div id="k${i + 1}" class="slot clip" data-start="${c.at}" data-duration="${c.dur}" data-track-index="3">${nl}` +
+        `        <div class="wrap"><div class="glow" data-layout-allow-overflow></div>${nl}` +
+        `          <div class="card">${c.contenu}<div class="sweep" data-layout-allow-overflow></div></div>${nl}` +
+        `        </div>${nl}` +
+        `      </div>`,
+    )
+    .join(nl);
+
 const rend = (template, d) => {
   let h = template;
+  // Le depot est en CRLF sur Windows : generer en LF casserait l'identite
+  // octet pour octet avec les fichiers livres. On suit le template.
+  const nl = template.includes("\r\n") ? "\r\n" : "\n";
+  h = h.split("{{CARTES}}").join(blocCartes(d.cartes, nl));
   h = h.split("{{ROOT_DUR}}").join(d.rootDur);
   h = h.split("{{CUES}}").join(d.cues);
   h = h.split("{{K}}").join(d.k);
   h = h.split("{{MODULE}}").join(d.module);
   h = h.split("{{END_TITLE}}").join(d.endTitle);
-  d.cartes.forEach((c, i) => {
-    const n = i + 1;
-    h = h.split(`{{K${n}_AT}}`).join(c.at);
-    h = h.split(`{{K${n}_DUR}}`).join(c.dur);
-    h = h.split(`{{K${n}_CARTE}}`).join(c.contenu);
-  });
+  // La carte de fin peut chevaucher la video (elle demarre avant VID).
+  h = h.split("{{END_AT}}").join(d.endAt ?? d.vid);
+  // Animation propre a un teaser, sans le sortir du socle. Ligne entiere
+  // supprimee quand il n'y en a pas, pour ne pas laisser de ligne vide.
+  h = d.extras
+    ? h.replace(/^[ \t]*\{\{EXTRAS\}\}$/m, d.extras)
+    : h.replace(/^[ \t]*\{\{EXTRAS\}\}\r?\n/m, "");
   // VID en dernier : il apparait dans presque tous les data-duration.
   return h.split("{{VID}}").join(d.vid);
 };
