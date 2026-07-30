@@ -90,16 +90,27 @@ n'invente pas sa propre structure. Un teaser est une capsule COURTE bâtie sur l
 meilleur passage continu — pas un assemblage de clips (erreur du teaser v1).
 
 En HyperFrames, cela veut dire concrètement :
-- Le tronc commun (chrome, sous-titres, sting, carte de fin, palette) vit dans
-  des **blocs et composants** partagés — `hyperframes.json` → `paths.blocks` et
-  `paths.components`. Voir `/hyperframes-registry`.
-- Un nouveau projet **installe** ces blocs, il ne recopie pas un `index.html`
-  voisin. Le copier-coller entre projets est la faute que cette règle interdit.
-- Une seule version de la CLI HyperFrames pour tout le dossier.
+- Le tronc commun (chrome, sous-titres, animation, carte de fin, palette) vit
+  dans **`imcp-hyperframes/_socle/teaser.template.html`**. Chaque teaser n'a plus
+  que ses données propres dans `teaser.json` ; son `index.html` est **généré**.
+- Un nouveau teaser part du socle : il ne recopie pas un `index.html` voisin.
+  Le copier-coller entre projets est la faute que cette règle interdit.
 
-*État au 29/07/2026 : cette règle est violée — 126 lignes sur 144 identiques
-entre les teasers 02 à 07, logo dupliqué 10 fois, trois versions de CLI. La
-factorisation est le premier chantier HyperFrames à mener.*
+**Comment modifier — lire avant de toucher à un `index.html` :**
+| Tu veux changer… | Tu édites… | Puis |
+|---|---|---|
+| le contenu d'UN teaser | son `teaser.json` | `npm run teasers:build` |
+| le look de TOUS les teasers | `_socle/teaser.template.html` | `npm run teasers:build` |
+| faire diverger un teaser | `"eject": true` dans son `teaser.json` | il garde son HTML |
+
+Ne jamais éditer un `index.html` généré à la main : `npm run teasers:check`
+(dans `npm run check`) échoue, parce que le prochain build écraserait la
+modification en silence. Détail : `imcp-hyperframes/_socle/README.md`.
+
+*Le socle a été extrait des 6 teasers livrés avec régénération vérifiée
+identique à l'octet près — aucune vidéo livrée n'a changé. Restent à traiter :
+le logo dupliqué 10 fois, les trois versions de CLI (0.7.67 / 0.7.72 / 0.7.77),
+et `teaser-01` qui suit une structure différente.*
 
 ## RÈGLE 4bis — l'identité passe par la charte, jamais par des valeurs à la main
 Toute couleur vient de `src/theme/baudot.ts`, seule source de vérité :

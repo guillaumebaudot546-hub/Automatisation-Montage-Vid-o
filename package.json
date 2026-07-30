@@ -36,7 +36,9 @@
     "check:sizes": "node scripts/check-sizes.mjs",
     "check:charte": "node scripts/check-charte.mjs",
     "portail": "node scripts/portail-doctrine.mjs",
-    "check": "npm run lint && npm run test && npm run check:sizes && npm run check:charte"
+    "teasers:build": "node scripts/teasers-build.mjs",
+    "teasers:check": "node scripts/teasers-build.mjs --check",
+    "check": "npm run lint && npm run test && npm run check:sizes && npm run check:charte && npm run teasers:check"
   },
   "sideEffects": [
     "*.css"

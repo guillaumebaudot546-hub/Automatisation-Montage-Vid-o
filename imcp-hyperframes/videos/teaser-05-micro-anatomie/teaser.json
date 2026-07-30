@@ -1,0 +1,25 @@
+{
+  "rootDur": "73.1",
+  "vid": "69.1",
+  "module": "Module 5 · Micro-anatomie",
+  "endTitle": "Micro-anatomie<br />du parodonte",
+  "cues": "[{s:0.0,e:1.26,t:\"On est dans des dimensions\",h:\"On est dans des dimensions\"},{s:1.26,e:2.8,t:\"histologiques et de la nature.\",h:\"<b>histologique</b>s et de la nature.\"},{s:2.8,e:5.44,t:\"Et microscopiques en chirurgie.\",h:\"Et microscopiques en chirurgie.\"},{s:5.54,e:7.68,t:\"Donc, imaginez-vous, quand\",h:\"Donc, imaginez-vous, quand\"},{s:7.68,e:10.14,t:\"vous allez opérer la gencive,\",h:\"vous allez opérer la <b>gencive</b>,\"},{s:10.58,e:12.86,t:\"vous opérez dans cette dimension, qui est\",h:\"vous opérez dans cette dimension, qui est\"},{s:12.86,e:15.02,t:\"de l'ordre de 1 mm d'épaisseur.\",h:\"de l'ordre de 1 mm d'épaisseur.\"},{s:15.06,e:18.94,t:\"La moyenne de l'épaisseur de la gencive est de 1 mm.\",h:\"La moyenne de l'épaisseur de la <b>gencive</b> est de 1 mm.\"},{s:19.3,e:20.96,t:\"Ça a été publié dans cet article.\",h:\"Ça a été publié dans cet article.\"},{s:21.26,e:23.38,t:\"Donc, c'est vraiment une microstructure.\",h:\"Donc, c'est vraiment une microstructure.\"},{s:23.4,e:27.24,t:\"D'où l'importance d'opérer avec un outil\",h:\"D'où l'importance d'opérer avec un outil\"},{s:27.24,e:31.06,t:\"microchirurgical qui est capable d'opérer dans cette dimension.\",h:\"<b>microchirurgical</b> qui est capable d'opérer dans cette dimension.\"},{s:31.34,e:32.78,t:\"Parce qu'avec une lame de bifurcation,\",h:\"Parce qu'avec une lame de bifurcation,\"},{s:32.8,e:35.88,t:\"vous êtes tout de suite au\",h:\"vous êtes tout de suite au\"},{s:35.88,e:37.76,t:\"-delà de 1 mm quand vous opérez.\",h:\"-delà de 1 mm quand vous opérez.\"},{s:37.98,e:40.56,t:\"Avec le laser Er-YAG, vous allez\",h:\"Avec le laser <b>Er-YAG</b>, vous allez\"},{s:40.56,e:43.86,t:\"opérer selon les couches d'altération thermique\",h:\"opérer selon les couches d'altération thermique\"},{s:43.86,e:46.0,t:\"et la fréquence des impacts que vous mettez.\",h:\"et la fréquence des impacts que vous mettez.\"},{s:46.08,e:48.22,t:\"Vous allez opérer, en gros, à\",h:\"Vous allez opérer, en gros, à\"},{s:48.22,e:50.64,t:\"une centaine de microns à la seconde.\",h:\"une centaine de <b>microns</b> à la seconde.\"},{s:50.64,e:52.24,t:\"Donc, pour atteindre les\",h:\"Donc, pour atteindre les\"},{s:52.24,e:54.56,t:\"couches profondes de cette structure,\",h:\"couches profondes de cette structure,\"},{s:54.88,e:57.1,t:\"il va vous falloir plusieurs secondes,\",h:\"il va vous falloir plusieurs secondes,\"},{s:57.1,e:59.28,t:\"c'est-à-dire 10 secondes\",h:\"c'est-à-dire 10 secondes\"},{s:59.28,e:61.66,t:\"pour arriver à 1 mm d'épaisseur.\",h:\"pour arriver à 1 mm d'épaisseur.\"},{s:61.66,e:62.24,t:\"Donc, il faut que\",h:\"Donc, il faut que\"},{s:62.24,e:65.34,t:\"vous percieviez bien cette dimension\",h:\"vous percieviez bien cette dimension\"},{s:65.34,e:69.08,t:\"et tout l'intérêt du laser pour opérer ces tissus.\",h:\"et tout l'intérêt du <b>laser</b> pour opérer ces <b>tissus</b>.\"}]",
+  "k": "[{id:\"#k1\",at:0.5,dur:8.5,cyc:1},{id:\"#k2\",at:20.7,dur:9.0,cyc:1},{id:\"#k3\",at:45.6,dur:9.5,cyc:2}]",
+  "cartes": [
+    {
+      "at": "0.5",
+      "dur": "8.5",
+      "contenu": "<div class=\"kicker\">L'échelle</div><div class=\"big\">La gencive fait<br /><span class='kw'>1 millimètre</span></div>"
+    },
+    {
+      "at": "20.7",
+      "dur": "9.0",
+      "contenu": "<div class=\"kicker\">Le geste</div><div class=\"big\">Le bistouri dépasse le mm.<br />Le laser reste <span class='kw'>dedans</span>.</div>"
+    },
+    {
+      "at": "45.6",
+      "dur": "9.5",
+      "contenu": "<div class=\"kicker\">Pourquoi</div><div class=\"big\">Opérer dans la<br />dimension <span class='kw'>histologique</span></div>"
+    }
+  ]
+}
