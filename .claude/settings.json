@@ -18,6 +18,10 @@
           {
             "type": "command",
             "command": "node scripts/check-sizes.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node scripts/check-charte.mjs --strict"
           }
         ]
       }

@@ -10,12 +10,23 @@
 // utilisaient --champagne:#d8c7a8, c'est-a-dire l'ANCIEN beige que le client a
 // explicitement remplace par le cyan #49B6C9. Personne ne l'a vu parce que rien
 // ne le verifiait. Voir decisions/014.
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const RACINE_HF = "imcp-hyperframes";
 const THEME = "src/theme/baudot.ts";
 const strict = process.argv.includes("--strict");
+const fix = process.argv.includes("--fix");
+
+/** "#49b6c9" -> "73, 182, 201" pour retrouver les usages en rgb()/rgba(). */
+const enRgb = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+
+/** Motif tolerant aux espaces : rgba(216, 199, 168, 0.5) comme rgba(216,199,168,.5) */
+const motifRgb = ([r, g, b]) =>
+  new RegExp(`\\b${r}\\s*,\\s*${g}\\s*,\\s*${b}\\b`, "g");
 
 /** Extrait la palette officielle depuis le theme, sans la dupliquer ici. */
 function charteOfficielle() {
@@ -107,13 +118,45 @@ for (const [fichier, liste] of parFichier) {
 
 console.log(`\n${ecarts.length} ecart(s) de charte sur ${parFichier.size} composition(s).`);
 
+if (fix) {
+  // Une couleur fautive n'est pas seulement dans :root — elle est reprise en
+  // rgba() dans les ombres, les fonds et les glows. Remplacer uniquement le
+  // bloc :root laisserait la moitie du fichier a l'ancienne palette.
+  let total = 0;
+  for (const [fichier, liste] of parFichier) {
+    let html = readFileSync(fichier, "utf8");
+    let n = 0;
+    for (const { trouve, attendu } of liste) {
+      if (!trouve.startsWith("#")) continue;
+      const avantHex = new RegExp(trouve.replace("#", "#"), "gi");
+      n += (html.match(avantHex) ?? []).length;
+      html = html.replace(avantHex, attendu);
+
+      const rgbAvant = motifRgb(enRgb(trouve));
+      const rgbApres = enRgb(attendu).join(", ");
+      n += (html.match(rgbAvant) ?? []).length;
+      html = html.replace(rgbAvant, rgbApres);
+    }
+    writeFileSync(fichier, html);
+    console.log(`  reharmonise ${fichier} — ${n} remplacement(s)`);
+    total += n;
+  }
+  console.log(
+    `\n✅ ${total} remplacement(s) sur ${parFichier.size} composition(s).\n` +
+      "   Les .mp4 deja livres ne changent pas ; seuls les prochains rendus.\n" +
+      "   Relancer sans --fix pour verifier, puis passer le hook en --strict.\n" +
+      "   Annulable : git checkout -- imcp-hyperframes/",
+  );
+  process.exit(0);
+}
+
 if (strict) {
   console.log("❌ Mode strict : ecart de charte bloquant.");
   process.exit(2);
 }
 console.log(
   "⚠️  Rapport seul. Ces compositions ont deja ete livrees : reharmoniser la\n" +
-    "   palette change leur rendu. Decision a prendre (voir decisions/014), puis\n" +
-    "   passer ce script en --strict dans le hook pour figer le resultat.",
+    "   palette change leur rendu. Lancer avec --fix pour reharmoniser\n" +
+    "   (voir decisions/014), puis passer ce script en --strict dans le hook.",
 );
 process.exit(0);
