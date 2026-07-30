@@ -70,7 +70,7 @@ export const ClinicalWrap: React.FC<ClinicalWrapProps> = ({
   title,
   subtitle,
   hasAudio,
-  musicSrc = "music/concerto.mp3",
+  musicSrc = "music/ambient-bed.wav",
   musicDelaySec = 0,
   musicOffsetSec = 0,
   musicChromeVol = 0.26,

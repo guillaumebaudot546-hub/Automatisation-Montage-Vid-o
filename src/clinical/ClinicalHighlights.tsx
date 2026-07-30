@@ -110,7 +110,7 @@ export const ClinicalHighlights: React.FC<ClinicalHighlightsProps> = ({
   hasAudio,
   segments,
   soundCues,
-  musicSrc = "music/concerto.mp3",
+  musicSrc = "music/ambient-bed.wav",
   musicOffsetSec = 0,
   musicChromeVol = 0.26,
   musicBedVol = 0.14,

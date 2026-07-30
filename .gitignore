@@ -20,7 +20,6 @@ IMCP/node_modules/
 IMCP/*.mp4
 IMCP/*.mov
 IMCP/.next/
-Saint-Preux*.mp3
 IMCP/
 
 # Livrables 1 min a la racine (67-102 Mo, >limite GitHub) — locaux seulement.
@@ -39,9 +38,28 @@ public/teaser-*.mp4
 imcp-hyperframes/**/snapshots/
 imcp-hyperframes/**/.hyperframes/
 
-# Médias lourds supplémentaires + musique commerciale (locaux seulement)
+# Médias lourds supplémentaires (locaux seulement)
 Vidéos Test/
 Vidéo 1 - IMCP/
 Higgsfield/
-musique/*.mp3
-musique/*.wav
+
+# === MUSIQUE — politique fail-closed (ne pas assouplir) ===
+# Historique : la règle « Saint-Preux*.mp3 » a été contournée par un simple
+# renommage. public/music/concerto.mp3 était le même fichier que
+# « Saint-Preux - Concerto Pour Une Voix » (SHA256 identique) et a été poussé
+# sur GitHub. Filtrer par nom de fichier ne protège de rien.
+#
+# Règle : TOUT audio est ignoré par défaut. Seuls les lits SYNTHÉTISÉS par
+# scripts/make_music.py (aucun sample, aucun droit voisin) sont whitelistés
+# un par un ci-dessous. Ajouter une ligne « ! » = affirmer que le fichier est
+# libre de droits, enregistrement compris.
+musique/
+public/music/*
+public/**/*.mp3
+
+# Whitelist — productions propres au projet, libres de droits :
+!public/music/ambient-bed.wav          # synthétisé par scripts/make_music.py
+!public/sfx/cinematic-riser.mp3        # synthétisé par scripts/make_sfx.py
+!public/sfx/cinematic-riser-2.mp3      # idem
+!public/voiceover.mp3                  # voix off ElevenLabs (licence du compte)
+!public/voiceover-fast.mp3             # idem
