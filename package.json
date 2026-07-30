@@ -33,7 +33,9 @@
     "lint": "eslint src && tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check:sizes": "node scripts/check-sizes.mjs"
+    "check:sizes": "node scripts/check-sizes.mjs",
+    "check:charte": "node scripts/check-charte.mjs",
+    "check": "npm run lint && npm run test && npm run check:sizes && npm run check:charte"
   },
   "sideEffects": [
     "*.css"
