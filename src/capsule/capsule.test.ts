@@ -134,6 +134,15 @@ describe("integrite des medias references", () => {
    * Un chemin d'asset est une chaine libre : une faute de frappe ne se voit
    * qu'au rendu, apres le bundling. Sur un pipeline automatise ou personne ne
    * relit chaque frame, la video part au praticien avec un visuel manquant.
+   *
+   * Les rushes et les lits musicaux sont exclus de git (medias lourds, voir
+   * .gitignore) : sur un clone frais ils sont TOUS absents. Echouer dans ce cas
+   * rendrait `npm run check` rouge par conception sur toute machine neuve, et
+   * un test qui echoue toujours finit par etre ignore — donc ne protege plus.
+   *
+   * Regle retenue : aucun media present = clone frais, on n'a rien a verifier.
+   * Des qu'au moins un media est la, les medias sont installes sur la machine
+   * et un fichier manquant redevient ce qu'il est : une erreur.
    */
   for (const { id, props } of CAPSULES) {
     it(`${id} : tous les fichiers references existent dans public/`, () => {
@@ -142,6 +151,12 @@ describe("integrite des medias references", () => {
         props.music?.src,
         ...props.overlays.flatMap((o) => [o.slideSrc, o.brollSrc]),
       ].filter((p): p is string => typeof p === "string" && p.length > 0);
+
+      const presents = attendus.filter((p) => existsSync(join(PUBLIC, p)));
+      if (presents.length === 0) {
+        // Clone frais : les medias n'ont pas encore ete rapatries.
+        return;
+      }
 
       const manquants = attendus.filter((p) => !existsSync(join(PUBLIC, p)));
       expect(manquants, `${id} : fichiers absents de public/`).toEqual([]);

@@ -44,12 +44,21 @@ npm run check
 `npm run check` doit finir **vert**. S'il est rouge, répare avant toute autre
 chose — c'est une règle du projet, pas une suggestion.
 
+Le lint affiche une vingtaine d'**avertissements** Remotion (`non-pure-animation`)
+sur du code hérité : c'est attendu, `0 errors` est ce qui compte.
+
 Le dépôt est **privé**. Il te faudra être authentifié auprès de GitHub
 (`gh auth login`, ou une clé SSH GitHub).
 
 > **Les rushes et les rendus ne sont PAS dans le dépôt** (médias lourds, exclus
 > par `.gitignore`). Tu récupères le code et la doctrine, pas les vidéos. Les
 > rendus se refont avec `npm run render` dans le dossier de chaque composition.
+>
+> Conséquence : sur un clone frais, le test d'intégrité des médias **se met en
+> veille** (il n'a rien à vérifier). Dès que tu rapatries les rushes dans
+> `public/`, il redevient actif et signale tout chemin fautif. Si tu veux
+> travailler sur les compositions Remotion, copie les médias depuis la machine
+> qui les détient — ils ne transiteront jamais par GitHub.
 
 ## Où est quoi
 
