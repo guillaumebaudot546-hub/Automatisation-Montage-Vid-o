@@ -63,3 +63,8 @@ public/**/*.mp3
 !public/sfx/cinematic-riser-2.mp3      # idem
 !public/voiceover.mp3                  # voix off ElevenLabs (licence du compte)
 !public/voiceover-fast.mp3             # idem
+
+# Rushes et livrables a la racine / dans public (medias bruts, hors depot)
+TEASER-*.mp4
+public/*.wav
+public/imcp*.mp4

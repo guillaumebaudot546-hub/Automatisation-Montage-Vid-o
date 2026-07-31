@@ -123,6 +123,63 @@ mots-clés) et `--amber` sont des tokens d'effet libres.
 
 Vérification : `npm run check:charte`. À lancer avant de livrer.
 
+## RÈGLE 4ter — la profondeur et le mouvement ont un vocabulaire fixe
+
+Ces valeurs ne s'inventent pas à chaque vidéo. Elles ont été **relevées sur les
+13 compositions livrées** : c'est le langage visuel de la marque, pas une
+préférence esthétique du moment. Une composition qui invente ses propres ombres
+ou ses propres courbes ne ressemble plus aux précédentes — c'est ce qui est
+arrivé au premier montage produit par l'agent (30/07).
+
+### Les ombres — trois usages, trois valeurs
+
+| Usage | Valeur |
+|---|---|
+| **Carte / panneau posé sur la vidéo** | `box-shadow: 0 30px 90px rgba(0,0,0,0.6), 0 0 60px rgba(95,232,255,0.12)` |
+| Élément secondaire, moins détaché | `box-shadow: 0 24px 70px rgba(0,0,0,0.55)` |
+| **Accent fluo** (pastille, filet, focus) | `box-shadow: 0 0 16px rgba(95,232,255,0.75)` |
+
+L'ombre porte **toujours deux couches** sur les cartes principales : une ombre
+noire large qui décolle l'élément du fond, et une **lueur cyan très faible**
+(`0.12`) qui le relie à la charte. Sans la seconde, la carte paraît collée ;
+avec une lueur trop forte, elle devient un néon.
+
+### Le texte — lisibilité d'abord
+
+| Usage | Valeur |
+|---|---|
+| Texte sur vidéo (sous-titres, titres) | `text-shadow: 0 3px 20px rgba(0,0,0,0.9)` |
+| Mot-clé fluo mis en avant | `text-shadow: 0 0 16px rgba(95,232,255,0.8), 0 0 5px rgba(95,232,255,0.6)` |
+| Titre avec halo doux | `text-shadow: 0 0 15px rgba(150,225,255,0.34), 0 2px 7px rgba(0,0,0,0.72)` |
+
+Le texte posé sur une image en mouvement **doit** porter une ombre noire : sans
+elle, il devient illisible dès que le fond s'éclaircit — et le fond bouge.
+
+### Le fond derrière une carte
+
+`filter: blur(48px) brightness(0.34) saturate(1.1)` — la vidéo continue de
+vivre derrière le panneau, assombrie et floutée, jamais remplacée par un aplat.
+C'est ce qui garde la présence du praticien à l'écran (RÈGLE 3bis) même quand
+une infographie occupe le cadre.
+
+### Le mouvement
+
+| Paramètre | Valeur | Pourquoi |
+|---|---|---|
+| Courbe par défaut | `power3.out` | démarre vite, s'arrête en douceur : l'élément « arrive », il ne glisse pas |
+| Courbe secondaire | `power2.out` | mêmes intentions, plus discrète |
+| Rebond léger | `back.out(1.6)` à `back.out(2.2)` | **réservé aux accents** (chiffre-choc, pastille). Jamais sur du texte courant |
+| Mouvement continu (caméra, balayage) | `none` | une caméra qui accélère se remarque, et on ne doit pas la remarquer |
+| Durée d'entrée | **0,35 à 0,6 s** | en dessous ça claque, au-dessus ça traîne |
+| Décalage d'entrée | `y: 16` à `y: 40` puis `y: 0` | l'élément monte en place ; jamais d'entrée latérale sur du texte |
+
+**La caméra respire, elle ne zoome pas.** Sur un plan fixe, un `scale` de 1,02 à
+1,07 sur toute la durée suffit à empêcher l'image de paraître morte. Au-delà,
+on recadre le praticien sans le vouloir.
+
+**Les entrées se décalent en cascade** (~0,08 à 0,12 s entre deux lignes d'une
+liste) : c'est ce qui donne la lecture guidée d'une énumération (RÈGLE 2).
+
 ## RÈGLE 5 — qualité & technique
 - Source basse déf (WhatsApp) → demander l'original en mode document. Prétraiter si besoin.
 - **Un seul encodage** final CRF 18. Remux faststart en copie (pas de ré-encodage).

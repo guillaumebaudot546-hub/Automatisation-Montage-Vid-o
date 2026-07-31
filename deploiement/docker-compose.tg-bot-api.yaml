@@ -1,0 +1,19 @@
+services:
+  tg-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    container_name: tg-bot-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8081"
+    env_file:
+      - .env
+    environment:
+      TELEGRAM_LOCAL: "1"
+    volumes:
+      # Le chemin hote DOIT etre identique au chemin conteneur. En mode --local,
+      # getFile renvoie un chemin ABSOLU tel que vu par le serveur ; Hermes lit
+      # ensuite le fichier sur le disque a ce chemin. Un montage sur un autre
+      # repertoire (ex. ./tg-bot-api-data) fait echouer la lecture, python-
+      # telegram-bot retombe alors sur un getFile HTTP, et le serveur --local
+      # repond 404 — remonte a l'utilisateur en « InvalidToken ». Teste le 30/07.
+      - /var/lib/telegram-bot-api:/var/lib/telegram-bot-api

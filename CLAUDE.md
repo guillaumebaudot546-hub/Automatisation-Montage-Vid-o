@@ -7,7 +7,9 @@
 |---|---|
 | `decisions/014-hyperframes-moteur-officiel.md` | **AVANT tout montage** — quel moteur, et pourquoi |
 | `decisions/015-hermes-orchestrateur.md` | **AVANT de toucher au service cloud** — Hermes orchestre, pas de bot maison |
-| `../Déploiement Hermes IA/hermes-vps-runbook.md` | tu déploies ou administres le VPS (10 phases, sourcé) |
+| `REPRISE.md` | **tu arrives sur une machine neuve** — où est quoi, quoi installer, ce qui reste |
+| `deploiement/hermes-vps-runbook.md` | tu déploies ou administres le VPS (10 phases, sourcé) |
+| `deploiement/AGENTS-vps.md` | tu changes les règles permanentes de l'agent Hermes (à redéployer sur le VPS) |
 | `.claude/skills/montage-imcp/SKILL.md` | tu montes une vidéo (doctrine — chargée comme skill) |
 | `praticiens/baudot.json` | tu montes pour le Dr Baudot : préférences, corrections passées, exemples validés |
 | `docs/gouvernance/architecture.md` | tu crées, déplaces ou fais grossir un fichier |
