@@ -21,3 +21,4 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [013](013-doctrine-talking-head.md) | Doctrine par type de contenu — talking-head = voix continue + calques | Actif |
 | [014](014-hyperframes-moteur-officiel.md) | HyperFrames devient le moteur, Remotion passe en maintenance | Actif — remplace la RÈGLE 4 |
 | [015](015-hermes-orchestrateur.md) | Hermes Agent est l'orchestrateur — pas de bot Telegram maison | Actif — modifie SPEC-PALIER-1 |
+| [016](016-cout-par-video.md) | Le coût par vidéo est un problème de plomberie, pas d'intelligence | Actif — étapes 1 et 4 faites |
