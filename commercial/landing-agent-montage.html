@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assistant Montage Vidéo · MedStream DCA</title>
+<meta name="description" content="Le praticien envoie son rush sur Telegram. Il reçoit une vidéo montée à sa charte, sous-titrée, prête à publier. Il valide. Rien ne sort sans son accord.">
+<style>
+  /* Charte MedStream DCA, reprise de la proposition existante, pas reinventee. */
+  :root{
+    --violet:#A23FE0; --blue:#2E6FE3; --cyan:#19B6E0;
+    --grad:linear-gradient(115deg,#A23FE0 0%,#5B7BEA 48%,#19B6E0 100%);
+    --ink:#0F1B2D; --fg:#394758; --muted:#6E7E97;
+    --line:#E1E8F1; --bg:#FFFFFF; --surface:#F4F7FB; --surface-2:#EAEFF6;
+    --radius:14px;
+    --shadow:0 8px 24px rgba(18,43,87,.08),0 2px 6px rgba(18,43,87,.05);
+    --font-display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+    --font-body:'Manrope',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ink:#EDF2FA; --fg:#B7C2D2; --muted:#8496AE;
+      --line:#22304A; --bg:#0B1524; --surface:#101E33; --surface-2:#16263E;
+      --blue:#5189EE; --cyan:#45CDF0; --violet:#B05FE6;
+      --shadow:0 8px 24px rgba(0,0,0,.4),0 2px 6px rgba(0,0,0,.3);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);
+    font-family:var(--font-body);font-size:16px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:var(--font-display);color:var(--ink);letter-spacing:-.02em;margin:0}
+  h1{font-size:clamp(2.1rem,1.4rem+2.6vw,3.3rem);line-height:1.08;font-weight:700}
+  h2{font-size:clamp(1.5rem,1.1rem+1.4vw,2.1rem);line-height:1.15;font-weight:700}
+  h3{font-size:1.05rem;font-weight:700;line-height:1.3}
+  p{margin:0}
+  a{color:inherit}
+
+  /* ---------- Navigation : une seule ligne, 64px ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;height:64px;display:flex;align-items:center;
+    background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;color:var(--ink);text-decoration:none;font-size:.95rem}
+  .brand .mark{width:26px;height:26px;border-radius:7px;background:var(--grad);flex:none}
+  .navlinks{display:flex;gap:26px;font-size:.88rem}
+  .navlinks a{color:var(--muted);text-decoration:none;white-space:nowrap}
+  .navlinks a:hover{color:var(--ink)}
+  @media(max-width:820px){.navlinks{display:none}}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 22px;border-radius:100px;font-weight:700;font-size:.9rem;
+    text-decoration:none;white-space:nowrap;border:1px solid transparent;
+    transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 6px 20px rgba(46,111,227,.28)}
+  .btn-primary:hover{box-shadow:0 10px 28px rgba(46,111,227,.36)}
+  .btn-ghost{border-color:var(--line);color:var(--ink);background:var(--bg)}
+  .btn-ghost:hover{border-color:var(--muted)}
+
+  /* ---------- Hero : split asymétrique, 4 éléments max ---------- */
+  header.hero{padding:clamp(48px,7vw,88px) 0 clamp(40px,5vw,64px)}
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(32px,5vw,72px);align-items:center}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:36px}}
+  .eyebrow{
+    font-size:.74rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+    color:var(--blue);margin-bottom:16px;
+  }
+  .hero p.lede{font-size:1.1rem;color:var(--fg);margin-top:18px;max-width:52ch}
+  .hero-cta{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
+
+  .phone{
+    position:relative;border-radius:26px;overflow:hidden;
+    border:1px solid var(--line);background:var(--surface);
+    box-shadow:var(--shadow);max-width:300px;margin-left:auto;
+  }
+  .phone img{display:block;width:100%;height:auto}
+  @media(max-width:900px){.phone{margin:0 auto}}
+
+  /* ---------- Sections ---------- */
+  section{padding:clamp(52px,6.5vw,88px) 0;border-top:1px solid var(--line)}
+  .sec-head{max-width:60ch;margin-bottom:clamp(28px,3.5vw,44px)}
+  .sec-head p{color:var(--muted);margin-top:12px}
+
+  /* Bande de confiance, sous le hero */
+  .trust{padding:26px 0;border-top:1px solid var(--line);background:var(--surface)}
+  .trust .wrap{display:flex;align-items:center;gap:clamp(20px,4vw,48px);flex-wrap:wrap;justify-content:center}
+  .trust span{font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:9px}
+  .trust svg{width:17px;height:17px;flex:none;color:var(--blue)}
+
+  /* Déroulé : timeline verticale, pas 3 cartes égales */
+  .flow{display:grid;grid-template-columns:auto 1fr;gap:0 22px}
+  .flow .rail{width:2px;background:linear-gradient(180deg,var(--violet),var(--cyan));border-radius:2px;grid-row:1/-1}
+  .flow .steps{display:grid;gap:26px}
+  .step{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+  .step .dot{
+    width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;
+    background:var(--bg);border:2px solid var(--line);font-family:var(--font-display);
+    font-size:.8rem;font-weight:700;color:var(--blue);margin-left:-38px;
+  }
+  .step p{color:var(--muted);margin-top:5px;font-size:.94rem;max-width:62ch}
+
+  /* Bento : tailles variées, fonds variés */
+  .bento{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:900px){.bento{grid-template-columns:1fr}}
+  .tile{border:1px solid var(--line);border-radius:var(--radius);padding:26px;background:var(--bg)}
+  .tile h3{margin-bottom:9px}
+  .tile p{font-size:.92rem;color:var(--muted)}
+  .tile-wide{grid-column:span 2}
+  @media(max-width:900px){.tile-wide{grid-column:span 1}}
+  .tile-accent{background:var(--grad);border-color:transparent;color:#fff}
+  .tile-accent h3{color:#fff}
+  .tile-accent p{color:rgba(255,255,255,.9)}
+  .tile-surface{background:var(--surface)}
+  .tile-media{padding:0;overflow:hidden;display:grid;place-items:center;background:var(--surface-2)}
+  .tile-media img{width:100%;height:100%;object-fit:cover;display:block}
+
+  /* Coûts : le cœur de l'argumentaire */
+  .cost{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(28px,4vw,56px);align-items:start}
+  @media(max-width:900px){.cost{grid-template-columns:1fr}}
+  .costcard{border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--bg)}
+  .costcard .row{display:flex;justify-content:space-between;gap:18px;padding:15px 22px;font-size:.93rem}
+  .costcard .row+.row{border-top:1px solid var(--line)}
+  .costcard .row.total{background:var(--surface);font-weight:700;color:var(--ink)}
+  .costcard .row span:last-child{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink);white-space:nowrap}
+  .costnote{font-size:.86rem;color:var(--muted);margin-top:16px;max-width:56ch}
+  .measured{
+    display:inline-flex;align-items:center;gap:8px;font-size:.76rem;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--blue);
+    border:1px solid var(--line);border-radius:100px;padding:6px 14px;margin-bottom:18px;
+  }
+
+  /* Engagements : liste groupée, pas de tableau à filets */
+  .pledges{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,36px)}
+  @media(max-width:760px){.pledges{grid-template-columns:1fr}}
+  .pledge{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+  .pledge svg{width:20px;height:20px;color:var(--blue);flex:none;margin-top:3px}
+  .pledge p{font-size:.92rem;color:var(--muted);margin-top:4px}
+
+  /* CTA final */
+  .final{background:var(--surface);border-radius:var(--radius);padding:clamp(32px,5vw,56px);text-align:center}
+  .final p{color:var(--muted);margin:14px auto 0;max-width:56ch}
+  .final .btns{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+
+  footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+  footer .wrap{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
+
+  /* Motion : justifiée (révélation séquentielle à l'entrée en vue), coupée si reduced-motion */
+  @media (prefers-reduced-motion:no-preference){
+    .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1)}
+    .reveal.in{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><span class="mark"></span> MedStream DCA</a>
+    <div class="navlinks">
+      <a href="#deroule">Le déroulé</a>
+      <a href="#inclus">Ce qui est inclus</a>
+      <a href="#couts">Les coûts</a>
+      <a href="#engagements">Nos engagements</a>
+    </div>
+    <a class="btn btn-primary" href="#contact">Demander une démo</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Assistant de montage vidéo</p>
+      <h1>Vous filmez.<br>L'assistant monte.<br>Vous validez.</h1>
+      <p class="lede">Envoyez votre rush d'intervention sur Telegram. La vidéo revient montée à votre charte, sous-titrée, prête à publier.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#contact">Demander une démo</a>
+        <a class="btn btn-ghost" href="#couts">Voir les coûts réels</a>
+      </div>
+    </div>
+    <div class="phone">
+      <img src="assets/produit-teaser-9x16.jpg" width="900" height="1600"
+           alt="Vidéo verticale montée : le praticien à l'image, un carton titre et un sous-titre incrusté à la charte de l'institut.">
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <div class="wrap">
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> Aucune publication sans votre accord</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Hébergement en Union européenne</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> Contrat de sous-traitance RGPD</span>
+    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v6h6"/></svg> Réversibilité, sources restituées</span>
+  </div>
+</div>
+
+<section id="deroule">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Tout se passe dans une conversation</h2>
+      <p>Aucun logiciel à installer, aucun compte à gérer, aucune manipulation technique. Vous écrivez au numéro dédié comme à un confrère.</p>
+    </div>
+    <div class="flow">
+      <div class="rail"></div>
+      <div class="steps">
+        <div class="step">
+          <span class="dot">1</span>
+          <div>
+            <h3>Vous déposez le rush</h3>
+            <p>La vidéo brute part sur Telegram, en pièce jointe, sans recompression. Jusqu'à 2 Go par fichier.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="dot">2</span>
+          <div>
+            <h3>L'assistant transcrit et lit</h3>
+            <p>Transcription automatique sur le serveur, jamais chez un tiers. Il lit l'intégralité de votre propos avant de choisir le moindre plan.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="dot">3</span>
+          <div>
+            <h3>Il vérifie son propre travail</h3>
+            <p>Le plan de montage passe un contrôle automatique avant tout rendu : voix jamais hachée, coupes aux fins de phrases, format conforme au réseau visé. Un plan fautif est refusé, pas livré.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="dot">4</span>
+          <div>
+            <h3>Vous corrigez en langage courant</h3>
+            <p>« Le titre est trop long », « garde le passage sur le laser ». Il refait. Autant de fois qu'il faut.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="dot">5</span>
+          <div>
+            <h3>Vous validez</h3>
+            <p>Rien n'est livré ni diffusé sans votre accord explicite. Cette validation vaut contrôle déontologique et médical.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="inclus">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Ce que l'assistant sait faire</h2>
+      <p>Il ne devine pas votre style : il applique une doctrine écrite, enrichie à chacune de vos corrections.</p>
+    </div>
+    <div class="bento">
+      <div class="tile tile-accent tile-wide">
+        <h3>Il apprend de vos corrections</h3>
+        <p>Chaque retour que vous faites est écrit dans son dossier praticien : la correction, la préférence qu'elle établit, et l'exemple validé. La vidéo suivante part de là. Il ne refait pas deux fois la même erreur.</p>
+      </div>
+      <div class="tile tile-media">
+        <img src="assets/produit-capsule-9x16.jpg" width="900" height="1600"
+             alt="Capsule verticale : chiffre-clé animé et sous-titre à mots-clés surlignés, sur la charte de l'institut.">
+      </div>
+
+      <div class="tile tile-surface">
+        <h3>Votre charte, verrouillée</h3>
+        <p>Couleurs, typographies, logo, générique. Un contrôle automatique refuse toute couleur hors charte avant livraison.</p>
+      </div>
+      <div class="tile">
+        <h3>Le format suit le réseau</h3>
+        <p>9:16 pour Reels et TikTok, 16:9 pour YouTube et votre site, 1:1 pour le feed. L'image n'est jamais étirée.</p>
+      </div>
+      <div class="tile">
+        <h3>Sous-titres intégraux</h3>
+        <p>Transcription mot pour mot, mots-clés mis en avant. La majorité des vues se font sans le son.</p>
+      </div>
+
+      <div class="tile tile-media">
+        <img src="assets/produit-16x9.jpg" width="900" height="506"
+             alt="Même contenu décliné en format horizontal 16:9 pour YouTube et le site web.">
+      </div>
+      <div class="tile tile-surface tile-wide">
+        <h3>La voix n'est jamais hachée</h3>
+        <p>C'est la règle qui a coûté le plus de versions à établir. Une prise continue, des coupes uniquement aux fins de phrases, un fondu audio si un raccord est indispensable. Un montage qui l'enfreint est bloqué avant le rendu, pas après votre visionnage.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="couts">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Ce que ça coûte, mesuré</h2>
+      <p>Le service s'appuie sur un moteur d'intelligence artificielle facturé à l'usage. Le compte est ouvert à votre nom : vous gardez la propriété et la visibilité complète des dépenses.</p>
+    </div>
+    <div class="cost">
+      <div>
+        <p class="measured">Relevé réel, première vidéo</p>
+        <div class="costcard">
+          <div class="row"><span>Écriture du contexte en cache</span><span>3,72 $</span></div>
+          <div class="row"><span>Relecture du contexte</span><span>1,85 $</span></div>
+          <div class="row"><span>Texte généré par le modèle</span><span>1,34 $</span></div>
+          <div class="row total"><span>Total mesuré</span><span>6,91 $</span></div>
+        </div>
+        <p class="costnote">
+          Chiffres relevés sur une vidéo réelle de 39 secondes, montée de bout en bout : 59 appels au modèle, transcription, plan de montage, trois rendus. Aucune estimation.
+        </p>
+      </div>
+      <div>
+        <h3 style="margin-bottom:12px">Pourquoi nous publions ce chiffre</h3>
+        <p style="font-size:.94rem;color:var(--muted)">
+          Un prestataire qui annonce « environ 1 € par vidéo » sans l'avoir mesuré vous expose à une surprise sur votre relevé. Nous préférons le chiffre exact, poste par poste, et vous dire ce qui le fait bouger.
+        </p>
+        <p style="font-size:.94rem;color:var(--muted);margin-top:14px">
+          Ce coût dépend de la durée du rush et du nombre d'allers-retours, pas d'un forfait. Un plafond de dépense mensuel est fixé d'un commun accord avant la mise en service : aucune consommation ne peut le dépasser, quelle que soit l'activité.
+        </p>
+        <p style="font-size:.94rem;color:var(--muted);margin-top:14px">
+          À cela s'ajoutent l'hébergement du serveur dédié et le forfait de service, tous deux fixes et connus d'avance.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="engagements">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Nos engagements</h2>
+      <p>Une vidéo d'intervention est une donnée de santé. Le cadre est écrit avant la première image.</p>
+    </div>
+    <div class="pledges">
+      <div class="pledge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+        <div>
+          <h3>Aucune publication sans votre validation</h3>
+          <p>L'assistant ne diffuse jamais de lui-même. Votre accord explicite déclenche la livraison et vaut contrôle déontologique et médical.</p>
+        </div>
+      </div>
+      <div class="pledge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        <div>
+          <h3>Contrat de sous-traitance RGPD signé</h3>
+          <p>Avant la première vidéo. Il précise ce qui est traité, où, combien de temps, et par qui.</p>
+        </div>
+      </div>
+      <div class="pledge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <div>
+          <h3>Rushes sur serveur dédié en Union européenne</h3>
+          <p>Transcription effectuée sur ce même serveur, jamais envoyée à un service tiers. Aucun nom de patient dans les fichiers. Le recueil du consentement patient reste de votre ressort.</p>
+        </div>
+      </div>
+      <div class="pledge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9"/><path d="M3 3v6h6"/></svg>
+        <div>
+          <h3>Réversibilité</h3>
+          <p>En fin de contrat, vos vidéos vous sont livrées en fichiers sources et vos rushes supprimés sous 30 jours, avec attestation. Sans engagement de durée, préavis d'un mois.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="wrap">
+    <div class="final">
+      <h2>Voir une vidéo montée sur votre propre rush</h2>
+      <p>Envoyez-nous une intervention filmée. Nous vous renvoyons le montage sous 48 heures, sans engagement, pour que vous jugiez sur pièce plutôt que sur promesse.</p>
+      <div class="btns">
+        <a class="btn btn-primary" href="mailto:contact@medstream-dca.com?subject=Assistant%20montage%20vid%C3%A9o%20%E2%80%94%20demande%20de%20d%C3%A9mo">Demander une démo</a>
+        <a class="btn btn-ghost" href="#deroule">Revoir le déroulé</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>MedStream DCA · Saint-Gély-du-Fesc</span>
+    <span>medstream-dca.com</span>
+  </div>
+</footer>
+
+<script>
+  // Révélation à l'entrée en vue : hiérarchise la lecture section par section.
+  // IntersectionObserver, pas d'écouteur de scroll. Coupée si l'utilisateur
+  // préfère moins d'animation.
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var targets = document.querySelectorAll('.sec-head, .step, .tile, .pledge, .costcard, .final');
+    targets.forEach(function (el) { el.classList.add('reveal'); });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e, i) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        setTimeout(function () { el.classList.add('in'); }, Math.min(i, 5) * 55);
+        io.unobserve(el);
+      });
+    }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+    targets.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>

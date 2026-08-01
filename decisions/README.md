@@ -22,3 +22,4 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [014](014-hyperframes-moteur-officiel.md) | HyperFrames devient le moteur, Remotion passe en maintenance | Actif — remplace la RÈGLE 4 |
 | [015](015-hermes-orchestrateur.md) | Hermes Agent est l'orchestrateur — pas de bot Telegram maison | Actif — modifie SPEC-PALIER-1 |
 | [016](016-cout-par-video.md) | Le coût par vidéo est un problème de plomberie, pas d'intelligence | Actif — étapes 1 et 4 faites |
+| [017](017-rythme-et-hook.md) | Rythme, ancrage et hook visuel sont des règles du portail | Actif |

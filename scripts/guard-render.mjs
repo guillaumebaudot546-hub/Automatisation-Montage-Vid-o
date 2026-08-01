@@ -34,21 +34,35 @@ function commandeAVerifier() {
   }
 }
 
-/** Rendus deja en cours, hors processus courant. */
+/**
+ * Rendus deja en cours, hors processus courant.
+ *
+ * CORRECTIF 01/08/2026 — ce script ne sondait QUE via powershell.exe. Sur le
+ * VPS Linux, l'appel echouait, le catch renvoyait [] et le garde-fou laissait
+ * donc passer tous les rendus paralleles : il ne protegeait rien la ou la
+ * production tourne. La sonde suit maintenant la plateforme.
+ */
 function rendusEnCours() {
   let sortie = "";
+  const sonde =
+    process.platform === "win32"
+      ? [
+          "powershell.exe",
+          [
+            "-NoProfile",
+            "-NonInteractive",
+            "-Command",
+            "Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | " +
+              "Select-Object -ExpandProperty CommandLine",
+          ],
+        ]
+      : ["ps", ["-eo", "args="]];
   try {
-    sortie = execFileSync(
-      "powershell.exe",
-      [
-        "-NoProfile",
-        "-NonInteractive",
-        "-Command",
-        "Get-CimInstance Win32_Process -Filter \"Name='node.exe'\" | " +
-          "Select-Object -ExpandProperty CommandLine",
-      ],
-      { encoding: "utf8", timeout: 10000, stdio: ["ignore", "pipe", "ignore"] },
-    );
+    sortie = execFileSync(sonde[0], sonde[1], {
+      encoding: "utf8",
+      timeout: 10000,
+      stdio: ["ignore", "pipe", "ignore"],
+    });
   } catch {
     return []; // Sonde indisponible : on ne bloque pas sur une incertitude.
   }

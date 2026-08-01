@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catalogue des agents IA · MedStream DCA</title>
+<meta name="description" content="Les agents que MedStream DCA sait déployer aujourd'hui, et ceux qui restent à développer. Chaque fiche indique ce qui est prouvé et ce qui ne l'est pas.">
+<style>
+  :root{
+    --ink:#0F1B2D; --fg:#3A4859; --muted:#6E7E97;
+    --line:#E1E8F1; --bg:#FFFFFF; --surface:#F4F7FB; --surface-2:#EAEFF6;
+    --radius:16px;
+    --shadow:0 10px 30px rgba(18,43,87,.08);
+    --font-display:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;
+    --font-body:'Manrope',ui-sans-serif,system-ui,-apple-system,sans-serif;
+
+    /* Un thème par agent. La couleur identifie le domaine, pas la décoration. */
+    --montage:#19B6E0;   /* cyan     : production vidéo */
+    --parole:#2E6FE3;    /* bleu     : transcription et parole */
+    --controle:#12A594;  /* teal     : contrôle et conformité */
+    --veille:#A23FE0;    /* violet   : recherche et veille */
+    --agenda:#D9730D;    /* ambre    : planification */
+    --dossier:#B5427A;   /* magenta  : rédaction clinique */
+    --relation:#5B7BEA;  /* indigo   : relation patient */
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ink:#EDF2FA; --fg:#B7C2D2; --muted:#8496AE;
+      --line:#22304A; --bg:#0B1524; --surface:#101E33; --surface-2:#16263E;
+      --shadow:0 10px 30px rgba(0,0,0,.42);
+      --montage:#45CDF0; --parole:#5189EE; --controle:#2CC0AE;
+      --veille:#B05FE6; --agenda:#F0952F; --dossier:#D4629B; --relation:#7E99F0;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:var(--font-display);color:var(--ink);letter-spacing:-.02em;margin:0}
+  h1{font-size:clamp(2rem,1.4rem+2.4vw,3rem);line-height:1.1;font-weight:700}
+  h2{font-size:clamp(1.4rem,1.1rem+1.3vw,2rem);line-height:1.18;font-weight:700}
+  h3{font-size:1.12rem;font-weight:700;line-height:1.3}
+  p{margin:0}
+
+  header{padding:clamp(52px,7vw,92px) 0 clamp(30px,4vw,46px)}
+  .eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+  header p.lede{font-size:1.08rem;margin-top:18px;max-width:62ch}
+
+  /* Barre de lecture : dit d'emblée comment lire le document */
+  .legend{display:flex;gap:26px;flex-wrap:wrap;margin-top:30px;padding-top:24px;border-top:1px solid var(--line)}
+  .legend div{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--muted)}
+  .chip{
+    font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:4px 11px;border-radius:100px;white-space:nowrap;
+  }
+  .chip-live{background:rgba(18,165,148,.14);color:var(--controle);border:1px solid rgba(18,165,148,.3)}
+  .chip-todo{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+
+  section{padding:clamp(44px,5.5vw,72px) 0;border-top:1px solid var(--line)}
+  .sec-head{max-width:64ch;margin-bottom:clamp(26px,3.4vw,40px)}
+  .sec-head p{color:var(--muted);margin-top:12px}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+  .agent{
+    position:relative;border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px 26px 24px;background:var(--bg);overflow:hidden;
+  }
+  /* Filet coloré : identifie le domaine de l'agent d'un coup d'oeil */
+  .agent::before{
+    content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--c);
+  }
+  .agent .top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}
+  .agent .icon{
+    width:38px;height:38px;border-radius:10px;flex:none;display:grid;place-items:center;
+    background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);
+  }
+  .agent .icon svg{width:20px;height:20px}
+  .agent h3{margin-top:14px}
+  .agent .role{font-size:.8rem;font-weight:700;color:var(--c);letter-spacing:.04em;text-transform:uppercase;margin-top:2px}
+  .agent p{font-size:.93rem;color:var(--muted);margin-top:10px}
+  .agent .proof{
+    font-size:.85rem;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);
+    color:var(--fg);
+  }
+  .agent .proof strong{color:var(--ink)}
+
+  .agent.todo{background:var(--surface)}
+  .agent.todo .proof{color:var(--muted)}
+
+  /* Le bloc "à développer" est visuellement en retrait, pas mis en avant */
+  .caveat{
+    background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 26px;margin-bottom:28px;font-size:.93rem;color:var(--fg);
+  }
+  .caveat strong{color:var(--ink)}
+
+  .final{background:var(--surface);border-radius:var(--radius);padding:clamp(30px,4.5vw,52px);text-align:center}
+  .final p{color:var(--muted);margin:14px auto 0;max-width:58ch}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:13px 26px;border-radius:100px;font-weight:700;font-size:.92rem;
+    text-decoration:none;margin-top:26px;
+    background:linear-gradient(115deg,#A23FE0 0%,#5B7BEA 48%,#19B6E0 100%);color:#fff;
+    box-shadow:0 6px 20px rgba(46,111,227,.28);
+    transition:transform .18s cubic-bezier(.16,1,.3,1);
+  }
+  .btn:active{transform:translateY(1px)}
+
+  footer{padding:34px 0 54px;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+  @media (prefers-reduced-motion:no-preference){
+    .reveal{opacity:0;transform:translateY(16px);transition:opacity .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1)}
+    .reveal.in{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">MedStream DCA</p>
+    <h1>Les agents que nous savons déployer</h1>
+    <p class="lede">
+      Un agent n'est pas un logiciel qu'on installe : c'est un collaborateur qu'on équipe
+      d'une doctrine, d'outils et de garde-fous. Ce catalogue distingue ce qui tourne
+      aujourd'hui de ce qui reste à construire.
+    </p>
+    <div class="legend">
+      <div><span class="chip chip-live">En production</span> déployé, mesuré, vérifiable</div>
+      <div><span class="chip chip-todo">À développer</span> réaliste, non construit à ce jour</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>En production</h2>
+      <p>
+        Ces quatre agents tournent sur un serveur dédié en Union européenne. Chaque ligne
+        « Preuve » renvoie à une mesure réelle, pas à une promesse.
+      </p>
+    </div>
+    <div class="grid">
+
+      <article class="agent" style="--c:var(--montage)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg></span>
+          <span class="chip chip-live">En production</span>
+        </div>
+        <h3>Monteur vidéo</h3>
+        <p class="role">Production de contenu</p>
+        <p>
+          Reçoit un rush sur Telegram, le transcrit, choisit les segments selon une doctrine
+          écrite, applique la charte du praticien, rend la vidéo au format du réseau visé
+          et la renvoie pour validation.
+        </p>
+        <p class="proof">
+          <strong>Preuve :</strong> vidéo de 39 s montée de bout en bout, rendu vérifié
+          identique en local et sur serveur, coût relevé 6,91 $.
+        </p>
+      </article>
+
+      <article class="agent" style="--c:var(--parole)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg></span>
+          <span class="chip chip-live">En production</span>
+        </div>
+        <h3>Transcripteur local</h3>
+        <p class="role">Parole et sous-titrage</p>
+        <p>
+          Transcrit le français avec le vocabulaire métier du praticien, sur le serveur et
+          jamais chez un tiers. Écarte les phrases que le moteur invente sur les silences,
+          et les signale plutôt que de les supprimer en douce.
+        </p>
+        <p class="proof">
+          <strong>Preuve :</strong> 3× le temps réel, vocabulaire technique correct après
+          amorçage, filtre anti-hallucination testé sur 10 cas.
+        </p>
+      </article>
+
+      <article class="agent" style="--c:var(--controle)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.7 8.9a1 1 0 0 1-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.5 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span class="chip chip-live">En production</span>
+        </div>
+        <h3>Contrôleur qualité</h3>
+        <p class="role">Conformité et garde-fous</p>
+        <p>
+          Juge le travail avant livraison, sans appel au modèle et sans avis : coupes hors
+          frontières de phrase, format incohérent avec le réseau, sous-titrage incomplet.
+          Trois essais maximum, puis il remonte à un humain.
+        </p>
+        <p class="proof">
+          <strong>Preuve :</strong> rejette un plan fautif en nommant 8 violations,
+          accepte un plan conforme. Il discrimine, il ne bloque pas tout.
+        </p>
+      </article>
+
+      <article class="agent" style="--c:var(--veille)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+          <span class="chip chip-live">En production</span>
+        </div>
+        <h3>Assistant documentaire</h3>
+        <p class="role">Recherche et veille</p>
+        <p>
+          Lit les documents du cabinet, retrouve une décision passée, cite ses sources par
+          fichier et par ligne. Il tient une mémoire persistante entre les conversations
+          plutôt que de repartir de zéro à chaque échange.
+        </p>
+        <p class="proof">
+          <strong>Preuve :</strong> retrouve et cite les attributs exacts d'un fichier de
+          montage archivé, y compris un incident documenté des mois plus tôt.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>À développer</h2>
+      <p>
+        Ces agents reposent sur les mêmes briques que les précédents. Rien n'a été construit
+        à ce jour : les délais et les coûts seraient à établir avant tout engagement.
+      </p>
+    </div>
+
+    <div class="caveat">
+      <strong>Ce bloc décrit une faisabilité, pas une offre.</strong>
+      Chacun de ces agents touche à des données de santé et exigerait son propre cadre
+      RGPD, ses propres garde-fous et une validation praticien à chaque étape. Nous ne les
+      chiffrons pas avant d'avoir prototypé, pour ne pas répéter l'erreur d'estimation que
+      nous avons corrigée sur le montage.
+    </div>
+
+    <div class="grid">
+
+      <article class="agent todo" style="--c:var(--dossier)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/></svg></span>
+          <span class="chip chip-todo">À développer</span>
+        </div>
+        <h3>Rédacteur de compte rendu</h3>
+        <p class="role">Rédaction clinique</p>
+        <p>
+          Transformerait la dictée post-opératoire en compte rendu structuré, à la trame du
+          praticien. La transcription locale existe déjà ; c'est la trame et la relecture
+          obligatoire qui restent à écrire.
+        </p>
+        <p class="proof">
+          <strong>Point dur :</strong> aucun compte rendu ne peut partir sans relecture et
+          signature du praticien. L'agent propose, il ne valide jamais.
+        </p>
+      </article>
+
+      <article class="agent todo" style="--c:var(--agenda)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+          <span class="chip chip-todo">À développer</span>
+        </div>
+        <h3>Coordinateur d'agenda</h3>
+        <p class="role">Planification</p>
+        <p>
+          Préparerait la journée : dossiers à sortir, matériel à prévoir, patients à
+          rappeler. La brique de tâches planifiées existe déjà sur le serveur.
+        </p>
+        <p class="proof">
+          <strong>Point dur :</strong> connexion au logiciel métier du cabinet. Faisabilité
+          à vérifier logiciel par logiciel avant tout engagement.
+        </p>
+      </article>
+
+      <article class="agent todo" style="--c:var(--relation)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <span class="chip chip-todo">À développer</span>
+        </div>
+        <h3>Assistant de suivi patient</h3>
+        <p class="role">Relation patient</p>
+        <p>
+          Préparerait les messages de suivi post-intervention, sur des modèles écrits par le
+          praticien, en respectant les délais de chaque protocole.
+        </p>
+        <p class="proof">
+          <strong>Point dur :</strong> un message à un patient engage le praticien. Aucun
+          envoi automatique : l'agent prépare, le cabinet envoie.
+        </p>
+      </article>
+
+      <article class="agent todo" style="--c:var(--montage)">
+        <div class="top">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></span>
+          <span class="chip chip-todo">À développer</span>
+        </div>
+        <h3>Éditeur de publications</h3>
+        <p class="role">Diffusion multi-réseaux</p>
+        <p>
+          Déclinerait une même vidéo en descriptions adaptées à chaque réseau, avec le ton
+          et la longueur propres à chacun. Prolongement direct du monteur déjà en place.
+        </p>
+        <p class="proof">
+          <strong>Point dur :</strong> le ton d'une publication engage la réputation du
+          praticien. Validation systématique avant publication, sans exception.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="final">
+      <h2>Le prochain agent part d'un besoin, pas d'un catalogue</h2>
+      <p>
+        Décrivez la tâche qui vous coûte le plus de temps chaque semaine. Nous vous dirons
+        honnêtement si un agent la traite bien, mal, ou pas du tout.
+      </p>
+      <a class="btn" href="mailto:contact@medstream-dca.com?subject=Agents%20IA%20%E2%80%94%20discuter%20d%27un%20besoin">Décrire un besoin</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>MedStream DCA · Saint-Gély-du-Fesc</span>
+    <span>Catalogue au 31 juillet 2026</span>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var targets = document.querySelectorAll('.agent, .sec-head, .caveat, .final');
+    targets.forEach(function (el) { el.classList.add('reveal'); });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e, i) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        setTimeout(function () { el.classList.add('in'); }, Math.min(i, 4) * 60);
+        io.unobserve(el);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+    targets.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>

@@ -19,6 +19,7 @@
 // c'est un verdict. Le code distingue les deux.
 import { readFileSync } from "node:fs";
 import { argv, exit } from "node:process";
+import { ecrireRecu } from "./guard-portail.mjs";
 
 const args = argv.slice(2).filter((a) => !a.startsWith("--"));
 const iPraticien = argv.indexOf("--praticien");
@@ -49,6 +50,19 @@ const seuils = {
   coupuresVoixMax: 1,
   crossfadeMinSec: 0.15,
   volumeMusique: nombreDans(praticien.preferences.musique, /volume\s*~?\s*(\d+[.,]\d+)/) ?? 0.08,
+
+  // Rythme et hook — ajoutes le 01/08/2026 apres la capsule 06.
+  // Le praticien a recu un montage ou tous les calques tombaient sur les
+  // premieres secondes. Le portail ne regardait alors que la duree d'un
+  // calque et son debordement : un plan groupe passait sans violation.
+  ecartCalquesMinSec:
+    nombreDans(praticien.preferences.rythmeCalques, /ecart\s*>=\s*(\d+(?:[.,]\d+)?)\s*s/i) ?? 2.5,
+  partPremierTiersMax:
+    (nombreDans(praticien.preferences.rythmeCalques, /au plus\s*(\d+)\s*%/i) ?? 50) / 100,
+  hookAvantSec:
+    nombreDans(praticien.preferences.hookVisuel, /demarre dans les\s*(\d+(?:[.,]\d+)?)\s*s/i) ?? 1.5,
+  hookDureeMaxSec:
+    nombreDans(praticien.preferences.hookVisuel, /tient\s*<=\s*(\d+(?:[.,]\d+)?)\s*s/i) ?? 3,
 };
 
 const TOLERANCE = 0.25;
@@ -104,6 +118,122 @@ for (const o of plan.overlays ?? []) {
     avertit("dureeInfographies", `Calque ${o.kind} tient ${o.durationSec}s (max ${seuils.dureeInfographieMaxSec}s).`);
 }
 
+// Rythme des calques — correction du 01/08/2026.
+// Trois defauts distincts, tous invisibles pour les regles precedentes :
+// des calques qui se chevauchent, une rafale, et un bloc en ouverture.
+{
+  const calques = [...(plan.overlays ?? [])].sort((a, b) => a.atSec - b.atSec);
+
+  for (let i = 1; i < calques.length; i++) {
+    const precedent = calques[i - 1];
+    const courant = calques[i];
+    const finPrecedent = precedent.atSec + precedent.durationSec;
+
+    if (courant.atSec < finPrecedent - 0.01) {
+      rejet(
+        "rythmeCalques",
+        `Calques ${precedent.kind} et ${courant.kind} se chevauchent (${courant.atSec}s < ${finPrecedent.toFixed(2)}s) : deux infographies a l'ecran en meme temps, illisible.`,
+      );
+      continue;
+    }
+
+    const ecart = courant.atSec - finPrecedent;
+    if (ecart < seuils.ecartCalquesMinSec - 0.01)
+      rejet(
+        "rythmeCalques",
+        `Seulement ${ecart.toFixed(1)}s entre ${precedent.kind} et ${courant.kind} (min ${seuils.ecartCalquesMinSec}s) : effet rafale, l'oeil ne suit pas.`,
+      );
+  }
+
+  // Un montage dont les calques tombent tous au debut laisse la fin nue.
+  //
+  // Le hook est exclu du calcul : la regle « hookVisuel » EXIGE qu'il soit dans
+  // la premiere seconde et demie. Le compter ici reviendrait a sanctionner ce
+  // qu'une autre regle impose — les deux regles se contrediraient sur tout
+  // montage conforme.
+  const illustratifs = calques.filter((o) => o.atSec > seuils.hookAvantSec + 0.01);
+  if (illustratifs.length >= 3 && dureeTotale > 0) {
+    const finPremierTiers = dureeTotale / 3;
+    const dansLeTiers = illustratifs.filter((o) => o.atSec < finPremierTiers).length;
+    const part = dansLeTiers / illustratifs.length;
+    if (part > seuils.partPremierTiersMax + 0.01)
+      rejet(
+        "rythmeCalques",
+        `${Math.round(part * 100)}% des calques dans le premier tiers (max ${Math.round(seuils.partPremierTiersMax * 100)}%) : ils arrivent en bloc au debut, le reste de la video retombe a plat.`,
+      );
+  }
+}
+
+// Ancrage des calques sur la parole — correction du 01/08/2026.
+//
+// Sur la capsule 06, le calque « list » des trois modules etait pose a 2 s
+// pour 6 s, alors que le praticien ne les enumere qu'entre 11,3 s et 29,6 s.
+// La cascade arrivait donc 18 secondes avant les mots qu'elle illustre, en
+// ouverture du monologue : c'est le « bloc au debut » signale par le client.
+// La preference « listes en cascade QUAND il les enumere » existait deja ;
+// il n'y avait simplement aucune regle pour la verifier.
+//
+// D'ou le champ « ancre » : le plan declare a quelle seconde de parole le
+// calque se rattache, et le portail verifie que le calque est bien a l'ecran
+// a ce moment-la. L'IA decide quoi illustrer, le code verifie le quand
+// (decision 005).
+{
+  const ILLUSTRENT_UN_PROPOS = new Set(["list", "chart", "stat"]);
+  const parle = (t) =>
+    (plan.captions ?? []).some((c) => t >= c.fromSec - TOLERANCE && t <= c.toSec + TOLERANCE);
+
+  for (const o of plan.overlays ?? []) {
+    if (!ILLUSTRENT_UN_PROPOS.has(o.kind)) continue;
+
+    if (typeof o.ancre !== "number") {
+      rejet(
+        "ancrageCalques",
+        `Calque ${o.kind} sans « ancre » : indiquer la seconde de parole qu'il illustre. Un ${o.kind} pose au hasard s'affiche avant ou apres les mots concernes.`,
+      );
+      continue;
+    }
+
+    const fin = o.atSec + o.durationSec;
+    if (o.ancre < o.atSec - TOLERANCE || o.ancre > fin + TOLERANCE)
+      rejet(
+        "ancrageCalques",
+        `Calque ${o.kind} visible de ${o.atSec}s a ${fin}s mais ancre a ${o.ancre}s : il n'est pas a l'ecran quand le propos est dit.`,
+      );
+
+    if (!parle(o.ancre))
+      rejet(
+        "ancrageCalques",
+        `Calque ${o.kind} ancre a ${o.ancre}s, ou personne ne parle : l'ancre designe le moment du propos illustre.`,
+      );
+  }
+}
+
+// Hook visuel — correction du 01/08/2026.
+// Les premieres secondes decident si la video est regardee. Un montage sans
+// accroche visuelle est un montage qui ne sera pas vu, quelle que soit sa suite.
+{
+  const calques = plan.overlays ?? [];
+  const hook = calques.find((o) => o.atSec <= seuils.hookAvantSec + 0.01);
+
+  if (!hook) {
+    rejet(
+      "hookVisuel",
+      `Aucun calque dans les ${seuils.hookAvantSec} premieres secondes : la video s'ouvre sans accroche.`,
+    );
+  } else {
+    if (hook.durationSec > seuils.hookDureeMaxSec + 0.01)
+      rejet(
+        "hookVisuel",
+        `Le hook ${hook.kind} tient ${hook.durationSec}s (max ${seuils.hookDureeMaxSec}s) : passe ce delai il n'accroche plus, il encombre.`,
+      );
+    if (hook.kind !== "punch")
+      avertit(
+        "hookVisuel",
+        `Le hook d'ouverture est un calque ${hook.kind} ; « punch » est le format retenu par le praticien pour l'accroche.`,
+      );
+  }
+}
+
 // Sous-titres — transcription integrale
 if (dureeVoix > 0) {
   const couv = (plan.captions ?? []).reduce((a, c) => a + (c.toSec - c.fromSec), 0) / dureeVoix;
@@ -116,8 +246,19 @@ const rejets = violations.filter((v) => v.gravite === "rejet");
 console.log(`Portail doctrine — ${praticien.praticien}`);
 console.log(`  seuils : infographie ≤ ${seuils.dureeInfographieMaxSec}s, coupures ≤ ${seuils.coupuresVoixMax}, fondu ≥ ${seuils.crossfadeMinSec}s\n`);
 
+/**
+ * Un plan qui passe laisse un recu a cote de lui. guard-portail.mjs le lit
+ * avant tout rendu : sans recu couvrant CETTE version du plan, le rendu est
+ * refuse. C'est ce qui transforme la REGLE 5 en verrou plutot qu'en consigne.
+ */
+const valide = () => {
+  const recu = ecrireRecu(args[0]);
+  console.log(`   recu ecrit — empreinte ${recu.empreinte.slice(0, 12)}…`);
+};
+
 if (violations.length === 0) {
   console.log("✅ Aucune violation. Passe au portail ② (juge), puis au Dr Baudot.");
+  valide();
   exit(0);
 }
 for (const v of violations) {
@@ -128,4 +269,5 @@ if (rejets.length > 0) {
   exit(3);
 }
 console.log("\n✅ Passe malgre les avertissements ci-dessus.");
+valide();
 exit(0);

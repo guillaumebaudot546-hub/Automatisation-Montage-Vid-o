@@ -3,6 +3,74 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-07-31 (suite) — Supports commerciaux, et le coût enfin mesuré
+
+### Le coût réel : 6,91 $, pas 1 €
+
+Hermes stocke le détail par session dans `~/.hermes/state.db`
+(`session_model_usage`). La session de montage du 30/07 :
+
+| Poste | Tokens | Coût | Part |
+|---|---|---|---|
+| **Écriture de cache** | 594 464 | **3,72 $** | **54 %** |
+| Lecture de cache | 3 703 390 | 1,85 $ | 27 % |
+| Sortie | 53 793 | 1,34 $ | 19 % |
+| Entrée non cachée | 118 | ~0 | 0 % |
+| | | **6,91 $** | |
+
+Recalculé à la main aux tarifs officiels Opus 4.8 (5 $/25 $ le million) : le
+total tombe exactement sur les 6,91 $ annoncés par la base. **L'écriture de
+cache était le premier poste**, ce qui confirme le diagnostic du TTL de 5 min :
+le contexte était réécrit à 6,25 $/M au lieu d'être relu à 0,50 $/M, soit
+**12,5× plus cher**.
+
+Total toutes sessions confondues : **11,22 $**. Guillaume avait relevé 15 € ;
+l'écart vient vraisemblablement des sessions Claude Code, facturées sur le même
+compte Anthropic mais étrangères au service.
+
+### Proposition commerciale corrigée
+
+`proposition-imcp-studio-video.html` annonçait **« ≈ 1 € par vidéo »** au
+Dr Baudot. Écart de 7× avec la mesure. Corrigée en **révision B** (31/07) :
+chiffre remplacé, décomposition ajoutée, et la correction elle-même est écrite
+dans le document plutôt que masquée. Original conservé en
+`proposition-imcp-studio-video.SAUVEGARDE-avant-correction-couts-2026-07-31.html`.
+
+### Livré dans `commercial/`
+
+| Fichier | Ce que c'est |
+|---|---|
+| `landing-agent-montage.html` | Landing page de l'agent. Charte MedStream reprise de la proposition, images produit extraites des vraies vidéos livrées, coûts mesurés affichés |
+| `deck-agents-ia.html` | Catalogue des agents : 4 en production (avec preuve mesurée), 4 à développer (avec le point dur de chacun). Une couleur par domaine |
+| `vitrine-agents/` | Mini-vidéo 16:9, 41 s, rendue en local |
+
+### Décision : la vitrine n'est PAS dans `imcp-hyperframes/`
+
+`check-charte` scanne `imcp-hyperframes/` et impose la charte IMCP (cyan
+`#49B6C9`). Or cette vidéo est un support **MedStream DCA** et demande une
+couleur par agent. Deux mauvaises options écartées : casser le vert du garde-fou,
+ou déguiser les noms de tokens pour passer sous son radar. Retenu : la placer
+dans `commercial/vitrine-agents/`, hors du périmètre scanné. La charte IMCP
+protège les vidéos du praticien, pas les supports de l'agence.
+
+### Défauts trouvés et corrigés en cours de route
+
+- **Deux tirets cadratins** dans la landing (dont le `<title>`, visible dans
+  l'onglet). La règle du skill est binaire, zéro toléré. Corrigés.
+- **Composition HyperFrames refusée 3 fois** avant de passer : conteneur racine
+  sans `data-composition-id`, sans dimensions, sans `data-start`, puis le
+  gabarit détecté comme seconde entrée. Réglé en déplaçant le gabarit dans
+  `_source/` (il garde son extension `.html` et sa coloration).
+- **Aucun accent dans la vidéo** au premier rendu (« Controleur qualite »,
+  « CONFORMITE »). Inacceptable sur un support commercial français, et inutile :
+  les polices embarquées couvrent latin-ext. Corrigé.
+- **Composition déséquilibrée** : tout le contenu dans la moitié gauche, moitié
+  droite vide en 16:9. Passée en trois colonnes, la preuve à droite.
+
+Les deux derniers n'ont été vus qu'en extrayant les images du rendu. Le
+`check` passait au vert dans les deux cas : un code de sortie ne remplace pas un
+contrôle visuel.
+
 ## 2026-07-31 (suite) — Les polices n'ont JAMAIS été chargées par HyperFrames
 
 Question de Guillaume : pourquoi le design, les polices, la charte ne se

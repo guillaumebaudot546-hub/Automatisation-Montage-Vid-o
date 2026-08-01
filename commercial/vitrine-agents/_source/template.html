@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="fr" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+/* @POLICES@ */
+
+      /* ═══════════════════════════════════════════════════════════════
+         Vitrine des agents · MedStream DCA
+         Support commercial MedStream, PAS une video praticien : la charte
+         IMCP verrouillee (cyan #49B6C9) ne s'applique pas ici. Chaque agent
+         porte sa propre couleur de domaine, ce qui est precisement l'objet
+         de la video.
+         Vocabulaire d'ombres et de mouvement : RÈGLE 4ter de la doctrine.
+         ═══════════════════════════════════════════════════════════════ */
+      :root {
+        --nuit:    #0B1524;   /* fond, hors charte IMCP : marque MedStream */
+        --nuit-2:  #101E33;
+        --blanc:   #EDF2FA;
+        --gris:    #8496AE;
+
+        /* Une couleur par domaine d'agent */
+        --a-montage:  #19B6E0;
+        --a-parole:   #2E6FE3;
+        --a-controle: #12A594;
+        --a-veille:   #A23FE0;
+
+        --ombre-carte: 0 30px 90px rgba(0,0,0,.6), 0 0 60px rgba(95,232,255,.12);
+        --ombre-texte: 0 3px 20px rgba(0,0,0,.9);
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: var(--nuit); color: var(--blanc);
+        font-family: Manrope, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .scene {
+        position: absolute; inset: 0;
+        display: grid; place-items: center;
+        padding: 0 160px;
+      }
+
+      /* Halo de scene : prend la couleur de l'agent courant */
+      .halo {
+        position: absolute; inset: 0; z-index: 0; pointer-events: none;
+        background:
+          radial-gradient(58% 62% at 50% 46%, color-mix(in srgb, var(--c) 26%, transparent) 0%, transparent 68%),
+          linear-gradient(180deg, var(--nuit-2) 0%, var(--nuit) 62%);
+      }
+
+      .inner { position: relative; z-index: 2; width: 100%; }
+
+      /* ── Ouverture ── */
+      .kicker {
+        font-size: 22px; font-weight: 800; letter-spacing: .26em;
+        text-transform: uppercase; color: var(--a-montage);
+        text-shadow: 0 0 16px rgba(25,182,224,.55);
+      }
+      .titre {
+        font-family: Cormorant, serif; font-size: 118px; line-height: 1.04;
+        margin-top: 26px; text-shadow: var(--ombre-texte);
+      }
+      .sous {
+        font-size: 30px; color: var(--gris); margin-top: 30px; max-width: 30ch;
+        line-height: 1.5; text-shadow: var(--ombre-texte);
+      }
+
+      /* ── Fiche agent ──
+         Deux colonnes : identite a gauche, preuve a droite. En 16:9 une
+         colonne unique laisse la moitie droite vide et la composition
+         penche. */
+      .fiche {
+        display: grid; grid-template-columns: 108px 1fr 1fr;
+        gap: 0 48px; align-items: start; width: 100%;
+      }
+      .pastille {
+        width: 108px; height: 108px; border-radius: 30px;
+        display: grid; place-items: center;
+        background: color-mix(in srgb, var(--c) 16%, transparent);
+        border: 2px solid color-mix(in srgb, var(--c) 52%, transparent);
+        box-shadow: 0 0 42px color-mix(in srgb, var(--c) 34%, transparent);
+      }
+      .pastille svg { width: 52px; height: 52px; stroke: var(--c); fill: none; stroke-width: 2; }
+
+      .domaine {
+        font-size: 20px; font-weight: 800; letter-spacing: .2em;
+        text-transform: uppercase; color: var(--c);
+      }
+      .nom {
+        font-family: Cormorant, serif; font-size: 96px; line-height: 1.05;
+        margin-top: 12px; text-shadow: var(--ombre-texte);
+      }
+      .desc {
+        font-size: 30px; line-height: 1.52; color: var(--blanc);
+        margin-top: 24px; max-width: 34ch; text-shadow: var(--ombre-texte);
+      }
+      .preuve {
+        align-self: center; padding: 30px 34px; border-radius: 18px;
+        background: rgba(11,21,36,.72);
+        border-left: 4px solid var(--c);
+        box-shadow: var(--ombre-carte);
+        font-size: 27px; color: var(--gris); line-height: 1.5;
+      }
+      .preuve b { color: var(--blanc); font-weight: 700; }
+
+      /* ── Fin ── */
+      .fin-grille { display: flex; gap: 20px; margin-top: 44px; justify-content: center; }
+      .puce {
+        width: 76px; height: 8px; border-radius: 99px;
+      }
+
+      /* ── Chrome permanent ── */
+      #marque {
+        position: absolute; top: 56px; left: 72px; z-index: 5;
+        font-size: 22px; font-weight: 800; letter-spacing: .2em;
+        color: var(--blanc); opacity: .82;
+      }
+      #compteur {
+        position: absolute; top: 56px; right: 72px; z-index: 5;
+        font-family: "JetBrains Mono", monospace; font-size: 21px;
+        color: var(--gris); letter-spacing: .1em;
+      }
+      #prog {
+        position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+        background: rgba(255,255,255,.09); z-index: 6;
+      }
+      #prog-fill {
+        height: 100%; width: 100%; transform-origin: 0 50%;
+        background: linear-gradient(90deg, #A23FE0, #2E6FE3, #19B6E0);
+      }
+    </style>
+  </head>
+
+  <body>
+   <div id="main" data-composition-id="main" data-width="1920" data-height="1080"
+        data-start="0" data-duration="41">
+    <div id="marque">MEDSTREAM DCA</div>
+    <div id="compteur" class="clip" data-start="4" data-duration="36" data-track-index="9">AGENTS EN PRODUCTION</div>
+
+    <!-- S0 · Ouverture -->
+    <div id="s0" class="clip scene" data-start="0" data-duration="4.4" data-track-index="0" style="--c: var(--a-montage)">
+      <div class="halo"></div>
+      <div class="inner" style="text-align:center">
+        <div class="kicker">MedStream DCA</div>
+        <h1 class="titre">Quatre agents,<br />quatre métiers</h1>
+        <p class="sous" style="margin-left:auto;margin-right:auto">Déployés, mesurés, vérifiables.</p>
+      </div>
+    </div>
+
+    <!-- S1 · Monteur video -->
+    <div id="s1" class="clip scene" data-start="4.4" data-duration="8" data-track-index="0" style="--c: var(--a-montage)">
+      <div class="halo"></div>
+      <div class="inner">
+        <div class="fiche">
+          <div class="pastille">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+          </div>
+          <div>
+            <div class="domaine">Production de contenu</div>
+            <h2 class="nom">Monteur vidéo</h2>
+            <p class="desc">Reçoit un rush, le transcrit, choisit les segments selon une doctrine écrite, applique la charte et rend au format du réseau visé.</p>
+          </div>
+          <div class="preuve"><b>Mesure :</b> vidéo de 39 s montée de bout en bout, rendu vérifié identique en local et sur serveur.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S2 · Transcripteur local -->
+    <div id="s2" class="clip scene" data-start="12.4" data-duration="8" data-track-index="0" style="--c: var(--a-parole)">
+      <div class="halo"></div>
+      <div class="inner">
+        <div class="fiche">
+          <div class="pastille">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>
+          </div>
+          <div>
+            <div class="domaine">Parole et sous-titrage</div>
+            <h2 class="nom">Transcripteur local</h2>
+            <p class="desc">Transcrit le français avec le vocabulaire métier, sur le serveur et jamais chez un tiers. Écarte ce que le moteur invente sur les silences.</p>
+          </div>
+          <div class="preuve"><b>Mesure :</b> 3× le temps réel, filtre anti-hallucination vérifié sur 10 cas.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3 · Controleur qualite -->
+    <div id="s3" class="clip scene" data-start="20.4" data-duration="8" data-track-index="0" style="--c: var(--a-controle)">
+      <div class="halo"></div>
+      <div class="inner">
+        <div class="fiche">
+          <div class="pastille">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.7 8.9a1 1 0 0 1-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1 1 0 0 1 1.5 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1Z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div>
+            <div class="domaine">Conformité et garde-fous</div>
+            <h2 class="nom">Contrôleur qualité</h2>
+            <p class="desc">Juge le travail avant livraison, sans avis et sans appel au modèle. Trois essais au maximum, puis il remonte à un humain.</p>
+          </div>
+          <div class="preuve"><b>Mesure :</b> rejette un plan fautif en nommant 8 violations, accepte un plan conforme.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4 · Assistant documentaire -->
+    <div id="s4" class="clip scene" data-start="28.4" data-duration="8" data-track-index="0" style="--c: var(--a-veille)">
+      <div class="halo"></div>
+      <div class="inner">
+        <div class="fiche">
+          <div class="pastille">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <div>
+            <div class="domaine">Recherche et veille</div>
+            <h2 class="nom">Assistant documentaire</h2>
+            <p class="desc">Lit les documents du cabinet, retrouve une décision passée, cite ses sources par fichier et par ligne. Il garde la mémoire entre les conversations.</p>
+          </div>
+          <div class="preuve"><b>Mesure :</b> retrouve les attributs exacts d'un montage archivé, incident documenté compris.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5 · Fin -->
+    <div id="s5" class="clip scene" data-start="36.4" data-duration="4.6" data-track-index="0" style="--c: var(--a-parole)">
+      <div class="halo"></div>
+      <div class="inner" style="text-align:center">
+        <div class="kicker" style="color: var(--blanc); opacity:.7">MedStream DCA</div>
+        <h1 class="titre" style="font-size:96px">Le prochain agent part<br />d'un besoin</h1>
+        <div class="fin-grille">
+          <span class="puce" style="background: var(--a-montage)"></span>
+          <span class="puce" style="background: var(--a-parole)"></span>
+          <span class="puce" style="background: var(--a-controle)"></span>
+          <span class="puce" style="background: var(--a-veille)"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="prog"><div id="prog-fill"></div></div>
+   </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      /* Vocabulaire de mouvement : RÈGLE 4ter.
+         power3.out par defaut, entrees 0,35-0,6 s, y 16-40 puis 0,
+         cascade 0,08-0,12 s entre deux lignes. Pas de rebond sur du
+         texte courant. */
+
+      /* ═══ S0 · Ouverture ═══ */
+      tl.fromTo("#s0 .kicker", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.25);
+      tl.fromTo("#s0 .titre",  { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.42);
+      tl.fromTo("#s0 .sous",   { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, 0.62);
+
+      /* ═══ Fiches agents ═══
+         Meme partition pour les quatre : la structure se repete, seule la
+         couleur change. C'est ce qui fait lire la video comme une serie. */
+      [
+        { id: "#s1", t: 4.4 },
+        { id: "#s2", t: 12.4 },
+        { id: "#s3", t: 20.4 },
+        { id: "#s4", t: 28.4 },
+      ].forEach(function (s) {
+        tl.fromTo(s.id + " .pastille", { opacity: 0, scale: 0.86 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, s.t + 0.2);
+        tl.fromTo(s.id + " .domaine",  { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, s.t + 0.32);
+        tl.fromTo(s.id + " .nom",      { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.6,  ease: "power3.out" }, s.t + 0.42);
+        tl.fromTo(s.id + " .desc",     { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, s.t + 0.56);
+        tl.fromTo(s.id + " .preuve",   { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, s.t + 0.72);
+        /* La camera respire : 1,02 -> 1,06 sur toute la scene, ease none.
+           Une camera qui accelere se remarque. */
+        tl.fromTo(s.id + " .halo", { scale: 1.02 }, { scale: 1.06, duration: 8, ease: "none" }, s.t);
+      });
+
+      /* ═══ S5 · Fin ═══ */
+      tl.fromTo("#s5 .kicker",     { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 36.65);
+      tl.fromTo("#s5 .titre",      { opacity: 0, y: 38 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 36.82);
+      tl.fromTo("#s5 .puce", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.45, ease: "power3.out", stagger: 0.1 }, 37.25);
+
+      /* ═══ Progression — scaleX, jamais un tween de width ═══ */
+      tl.fromTo("#prog-fill", { scaleX: 0 }, { scaleX: 1, duration: 41, ease: "none" }, 0);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
