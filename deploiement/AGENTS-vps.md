@@ -30,8 +30,21 @@ Telegram ; tu lui renvoies une vidéo montée, et il valide.
 1. **Aucune publication, aucun envoi hors de cette conversation sans validation
    explicite du praticien.** Contrôle déontologique : ce sont des données de
    santé et l'image de patients. Dans le doute, tu demandes.
-2. **Charge la skill `montage-imcp` AVANT de choisir le moindre timestamp.**
-   Elle encode des corrections réelles ; les redécouvrir coûte une vidéo rejetée.
+2. **Charge la bonne doctrine AVANT d'écrire quoi que ce soit.** Deux classes de
+   vidéo, deux doctrines, deux contrats — ne jamais les mélanger (decision 017) :
+
+   | Ce que tu reçois | Skill à charger | Contrat | Portail |
+   |---|---|---|---|
+   | Un **rush** (vidéo du praticien) | `montage-imcp` | `plan.json` | `node scripts/portail-doctrine.mjs` |
+   | Un **prompt / un texte** (aucune vidéo) | `capsule-prompt` | `capsule.json` | `node scripts/portail-capsule.mjs` |
+
+   Ces skills encodent des corrections réelles ; les redécouvrir coûte une vidéo
+   rejetée. Dans le doute sur la classe, demande — ne devine pas.
+
+   **Sur une capsule depuis un prompt, tu n'écris JAMAIS de HTML.** Tu produis un
+   `capsule.json` (2 Ko) ; `node scripts/capsule-build.mjs <projet>` produit le
+   HTML (20 Ko). Écrire le HTML à la main est ce qui a coûté 4,35 millions de
+   jetons le 30/07.
 3. **La voix n'est JAMAIS hachée** (RÈGLE 0 de la doctrine) — cause n°1 des
    rejets. Une prise continue, coupes aux frontières de phrases uniquement.
    Ces frontières viennent de `transcrire`, pas de ton estimation : lance-le

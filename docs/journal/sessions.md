@@ -3,6 +3,56 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-08-03 — Déploiement sur le VPS
+
+Hermes sait désormais générer une capsule depuis un prompt. Déployé sur
+`HermesMedStreamDCA` (78.47.14.178), sauvegarde préalable dans
+`~/sauvegardes/2026-08-03-1147`.
+
+### Trois blocages trouvés à l'inspection, avant de toucher à quoi que ce soit
+
+1. **`~/imcp` n'est pas un dépôt git** — copie manuelle, déploiement par `scp`.
+2. **`src/theme/` n'existait pas du tout sur le VPS.** `capsule-build` et
+   `portail-capsule` le lisent : ils auraient échoué au premier appel. Créé
+   avec `client-01.ts`.
+3. **Le VPS avait encore `praticiens/baudot.json`.** Les scripts renommés
+   cherchent `client-01.json` : déployer sans renommer cassait le montage
+   existant. Renommé dans le même geste.
+
+Constat en passant : l'`AGENTS.md` du VPS datait du **31/07** et ne contenait
+aucune trace du verrou. Tout le travail du 01/08 n'avait jamais été déployé.
+
+### Déployé
+
+5 scripts (`capsule-build`, `portail-capsule`, `guard-portail`,
+`portail-doctrine`, `guard-render`), `src/theme/client-01.ts`,
+`_socle/capsule.template.html` + les 4 polices, la skill `capsule-prompt`
+dans `~/.hermes/skills/video/`, et `AGENTS.md` aux deux emplacements
+(empreintes identiques vérifiées).
+
+**RÈGLE 2 réécrite en aiguillage** : rush → `montage-imcp` + `plan.json` ;
+prompt → `capsule-prompt` + `capsule.json`. Sans ça, la skill était installée
+mais Hermes n'avait aucune raison de la charger.
+
+### Vérifié SUR LE VPS, pas en local
+
+- Portail capsule : 0 violation, reçu écrit.
+- Builder : `index.html` de 11 451 octets, charte lue depuis `src/theme/`.
+- Verrou : plan modifié après validation → **rendu bloqué (2)** ; revalidation
+  → **0** ; rendu autorisé → **0**.
+- `guard-render` : sonde multiplateforme confirmée. **Le garde-fou « jamais
+  deux rendus en parallèle » protège enfin quelque chose là où la production
+  tourne** — il ne sondait que via `powershell.exe`.
+- Montage rush intact après renommage.
+
+### Reste ouvert
+
+- Aucun test bout-en-bout depuis Telegram : la chaîne est vérifiée en ligne de
+  commande sur le VPS, pas via une vraie conversation avec le praticien.
+- Le dépôt GitHub est **public** et les noms restent dans les contenus
+  (~97 occurrences) et dans tout l'historique. Le renommage ne couvre que les
+  identifiants techniques.
+
 ## 2026-08-02 (fin) — La génération depuis un prompt devient une doctrine
 
 Demande de Guillaume : que ce type de vidéo soit implémenté dans les skills
