@@ -7,7 +7,7 @@ section utile à la tâche (charge à la demande).
 
 ## Où regarder
 - **§1** projet · **§2** règle active (ne modifier que les 1 min) · **§3** compositions
-- **§4** charte graphique (`src/theme/baudot.ts`) · **§5** templates architecture
+- **§4** charte graphique (`src/theme/client-01.ts`) · **§5** templates architecture
 - **§6** props éditables · **§7** audio · **§8** sources & assets · **§9** règles de travail
 - **§10** commandes · **§11** livrables produits · **§12** backlog
 - **ANNEXE A** audit archi (fait) · **ANNEXE B** texte défilant (à faire)
@@ -25,7 +25,7 @@ Ce PRD décrit l'état **Remotion** au 17/07/2026. Deux choses ont changé depui
    `C:\Users\Guillaume\Desktop\LP MedStream DCA\MONTAGE-IA-IMCP`.
 
 Ce qui reste valable : **§4 la charte graphique** (source de vérité
-`src/theme/baudot.ts`, accent cyan `#49B6C9`) et **§7 l'audio**. Le reste est de
+`src/theme/client-01.ts`, accent cyan `#49B6C9`) et **§7 l'audio**. Le reste est de
 l'archive Remotion.
 
 ## ⚠️ Direction en cours
@@ -42,7 +42,7 @@ HyperFrames avant toute implémentation.
 
 **Dossier :** `C:\Users\Guillaume\Desktop\my-video-IMCP` (projet **Remotion** — vidéos en React/TypeScript).
 **Propriétaire :** Guillaume, **non-développeur** — tout passe par l'IA, explications simples exigées.
-**Objet :** production vidéo pour le **Dr Fabrice BAUDOT / IMCP** (Institut Microchirurgie Parodontale) : promo de formation, habillage de cas cliniques, versions courtes réseaux, hero web.
+**Objet :** production vidéo pour le **Dr Fabrice CHARTE / IMCP** (Institut Microchirurgie Parodontale) : promo de formation, habillage de cas cliniques, versions courtes réseaux, hero web.
 
 ## 2. RÈGLE ACTIVE LA PLUS IMPORTANTE
 
@@ -60,7 +60,7 @@ HyperFrames avant toute implémentation.
 | **`HighlightsVestibulaire`** | **1 min commentée** (sous-titres + CTA) | 67,5 s ·30fps | **ACTIVE** |
 | **`HighlightsSerdat`** | **1 min** | ~57 s ·30fps | **ACTIVE** |
 
-## 4. Charte graphique (source de vérité : `src/theme/baudot.ts`)
+## 4. Charte graphique (source de vérité : `src/theme/client-01.ts`)
 
 **Palette IMCP (imposée par le client, remplace l'ancien champagne) :**
 | Token | Hex | Usage |
@@ -79,13 +79,13 @@ HyperFrames avant toute implémentation.
 - Existent aussi : Inter, Plus Jakarta Sans, Playfair Display, JetBrains Mono, Space Grotesk (promo/hero)
 
 **Marque :** logo `public/logo-mark.png` (wordmark IMCP cyan détouré) ; sting animé `public/intro-imcp.mp4` (source 14 s, logo résolu à 8,5 s → toujours trimmer).
-**Nom du praticien : TOUJOURS EN MAJUSCULES** → « DR FABRICE BAUDOT » (lower-third, générique).
+**Nom du praticien : TOUJOURS EN MAJUSCULES** → « DR FABRICE CHARTE » (lower-third, générique).
 
 ## 5. Templates réutilisables (architecture)
 
 ```
-src/theme/baudot.ts            ← tokens DA (SEUL endroit à éditer pour re-brander)
-src/clinical/BaudotChrome.tsx  ← carton-titre, lower-third, watermark, générique
+src/theme/client-01.ts            ← tokens DA (SEUL endroit à éditer pour re-brander)
+src/clinical/ClientChrome.tsx  ← carton-titre, lower-third, watermark, générique
 src/clinical/HighlightExtras.tsx ← sous-titres narratifs (fond TRANSPARENT + text-shadow) + carton CTA
 src/clinical/ClinicalWrap.tsx  ← template LONG : sting → carton → contenu intégral → générique
 src/clinical/ClinicalHighlights.tsx ← template 1 MIN : sting → carton → segments cutés → CTA → générique

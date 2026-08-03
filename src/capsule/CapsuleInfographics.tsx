@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
-import { BAUDOT } from "../theme/baudot";
-import { Watermark } from "../clinical/BaudotChrome";
+import { CHARTE } from "../theme/client-01";
+import { Watermark } from "../clinical/ClientChrome";
 
 /**
  * Infographies animées de la capsule : visuels « qui vendent », générés par
@@ -8,7 +8,7 @@ import { Watermark } from "../clinical/BaudotChrome";
  * carte site web. Plein cadre, la voix du praticien continue dessous.
  */
 
-const C = BAUDOT.color;
+const C = CHARTE.color;
 
 const inOut = (f: number, frames: number) =>
   Math.min(
@@ -26,7 +26,7 @@ export const BigStat: React.FC<{ value: string; label: string; frames: number }>
   const R = 320;
   const circ = 2 * Math.PI * R;
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
       <svg width={760} height={760} viewBox="0 0 760 760" style={{ position: "absolute" }}>
         <circle cx={380} cy={380} r={R} fill="none" stroke={`${C.champagne}33`} strokeWidth={3} />
         <circle
@@ -35,10 +35,10 @@ export const BigStat: React.FC<{ value: string; label: string; frames: number }>
         />
       </svg>
       <div style={{ textAlign: "center", transform: `scale(${punch})` }}>
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 340, fontWeight: 700, color: C.ivory, lineHeight: 1 }}>{value}</div>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 340, fontWeight: 700, color: C.ivory, lineHeight: 1 }}>{value}</div>
       </div>
       <div style={{ position: "absolute", top: "68%", width: "100%", textAlign: "center", opacity: labelOp }}>
-        <div style={{ fontFamily: BAUDOT.font.body, fontSize: 40, fontWeight: 700, color: C.champagne, textTransform: "uppercase", letterSpacing: "0.14em" }}>{label}</div>
+        <div style={{ fontFamily: CHARTE.font.body, fontSize: 40, fontWeight: 700, color: C.champagne, textTransform: "uppercase", letterSpacing: "0.14em" }}>{label}</div>
       </div>
       <Watermark />
     </AbsoluteFill>
@@ -69,9 +69,9 @@ export const ProgressChart: React.FC<{ title: string; caption: string; frames: n
   const gridOp = interpolate(f, [0, 14], [0, 1], { extrapolateRight: "clamp" });
   const labelsOp = interpolate(f, [60, 78], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "absolute", top: "13%", width: "100%", textAlign: "center" }}>
-        <div style={{ fontFamily: BAUDOT.font.body, fontSize: 30, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, color: C.champagne }}>{title}</div>
+        <div style={{ fontFamily: CHARTE.font.body, fontSize: 30, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 700, color: C.champagne }}>{title}</div>
       </div>
       <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
         {/* grille */}
@@ -94,7 +94,7 @@ export const ProgressChart: React.FC<{ title: string; caption: string; frames: n
         ))}
       </svg>
       <div style={{ position: "absolute", bottom: "16%", width: "100%", textAlign: "center", opacity: labelsOp }}>
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 52, fontWeight: 700, color: C.ivory }}>{caption}</div>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 52, fontWeight: 700, color: C.ivory }}>{caption}</div>
       </div>
       <Watermark />
     </AbsoluteFill>
@@ -111,7 +111,7 @@ export const SiteCard: React.FC<{ url: string; title: string; subtitle: string; 
   const btnPulse = 1 + 0.04 * Math.sin(f / 9);
   const btnOp = interpolate(f, [56, 70], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
       <div style={{ width: "86%", transform: `translateY(${rise}px)` }}>
         {/* fenêtre navigateur */}
         <div style={{ borderRadius: 22, overflow: "hidden", boxShadow: "0 40px 100px rgba(0,0,0,0.65)", border: `1.5px solid ${C.champagne}44` }}>
@@ -119,15 +119,15 @@ export const SiteCard: React.FC<{ url: string; title: string; subtitle: string; 
             {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
               <div key={c} style={{ width: 16, height: 16, borderRadius: 8, background: c }} />
             ))}
-            <div style={{ flex: 1, marginLeft: 14, background: "#060D18", borderRadius: 12, padding: "14px 22px", fontFamily: BAUDOT.font.body, fontSize: 30, fontWeight: 600, color: C.ivory }}>
+            <div style={{ flex: 1, marginLeft: 14, background: "#060D18", borderRadius: 12, padding: "14px 22px", fontFamily: CHARTE.font.body, fontSize: 30, fontWeight: 600, color: C.ivory }}>
               {url.slice(0, typed)}
               {caret && <span style={{ color: C.champagne }}>|</span>}
             </div>
           </div>
           <div style={{ background: "#0A1A2F", padding: "56px 40px 60px", textAlign: "center" }}>
-            <div style={{ fontFamily: BAUDOT.font.display, fontSize: 58, fontWeight: 700, color: C.ivory, lineHeight: 1.15 }}>{title}</div>
-            <div style={{ fontFamily: BAUDOT.font.body, marginTop: 18, fontSize: 28, fontWeight: 500, color: C.slate }}>{subtitle}</div>
-            <div style={{ marginTop: 40, opacity: btnOp, transform: `scale(${btnPulse})`, display: "inline-block", background: C.champagne, color: "#06131C", fontFamily: BAUDOT.font.body, fontSize: 30, fontWeight: 800, padding: "20px 52px", borderRadius: 999 }}>
+            <div style={{ fontFamily: CHARTE.font.display, fontSize: 58, fontWeight: 700, color: C.ivory, lineHeight: 1.15 }}>{title}</div>
+            <div style={{ fontFamily: CHARTE.font.body, marginTop: 18, fontSize: 28, fontWeight: 500, color: C.slate }}>{subtitle}</div>
+            <div style={{ marginTop: 40, opacity: btnOp, transform: `scale(${btnPulse})`, display: "inline-block", background: C.champagne, color: "#06131C", fontFamily: CHARTE.font.body, fontSize: 30, fontWeight: 800, padding: "20px 52px", borderRadius: 999 }}>
               Découvrir les TP →
             </div>
           </div>

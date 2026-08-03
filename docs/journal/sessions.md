@@ -3,6 +3,213 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-08-02 (fin) — La génération depuis un prompt devient une doctrine
+
+Demande de Guillaume : que ce type de vidéo soit implémenté dans les skills
+d'Hermes — générer depuis un prompt, via HyperFrames, avec la fiabilité que la
+doctrine garantit pour les montages. Écrit en `decisions/017`.
+
+**Le constat de départ, inconfortable :** la vidéo FBE est partie sans le
+moindre garde-fou. `portail-doctrine.mjs` juge des spans et une couverture de
+sous-titres issus d'une transcription — sans rush, rien à juger. Et
+`guard-portail.mjs`, corrigé la veille, laisse passer tout rendu sans
+`plan.json`. Réutiliser le portail existant était impossible : il fallait un
+second portail.
+
+**Livré :** contrat `capsule.json`, socle `_socle/capsule.template.html`,
+builder `capsule-build.mjs` (8 blocs, balisage restreint `**mot**`, charte lue
+dans `src/theme/`), portail `portail-capsule.mjs`, skill `capsule-prompt`,
+`guard-portail` étendu aux deux contrats, `capsule:check` dans `npm run check`.
+
+**Ce que le portail a immédiatement trouvé, sur sa première utilisation :**
+la piste `Clinical_Grace.mp3` est rejetée faute de licence, et les durées de la
+v2 livrée (123 s) mettent les scènes 1, 3 et 9 entre 3,6 et 4,2 mots/s —
+**la v2 était trop dense à lire.** Corrigé en coupant du texte plutôt qu'en
+allongeant : 126 s, une seule scène encore signalée.
+
+**Bug corrigé :** `capsule-build` et `portail-capsule` résolvaient `src/theme/`
+et le socle relativement au dossier de travail. Hermes lance ses commandes
+depuis le dossier de la vidéo — les deux échouaient. Racine déduite de
+l'emplacement du script.
+
+**Vérifications :** chaîne complète testée depuis le dossier de la vidéo
+(portail 3 → rendu bloqué 2 ; avec licence, portail 0 → reçu écrit) ;
+`hyperframes check` sur la composition générée à 0 erreur et 50/50 contrastes ;
+les 6 garde-fous du dépôt verts.
+
+## 2026-08-02 (suite) — Lit musical ajouté, et un trou dans la politique audio
+
+Guillaume fournit `Clinical_Grace.mp3` et demande de l'ajouter à la vidéo FBE.
+
+### Le fichier
+
+145,2 s · 192 kbps · 3,5 Mo · SHA256 `14c701a5…7302da`.
+**Aucune métadonnée** — ni artiste, ni titre, ni source. Nom d'origine conservé
+dans le projet : renommer masque la provenance, et c'est exactement ce qui a
+laissé passer le Saint-Preux (decision 014).
+
+**Licence non fournie à ce jour.** La règle du dépôt est explicite : « toute
+piste autre que le défaut exige une preuve de licence ». Le fichier est intégré
+au rendu local mais **reste hors dépôt**.
+
+### La faille trouvée
+
+La politique fail-closed du `.gitignore` ne couvrait que `musique/`,
+`public/music/*` et `public/**/*.mp3`. La section médias de
+`imcp-hyperframes/` ignore `.mp4`, `.mov` et `.wav` — **mais pas `.mp3`**.
+Vérifié : `git check-ignore` laissait passer
+`imcp-hyperframes/videos/fbe-presentation/Clinical_Grace.mp3`.
+
+C'est la même classe de faille que le renommage Saint-Preux : un filtre qui a
+un trou ne protège de rien. Corrigé — tout audio est désormais ignoré où qu'il
+soit (`*.mp3 *.m4a *.aac *.flac *.ogg *.opus *.wav *.aiff`), la whitelist des
+5 productions libres de droits vérifiée intacte, et aucun fichier déjà suivi
+n'a été éjecté.
+
+### Le montage audio
+
+`<audio>` séparé, `data-volume 0.68`, fondu d'ouverture 2,5 s et sortie 5 s
+animés sur la timeline (`volume`), pas via `data-volume` — le runtime sonde ces
+keyframes et les applique à l'identique en preview et au rendu.
+
+**Vérifié sur le MP4 final**, pas sur le code : flux AAC 48 kHz stéréo, 123 s.
+Profil mesuré à `volumedetect` — 0-1 s : −29,4 dB · 4-6 s : −22,4 dB ·
+61-63 s : −19,6 dB · 116-117 s : −15,3 dB · **122-123 s : −52,3 dB**. Les deux
+fondus sont dans le fichier.
+
+### À trancher par Guillaume
+
+1. **Licence de `Clinical_Grace.mp3`** — sans preuve, la piste ne peut pas
+   partir chez un praticien ni être poussée sur GitHub.
+2. **La charte utilisée est celle du Dr Baudot** (cyan `#49B6C9` « imposé par le
+   client ») sur une vidéo destinée au **Dr Robert Fromental**. `check-charte`
+   est vert, mais c'est un problème de fond, pas de code.
+
+## 2026-08-02 — Vidéo FBE générée en session (HyperFrames, sans rush)
+
+Demande de Guillaume : générer la vidéo de présentation du FBE dans la session,
+100 % IA, via HyperFrames. Périmètre du palier 1 explicitement outrepassé par
+lui après que la contrainte a été signalée — c'est sa décision.
+
+**Livré :** `imcp-hyperframes/videos/fbe-presentation/` — 10 scènes, 3 min 02,
+1920×1080, 30 fps, 5 460 frames, 6,3 Mo, rendu en 2 min 26. Composition de
+287 lignes (plafond 700).
+
+**Nature réelle du livrable — à ne pas surestimer.** Ce n'est pas la vidéo du
+storyboard : c'est du **motion design typographique muet**. Il manque la voix
+off (workspace Higgsfield à court de crédits, et Guillaume a dit qu'elle
+n'était pas obligatoire) et toutes les 3D des scènes 2, 3, 6, 7 et 9
+(module images IA, decision 011, palier 2-3, non construit). Le texte du
+storyboard a été condensé pour être lisible à l'écran, pas récité.
+
+**Doctrine appliquée :** RÈGLE 2 (typographie plutôt qu'images brutes — c'est
+le point fort ici), RÈGLE 3 (16:9, cible YouTube/site), RÈGLE 4bis (charte
+depuis `src/theme/client-01.ts`). La RÈGLE 0 est satisfaite par construction :
+sans rush, il n'y a pas de voix à hacher.
+
+**Vérifications :** `hyperframes check` → 0 erreur, 48/48 contrôles de contraste
+WCAG AA (un `#foot` à 3,38:1 corrigé en couleur `slate` pleine). `check-sizes`,
+`check-charte`, `fonts:check`, `socle:check` → verts. Frames extraites du MP4
+final et inspectées, pas seulement les snapshots.
+
+**Preuve pour la decision 016 :** le rendu affiche « Fonts: 4 loaded » et les
+frames du MP4 montrent Cormorant, Manrope et JetBrains Mono correctement
+appliquées. C'est la vérification visuelle que l'extraction des polices exigeait.
+
+### Bug corrigé : le verrou du portail bloquait tout
+
+`guard-portail.mjs`, écrit la veille, refusait TOUT rendu sans `plan.json` — il
+aurait bloqué les 13 compositions livrées, écrites à la main. Périmètre corrigé :
+**s'il existe un `plan.json`, il doit être validé ; sinon le rendu passe.** Le
+portail valide un plan de montage dérivé d'un rush ; une composition sans rush
+n'a rien à valider. Retesté : composition sans plan → 0, montage avec plan non
+validé → 2.
+
+### Reste ouvert
+
+- Avertissement `timeline_track_too_dense` (10 éléments sur la piste 2) laissé
+  tel quel. HyperFrames recommande des sous-compositions ; c'est aussi le remède
+  de `check-sizes`. À faire si la composition grossit.
+- Le workspace Higgsfield est à court de crédits — aucune voix off générable.
+
+## 2026-08-01 — Coût par vidéo : sortir la plomberie, garder le raisonnement
+
+Question de Guillaume : réduire largement le coût par vidéo **sans atténuer la
+qualité de la réflexion ni celle du montage**. Décision écrite en
+`decisions/016-cout-par-video.md`, feuille de route en `docs/COUT-PAR-VIDEO.md`.
+
+### Le diagnostic
+
+Décomposition du relevé du 30/07 (6,91 $) : écriture cache 3,72 $ (54 %),
+relecture 1,85 $ (27 %), sortie 1,34 $ (19 %). Soit 7 à 10 M de jetons,
+~120 000 jetons de contexte par appel. **Le coût n'est pas ce que le modèle
+écrit, c'est ce qui s'accumule et se refait relire.**
+
+Le plus gros contributeur mesuré : **144 580 des 168 232 octets de chaque
+composition étaient de la police en base64** (86 %). Une lecture du fichier
+injectait ~42 000 jetons, relus à chaque appel suivant — ~0,88 $ par passage.
+
+Corollaire inconfortable : `proactive_prune_tokens: 120000` et la compression à
+0,4, posés le 31/07, **supprimaient du raisonnement pour faire de la place à du
+base64**. La plomberie ne coûtait pas que de l'argent, elle mangeait la réflexion.
+
+### Ce qui a été fait
+
+- **Polices sorties du HTML** (`scripts/fonts-extract.mjs`, idempotent).
+  14 fichiers, **2 020 438 octets retirés**, −81 % à −93 % par fichier.
+- **`socle-assets.mjs` gère les dossiers d'assets** et sème ceux que le HTML
+  référence, au lieu d'attendre qu'ils existent.
+- **Portail transformé en verrou** (`scripts/guard-portail.mjs`, hook
+  `PreToolUse`). Reçu empreinté SHA-256 ; aucun rendu sans reçu couvrant cette
+  version du plan.
+- **`guard-render.mjs` réparé.** Il ne sondait que via `powershell.exe` : sur le
+  VPS Linux, le `catch` renvoyait `[]` et le garde-fou « jamais deux rendus en
+  parallèle » **ne protégeait rien là où la production tourne**. Sonde `ps` hors
+  Windows.
+
+### Sur le renversement du choix du 31/07
+
+Le base64 avait été choisi la veille, délibérément, pour deux raisons écrites :
+« un HTML mono-fichier » et « aucun chemin relatif à casser entre local et VPS ».
+Ce choix a été renversé **en gardant l'auto-hébergement**, qui était le fond de
+la décision : aucun accès réseau, aucune police système. Seul le transport change.
+
+La contrepartie a été payée. Le base64 achetait l'immunité au défaut invisible
+du 31/07 — police absente, fallback sans-serif, aucune erreur. En reprenant ces
+142 Ko, `npm run fonts:check` **bloque désormais** si une référence `./fonts/`
+ne résout pas. Le défaut est devenu bruyant. Vérifié en cassant volontairement
+une référence : exit 0 → 2 → 0 après `socle:sync`.
+
+Argument qui a levé le doute sur les chemins relatifs : `source.mp4`,
+`logo-mark.png`, `intro-imcp.mp4` sont **déjà** référencés en relatif par les
+compositions qui rendent sur le VPS. Le renderer les résout ; le seul risque
+réel était d'oublier la copie, et c'est précisément ce que `socle:sync` gère.
+
+### Vérifications
+
+- Round-trip **bit-pour-bit contre `HEAD`** : 4/4 polices identiques. Les octets
+  que Chromium reçoit n'ont pas changé, seul leur transport.
+- Signatures `wOF2` sur les 4 fichiers ; 0 référence cassée sur 13 compositions.
+- `teasers:check` → **0 dérive** : le socle regénère toujours l'octet exact.
+- `check-sizes`, `check-charte`, `socle:check`, `fonts:check` → verts.
+- Chaîne du verrou testée : plan valide → portail 0 → rendu autorisé ;
+  plan fautif → portail 3 (RÈGLE 0) → rendu bloqué 2.
+
+**Non vérifié, et ça reste à faire par Guillaume :** un `npx hyperframes render`
+suivi d'un **contrôle visuel du `.mp4`**. La doctrine l'exige et aucune de mes
+vérifications ne le remplace.
+
+### À trancher
+
+`Proposition_Studio_Contenu_IA_Medstream.pdf` §7 affirme que « quatre cinquièmes
+de la facture tiennent au transcript ». `imcp3181.srt` fait 1 573 octets — c'est
+faux, et la promesse commerciale qui en découle (« un rush deux fois plus long
+coûte deux fois plus cher ») ne tient pas. À corriger avant envoi au praticien.
+
+Prochaine étape : redéployer `AGENTS-vps.md` sur le VPS, puis l'étape 2
+(builder `plan.json → index.html`) — qui demande une décision de design sur le
+livrable, à prendre avec Guillaume sur un rendu de référence.
+
 ## 2026-07-31 (suite) — Les polices n'ont JAMAIS été chargées par HyperFrames
 
 Question de Guillaume : pourquoi le design, les polices, la charte ne se
@@ -14,7 +221,7 @@ projet local depuis le début.**
 
 ### Le diagnostic, fichier par fichier
 
-1. `src/theme/baudot.ts` est bien la source de vérité : cyan `#49B6C9`, fond
+1. `src/theme/client-01.ts` est bien la source de vérité : cyan `#49B6C9`, fond
    navy `#060D18`, display **Cormorant**, corps **Manrope**.
 2. **Remotion (`src/`) charge vraiment ces polices** — `src/index.css` contient
    un `@import` Google Fonts. D'où des montages locaux conformes : le PC a
@@ -300,10 +507,10 @@ explicitement). Non testé faute de rush sous la main.
 | 1 | `apt install unzip` | Manquait ; bloquait le téléchargement de chrome-headless-shell par HyperFrames | `unzip -v` → UnZip 6.00 |
 | 2 | Node déplacé `/root/.hermes/node/` → `/opt/node/` | `/root` est en `700` : aucun compte non-root ne pouvait exécuter `node`. Symlinks `/usr/local/bin/{node,npm,npx}` repointés | `su - guillaume -c 'node -v'` → v22.23.2 |
 | 3 | Swap 4 Go créé | `/swapfile`, ajouté à `/etc/fstab` (persiste au reboot) | `free -h` → Swap 4.0Gi |
-| 4 | Projet doctrine transféré | `/home/guillaume/imcp/` : `praticiens/baudot.json`, `scripts/portail-doctrine.mjs`, `imcp-hyperframes/_socle/` | `find` → 5 fichiers |
+| 4 | Projet doctrine transféré | `/home/guillaume/imcp/` : `praticiens/client-01.json`, `scripts/portail-doctrine.mjs`, `imcp-hyperframes/_socle/` | `find` → 5 fichiers |
 | 5 | Skill installée | `/home/guillaume/.hermes/skills/video/montage-imcp/SKILL.md` | `hermes skills list` → `montage-imcp \| video \| local \| enabled` |
 | 6 | `AGENTS.md` déployé | En `/home/guillaume/.hermes/` (cwd du gateway, lu à chaque conversation) ET `/home/guillaume/imcp/`. Source versionnée : `Déploiement Hermes IA/AGENTS-vps.md` | fichiers présents, 3364 o |
-| 7 | Wrapper `portail-doctrine` | `/usr/local/bin/portail-doctrine` — le portail lit `praticiens/<nom>.json` en RELATIF, donc cassé hors racine projet. Le wrapper fixe le `cd`. Source : `Déploiement Hermes IA/portail-doctrine-wrapper.sh` | testé depuis `/tmp` |
+| 7 | Wrapper `portail-doctrine` | `/usr/local/bin/portail-doctrine` — le portail lit `praticiens/<client>.json` en RELATIF, donc cassé hors racine projet. Le wrapper fixe le `cd`. Source : `Déploiement Hermes IA/portail-doctrine-wrapper.sh` | testé depuis `/tmp` |
 
 ### Preuve que le portail fonctionne sur le VPS
 

@@ -10,7 +10,7 @@ import {
   Easing,
 } from "remotion";
 import { z } from "zod";
-import { TitleCard, LowerThird, Watermark, EndCredits } from "./BaudotChrome";
+import { TitleCard, LowerThird, Watermark, EndCredits } from "./ClientChrome";
 import { CaptionTrack, CtaCard } from "./HighlightExtras";
 
 /**

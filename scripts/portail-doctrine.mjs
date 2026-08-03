@@ -19,10 +19,11 @@
 // c'est un verdict. Le code distingue les deux.
 import { readFileSync } from "node:fs";
 import { argv, exit } from "node:process";
+import { ecrireRecu } from "./guard-portail.mjs";
 
 const args = argv.slice(2).filter((a) => !a.startsWith("--"));
 const iPraticien = argv.indexOf("--praticien");
-const praticienNom = iPraticien > -1 ? argv[iPraticien + 1] : "baudot";
+const praticienNom = iPraticien > -1 ? argv[iPraticien + 1] : "client-01";
 
 if (args.length === 0) {
   console.error("Usage : node scripts/portail-doctrine.mjs <plan.json> [cues.json]");
@@ -116,8 +117,19 @@ const rejets = violations.filter((v) => v.gravite === "rejet");
 console.log(`Portail doctrine — ${praticien.praticien}`);
 console.log(`  seuils : infographie ≤ ${seuils.dureeInfographieMaxSec}s, coupures ≤ ${seuils.coupuresVoixMax}, fondu ≥ ${seuils.crossfadeMinSec}s\n`);
 
+/**
+ * Un plan qui passe laisse un recu a cote de lui. guard-portail.mjs le lit
+ * avant tout rendu : sans recu couvrant CETTE version du plan, le rendu est
+ * refuse. C'est ce qui transforme la REGLE 5 en verrou plutot qu'en consigne.
+ */
+const valide = () => {
+  const recu = ecrireRecu(args[0]);
+  console.log(`   recu ecrit — empreinte ${recu.empreinte.slice(0, 12)}…`);
+};
+
 if (violations.length === 0) {
   console.log("✅ Aucune violation. Passe au portail ② (juge), puis au Dr Baudot.");
+  valide();
   exit(0);
 }
 for (const v of violations) {
@@ -128,4 +140,5 @@ if (rejets.length > 0) {
   exit(3);
 }
 console.log("\n✅ Passe malgre les avertissements ci-dessus.");
+valide();
 exit(0);

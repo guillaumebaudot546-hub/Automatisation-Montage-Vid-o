@@ -18,11 +18,11 @@ Gabarit d'habillage réutilisable pour **toute** vidéo du Dr Baudot
 | **Musique** | Saint-Preux *Concerto Pour Une Voix* : fondus propres, discrète sous le geste, **duckée** si la source a du son |
 | **SFX** | Riser cinématique vers le carton, swooshs aux cuts |
 
-## DA (source de vérité : `IMCP/DESIGN.md` → `src/theme/baudot.ts`)
+## DA (source de vérité : `IMCP/DESIGN.md` → `src/theme/client-01.ts`)
 
 - **Couleurs** : navy `#0A1A2F/#0E2238/#16314B` · ivoire `#F4EFE6` · crème `#E7E0D3` · slate `#A9B6C4` · **champagne `#C6A668` (accent unique)**
 - **Typo** : Cormorant (display) · Manrope (corps)
-- Changer la DA = éditer `src/theme/baudot.ts` uniquement.
+- Changer la DA = éditer `src/theme/client-01.ts` uniquement.
 
 ## Ajouter une nouvelle vidéo (5 minutes)
 
@@ -55,8 +55,8 @@ Gabarit d'habillage réutilisable pour **toute** vidéo du Dr Baudot
 ## Fichiers du template
 
 - `src/clinical/ClinicalWrap.tsx` — assemblage (structure, timings, mix)
-- `src/clinical/BaudotChrome.tsx` — carton-titre, lower-third, watermark, générique
-- `src/theme/baudot.ts` — tokens DA (couleurs, typo)
+- `src/clinical/ClientChrome.tsx` — carton-titre, lower-third, watermark, générique
+- `src/theme/client-01.ts` — tokens DA (couleurs, typo)
 - `public/music/concerto.mp3` — musique de fond
 - `public/intro-imcp.mp4`, `public/logo-mark.png` — marque
 

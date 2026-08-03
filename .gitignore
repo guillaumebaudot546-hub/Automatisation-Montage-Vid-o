@@ -3,6 +3,11 @@ dist
 .DS_Store
 .env
 
+# Reçu de validation du portail doctrine : état local d'un montage en cours,
+# lié à une empreinte de plan.json. Aucun intérêt à le versionner, et le
+# versionner ferait croire à une validation qui n'a pas eu lieu ici.
+.portail-ok.json
+
 # Ignore the output video from Git but not videos you import into src/.
 out
 
@@ -56,6 +61,20 @@ Higgsfield/
 musique/
 public/music/*
 public/**/*.mp3
+
+# Extension du 02/08/2026 — la règle ne couvrait que public/ et musique/.
+# Un .mp3 déposé dans imcp-hyperframes/ passait au travers : la section
+# médias y ignore .mp4, .mov et .wav, mais PAS .mp3. Même classe de faille
+# que le renommage Saint-Preux — un filtre qui a un trou ne protège de rien.
+# Désormais TOUT audio est ignoré, où qu'il soit dans le dépôt.
+*.mp3
+*.m4a
+*.aac
+*.flac
+*.ogg
+*.opus
+*.wav
+*.aiff
 
 # Whitelist — productions propres au projet, libres de droits :
 !public/music/ambient-bed.wav          # synthétisé par scripts/make_music.py

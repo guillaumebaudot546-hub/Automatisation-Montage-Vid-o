@@ -101,7 +101,7 @@ range for speech. Crisp high-fidelity production.
 2. Le praticien choisit, ou demande un autre thème.
 3. L'IA génère avec le prompt correspondant, durée = vidéo + 18 s.
 4. Le lit est posté à ~0,04–0,05 de volume (fondus auto), sous la voix.
-5. Le choix nourrit ses préférences (`praticiens/<nom>.json`) — au fil du temps,
+5. Le choix nourrit ses préférences (`praticiens/<client>.json`) — au fil du temps,
    son thème favori devient le défaut.
 
 ## 6. Droits
