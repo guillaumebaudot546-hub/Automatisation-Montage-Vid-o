@@ -3,6 +3,49 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-08-03 (suite) — Le premier test Telegram échoue : la skill était invisible
+
+Guillaume teste depuis Telegram. Hermes répond « sans voix off, il faut quand
+même une source visuelle réelle » et part chercher du B-roll en `*.mp4`.
+**Il raisonne en `montage-imcp`.** L'aiguillage n'a pas déclenché.
+
+### La cause, trouvée dans agent.log
+
+Une ligne du 31/07 :
+
+> `Description is 192 chars — new skills must fit the 60-char system-prompt`
+> `budget (one sentence, trigger first, ends with a period). The skill index`
+> `truncates longer descriptions`
+
+**Hermes plafonne les descriptions de skill à 60 caractères.** La mienne en
+faisait **298**. L'index que voit le routeur la tronquait : le déclencheur
+« depuis un prompt, sans rush » n'y figurait pas. La skill était installée et
+inatteignable.
+
+`ffmpeg-image-slideshow`, créée par le curateur le 31/07, fait exactement
+60 caractères — après deux rejets pour la même raison. Le garde-fou existait,
+je ne l'avais pas lu.
+
+Corrigé : `Vidéo depuis un texte ou un prompt, sans rush ni caméra.` (56 car.).
+La doctrine détaillée remonte dans le corps du fichier, où elle ne coûte rien.
+
+### Seconde cause, à ne pas confondre
+
+Le test tournait dans `session=20260730_203305_a54410a5` — une session ouverte
+le **30/07**, 196+ messages, dont tout le cadrage « montage du laser Er-YAG pour
+le Dr Baudot ». Même avec une description correcte, un fil aussi chargé ramène
+l'agent vers ce qu'il faisait déjà. La règle est écrite dans CLAUDE.md :
+**une session, un objectif.**
+
+### Reste ouvert
+
+- `montage-imcp` a une description de 350 caractères, également tronquée. Elle
+  fonctionne parce que sa troncature commence par « Doctrine de montage vidéo »,
+  ce qui capte toutes les demandes vidéo — y compris celles qui ne sont pas des
+  montages. À raccourcir, mais c'est une skill utilisateur : décision de
+  Guillaume, pas correction unilatérale.
+- Le test bout-en-bout reste à refaire dans une session neuve.
+
 ## 2026-08-03 — Déploiement sur le VPS
 
 Hermes sait désormais générer une capsule depuis un prompt. Déployé sur

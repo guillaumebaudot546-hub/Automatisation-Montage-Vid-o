@@ -1,11 +1,16 @@
 ---
 name: capsule-prompt
-description: Générer une capsule vidéo HyperFrames à partir d'un PROMPT (sujet, script, notes) — sans rush, sans caméra. À charger AVANT d'écrire quoi que ce soit. Ne s'applique PAS au montage d'un rush : pour ça, charger montage-imcp. Moteur = HyperFrames (decision 014), contrat = capsule.json (decision 017).
+description: Vidéo depuis un texte ou un prompt, sans rush ni caméra.
 metadata:
   tags: capsule, prompt, hyperframes, motion-design, sans-rush, IMCP
 ---
 
 # Capsule depuis un prompt
+
+> **Quand cette skill s'applique.** Le praticien envoie un **sujet, un script
+> ou des notes** — aucune vidéo, aucun rush, aucune caméra. Le rendu est du
+> motion design typographique : il n'a besoin d'AUCUNE source visuelle.
+> Si tu reçois un rush, ce n'est pas cette skill : charge `montage-imcp`.
 
 > Deux classes de vidéo, deux doctrines. **Ne pas les mélanger.**
 >
@@ -48,7 +53,7 @@ palette** (RÈGLE 4bis de `montage-imcp`). Le portail rejette une charte
 inexistante.
 
 ⚠️ Ne réutilise **jamais** la charte d'un praticien pour un autre. Le cyan
-`#49B6C9` est l'accent IMCP, imposé par le Dr Baudot. Un nouveau praticien =
+`#49B6C9` est l'accent du client-01. Un nouveau praticien =
 un nouveau thème, pas un emprunt.
 
 ## RÈGLE D — aucune piste sans licence
@@ -65,7 +70,7 @@ Conserve le **nom d'origine** du fichier — renommer masque la provenance.
 {
   "type": "capsule-prompt",
   "titre": "…",
-  "charte": "baudot",
+  "charte": "client-01",
   "format": "16:9",
   "reseau": "youtube",
   "pied": "… · Dr …",
