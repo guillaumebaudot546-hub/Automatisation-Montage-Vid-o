@@ -3,6 +3,43 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-08-03 (fin) — Audit des 5 $ : ce n'était pas le HTML
+
+Capsule livrée en 15 min pour ~5 $. Audit complet en
+`docs/AUDIT-2026-08-03-capsule-5usd.md`.
+
+**Mon hypothèse était fausse.** Je cherchais du HTML écrit à la main. Les trois
+écritures de la session font 280, 287 et 279 caractères — du `capsule.json`. Le
+contrat a tenu, la RÈGLE A a été respectée. Tous les retours d'outils cumulés
+font 54 Ko : l'argent n'est pas passé là.
+
+**Les vraies causes**, déduites du log (Hermes ne journalise aucun jeton — c'est
+une attribution raisonnée, pas une mesure comme le 30/07) :
+
+1. **La session n'a jamais été refermée.** Ouverte le 30/07, **246 messages** à
+   l'arrivée de la demande, **349** à la fin, renvoyés à chacun des **120 appels
+   au modèle** pour 6 tours de conversation.
+2. **17 `vision_analyze`.** L'agent regardait son propre rendu, alors que
+   `portail:capsule`, `hyperframes check` et `ffprobe` donnent la même
+   information objectivement et gratuitement.
+3. **Réglages permissifs** : `idle_compact_after_seconds: 0` (un fil dormant
+   depuis 4 jours jamais compacté), curateur de skills toutes les 15 tours qui
+   relit tout l'historique, plafonds de boucle à 50.
+
+**Correctifs** : config VPS (5 réglages, sauvegarde horodatée, YAML revalidé) +
+RÈGLE E dans `capsule-prompt` + section coût dans `AGENTS.md`.
+
+### Régression que j'ai introduite et corrigée
+
+Ma substitution `BAUDOT` → `CHARTE` du renommage visait l'export TypeScript.
+Elle a aussi frappé le **nom du praticien en majuscules** dans trois fichiers,
+dont `AGENTS.md` déjà déployé sur le VPS : « Dr Fabrice CHARTE ». Corrigé en
+restant sur l'anonymisation demandée (`praticien client-01`, `Client 01`), pas
+en restaurant le nom. `npm run check` vert après correction.
+
+C'est exactement le mode de défaillance du `sed` du 30/07 : une substitution
+large sans vérification de ses effets de bord.
+
 ## 2026-08-03 (suite) — Le premier test Telegram échoue : la skill était invisible
 
 Guillaume teste depuis Telegram. Hermes répond « sans voix off, il faut quand

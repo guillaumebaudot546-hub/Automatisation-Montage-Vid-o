@@ -42,7 +42,7 @@ HyperFrames avant toute implémentation.
 
 **Dossier :** `C:\Users\Guillaume\Desktop\my-video-IMCP` (projet **Remotion** — vidéos en React/TypeScript).
 **Propriétaire :** Guillaume, **non-développeur** — tout passe par l'IA, explications simples exigées.
-**Objet :** production vidéo pour le **Dr Fabrice CHARTE / IMCP** (Institut Microchirurgie Parodontale) : promo de formation, habillage de cas cliniques, versions courtes réseaux, hero web.
+**Objet :** production vidéo pour le **praticien client-01 / IMCP** (Institut Microchirurgie Parodontale) : promo de formation, habillage de cas cliniques, versions courtes réseaux, hero web.
 
 ## 2. RÈGLE ACTIVE LA PLUS IMPORTANTE
 
@@ -79,7 +79,7 @@ HyperFrames avant toute implémentation.
 - Existent aussi : Inter, Plus Jakarta Sans, Playfair Display, JetBrains Mono, Space Grotesk (promo/hero)
 
 **Marque :** logo `public/logo-mark.png` (wordmark IMCP cyan détouré) ; sting animé `public/intro-imcp.mp4` (source 14 s, logo résolu à 8,5 s → toujours trimmer).
-**Nom du praticien : TOUJOURS EN MAJUSCULES** → « DR FABRICE CHARTE » (lower-third, générique).
+**Nom du praticien : TOUJOURS EN MAJUSCULES** → « DR <NOM DU PRATICIEN> » (lower-third, générique).
 
 ## 5. Templates réutilisables (architecture)
 

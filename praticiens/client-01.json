@@ -1,5 +1,5 @@
 {
-  "praticien": "Dr Fabrice CHARTE",
+  "praticien": "Client 01",
   "structure": "IMCP — Institut Microchirurgie Parodontale",
   "charte": {
     "source": "src/theme/client-01.ts",

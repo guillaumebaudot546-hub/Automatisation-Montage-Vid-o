@@ -131,11 +131,39 @@ le contrat après validation invalide le reçu.
 Un rejet du portail coûte 0 jeton et 1 seconde. Un rendu fautif coûte plusieurs
 minutes machine et toute la boucle de correction.
 
+## RÈGLE E — le coût vient de la SESSION, pas du fichier
+
+Audit du 03/08/2026, capsule livrée en 15 min pour ~5 $. Le contrat, lui, a bien
+fonctionné : tes écritures faisaient 280 à 1 102 caractères, du `capsule.json`,
+pas du HTML. Le coût était ailleurs, et il faut que tu le saches.
+
+**1. Une capsule = une session neuve.** La demande est arrivée dans un fil
+ouvert le 30/07, à **246 messages**, terminé à **349**. Chacun des **120 appels
+au modèle** a renvoyé tout cet historique. C'est le premier poste, de loin.
+Si le fil dépasse ~40 messages ou change de sujet, **demande à Guillaume
+d'ouvrir une session neuve** avant de commencer. Ne t'exécute pas dans un fil
+chargé.
+
+**2. Ne regarde pas ton propre rendu avec `vision_analyze`.** Il y a eu **17
+analyses d'images** sur cette capsule. Une image coûte des milliers de jetons
+en entrée et reste dans l'historique. La vérification d'une capsule est
+**objective et gratuite** : `portail:capsule` juge la lisibilité et le
+débordement, `hyperframes check` juge le contraste, le layout et le mouvement.
+Une image ne t'apprend rien qu'ils ne disent déjà.
+
+Une seule exception : le praticien signale un défaut visuel que les contrôles
+ne détectent pas. Alors **une** image, pas dix-sept.
+
+**3. Compte tes appels.** Une capsule de 10 scènes tient en une quinzaine
+d'appels d'outils : écrire le contrat, portail, build, check, rendre, livrer.
+Si tu dépasses 25, tu boucles — arrête-toi et remonte à Guillaume.
+
 ## Ce que tu ne mets pas dans ton contexte
 
 - Ne relis **jamais** un `index.html` généré. Il fait 20 Ko ; le contrat en fait 2.
 - Sorties de `ffmpeg`, `ffprobe`, `hyperframes render` → vers un fichier. Tu ne
   lis que le code de sortie, et les 5 dernières lignes en cas d'échec.
+- Ne relis pas non plus les `snapshots/*.png` : ce sont des images.
 
 ## Hors périmètre
 
