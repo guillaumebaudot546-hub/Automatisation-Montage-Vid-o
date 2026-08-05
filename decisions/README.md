@@ -25,3 +25,4 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [017](017-capsule-depuis-prompt.md) | Une capsule depuis un prompt est une AUTRE classe de vidéo — contrat capsule.json | Actif |
 | [018](018-mesurer-les-jetons.md) | On mesure les jetons (state.db + scripts/couts.py), on ne les déduit plus | Actif |
 | [019](019-verrou-de-budget.md) | Le budget devient un verrou (hook pre_tool_call), pas une consigne | Actif |
+| [020](020-le-fichier-teste-est-celui-qui-tourne.md) | Un garde-fou non testé n'est pas un garde-fou — source unique, 6 garde-fous couverts | Actif |
