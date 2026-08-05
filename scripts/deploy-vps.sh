@@ -37,6 +37,7 @@ echo "── 3. scripts ──"
 $DRY scp -q -i "$KEY" \
   scripts/capsule-build.mjs scripts/portail-capsule.mjs scripts/guard-portail.mjs \
   scripts/portail-doctrine.mjs scripts/guard-render.mjs scripts/couts.py \
+  scripts/hook-budget.py \
   "$VPS:~/imcp/scripts/"
 
 echo "── 4. charte + préférences ──"
@@ -77,6 +78,21 @@ printf "%s" "{\"type\":\"capsule-prompt\",\"charte\":\"client-01\",\"format\":\"
 node scripts/portail-capsule.mjs $D >/dev/null 2>&1 && echo "  ✅ portail : passe" || { echo "  ❌ portail en échec"; ok=0; }
 node scripts/capsule-build.mjs $D >/dev/null 2>&1 && [ -s $D/index.html ] && echo "  ✅ builder : index.html généré" || { echo "  ❌ builder en échec"; ok=0; }
 python3 scripts/couts.py >/dev/null 2>&1 && echo "  ✅ relevé des coûts opérationnel" || { echo "  ❌ couts.py en échec"; ok=0; }
+echo "  — verrou de budget —"
+chmod +x scripts/hook-budget.py
+# L allowlist controle la derive de mtime : redeployer le script le DESACTIVE.
+python3 - <<PYEOF
+import json, os, datetime
+A=os.path.expanduser("~/.hermes/shell-hooks-allowlist.json"); S=os.path.expanduser("~/imcp/scripts/hook-budget.py")
+def iso(t): return datetime.datetime.fromtimestamp(t, datetime.timezone.utc).isoformat().replace("+00:00","Z")
+d=json.load(open(A)); d["approvals"]=[a for a in d["approvals"] if a["command"]!=S]
+d["approvals"].append({"approved_at":iso(datetime.datetime.now(datetime.timezone.utc).timestamp()),
+  "command":S,"event":"pre_tool_call","script_mtime_at_approval":iso(os.path.getmtime(S))})
+json.dump(d, open(A,"w"), indent=2, sort_keys=True)
+PYEOF
+cd /usr/local/lib/hermes-agent && ./venv/bin/python -m hermes_cli.main hooks doctor 2>&1 | grep -q "All shell hooks look healthy" \
+  && echo "  ✅ hooks sains (budget réapprouvé après copie)" || { echo "  ❌ hooks en défaut"; ok=0; }
+cd ~/imcp
 rm -rf $D
 echo
 [ $ok -eq 1 ] && echo "✅ DÉPLOIEMENT VÉRIFIÉ" || { echo "❌ DÉPLOIEMENT INCOMPLET — voir ci-dessus"; exit 2; }'

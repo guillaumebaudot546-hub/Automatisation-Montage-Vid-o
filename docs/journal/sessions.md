@@ -3,6 +3,62 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-08-05 — Le budget devient un verrou
+
+Guillaume : « un tel tarif n'est pas acceptable, à corriger ». Écrit en
+`decisions/019`.
+
+**Le constat qui gouverne.** La réponse du 03/08 avait été d'écrire « une vidéo
+= une session neuve » dans `AGENTS.md` et dans la skill. C'était refaire le
+pari de « RENDRE SANS PORTAIL EST INTERDIT » — consigne en majuscules, ignorée
+trois fois de suite le 30/07. Le projet a déjà tranché : une règle qui dépend
+de la bonne volonté de l'agent n'est pas un garde-fou.
+
+### Livré
+
+`scripts/hook-budget.py`, branché en `pre_tool_call` **sans matcher** (donc sur
+tous les outils, pas seulement le terminal) et **avant** `portail.py` — inutile
+de valider un plan dans une session qu'on va arrêter.
+
+| Seuil | Défaut | Intention |
+|---|---|---|
+| `IMCP_CONTEXTE_MAX` | 60 000 jetons/appel | Préventif : au-delà, chaque appel coûte trop cher avant de commencer |
+| `IMCP_BUDGET_USD` | 2,00 $ | Curatif : filet contre une boucle |
+
+Budget calculé au **tarif standard**, pas au tarif d'introduction : régler un
+verrou sur un prix qui augmente de 50 % le 31/08 serait le régler faux.
+
+Bloquer un outil n'empêche pas l'agent de parler : il garde la possibilité
+d'expliquer au praticien pourquoi il s'arrête, mais il ne peut plus dépenser.
+
+### Politique de panne, inverse de portail.py
+
+Base illisible, payload incompréhensible : **on laisse passer**. Un verrou de
+budget cassé ne doit pas geler la production. `portail.py`, lui, bloque quand il
+est cassé — il protège la qualité livrée au praticien, celui-ci ne protège que
+de l'argent.
+
+### Vérifié sur le VPS
+
+Cinq chemins testés (session réelle → bloque · seuils relevés → passe · base
+absente → passe · payload illisible → passe · budget dépassé → bloque).
+`hermes hooks doctor` : **« All shell hooks look healthy »**.
+
+### Deux constats d'exploitation
+
+- `~/.hermes/agent-hooks/` appartient à **root** : ni toi ni un script de
+  déploiement ne peut y écrire. `portail.py` n'est pas maintenable par le
+  projet ; les garde-fous vivent désormais dans `~/imcp/scripts/`.
+- L'allowlist contrôle la **dérive de mtime** : recopier le script le désactive.
+  `deploy-vps.sh` réapprouve et vérifie automatiquement après chaque copie —
+  sans quoi un déploiement aurait silencieusement éteint le verrou.
+
+### Reste ouvert
+
+La cible de ~0,50 $ par capsule est une **projection**. Elle ne sera établie
+qu'en produisant une capsule dans une session vide, `scripts/couts.py` relevé
+avant et après.
+
 ## 2026-08-03 (clôture) — La donnée était là depuis le début
 
 Guillaume : « il faut pouvoir relever le nombre de jetons » et rendre la
