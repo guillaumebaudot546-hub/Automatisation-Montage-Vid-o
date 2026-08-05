@@ -3,11 +3,19 @@
 **Date :** 2026-08-03 · **Source :** `~/.hermes/logs/agent.log` sur le VPS
 **Objet :** première capsule générée depuis un prompt via la chaîne `capsule-prompt`
 
-> ⚠️ **Ce n'est pas une mesure, c'est une attribution.** Hermes ne journalise
-> aucun décompte de jetons — contrairement au relevé du 30/07 (6,91 $), où la
-> décomposition venait de l'API. Les causes ci-dessous sont déduites de
-> grandeurs observables (nombre d'appels, taille d'historique, nature des
-> outils). Les proportions sont raisonnées, pas mesurées.
+> ✅ **CORRIGÉ LE 03/08 — c'est désormais une mesure.** J'avais écrit ici que
+> « Hermes ne journalise aucun décompte de jetons ». C'était faux : la donnée
+> était dans `~/.hermes/state.db`, table `session_model_usage`. J'avais cherché
+> dans les logs sans ouvrir la base. Voir `decisions/018` et
+> `python3 scripts/couts.py`.
+>
+> **Les chiffres mesurés** (session `20260730_203305_a54410a5`, Sonnet 5) :
+> **8,79 $** — écriture du cache **5,69 $ (65 %)**, relecture 2,53 $ (29 %),
+> sortie 0,56 $ (6 %). **143 803 jetons de contexte par appel** sur 88 appels,
+> et **25 881 jetons réécrits en cache à chaque appel**.
+>
+> L'attribution qui suivait était juste sur le fond — la session est bien la
+> cause dominante — mais elle était déduite là où elle pouvait être mesurée.
 
 ## Ce qui a bien fonctionné
 

@@ -23,3 +23,4 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [015](015-hermes-orchestrateur.md) | Hermes Agent est l'orchestrateur — pas de bot Telegram maison | Actif — modifie SPEC-PALIER-1 |
 | [016](016-cout-par-video.md) | Le coût par vidéo est un problème de plomberie, pas d'intelligence | Actif — étapes 1 et 4 faites |
 | [017](017-capsule-depuis-prompt.md) | Une capsule depuis un prompt est une AUTRE classe de vidéo — contrat capsule.json | Actif |
+| [018](018-mesurer-les-jetons.md) | On mesure les jetons (state.db + scripts/couts.py), on ne les déduit plus | Actif |

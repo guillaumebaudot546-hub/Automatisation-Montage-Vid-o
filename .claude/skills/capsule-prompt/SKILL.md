@@ -137,9 +137,14 @@ Audit du 03/08/2026, capsule livrée en 15 min pour ~5 $. Le contrat, lui, a bie
 fonctionné : tes écritures faisaient 280 à 1 102 caractères, du `capsule.json`,
 pas du HTML. Le coût était ailleurs, et il faut que tu le saches.
 
-**1. Une capsule = une session neuve.** La demande est arrivée dans un fil
-ouvert le 30/07, à **246 messages**, terminé à **349**. Chacun des **120 appels
-au modèle** a renvoyé tout cet historique. C'est le premier poste, de loin.
+**1. Une capsule = une session neuve.** Mesuré, pas supposé
+(`python3 scripts/couts.py`) : **143 803 jetons de contexte par appel** sur
+88 appels, et **25 881 jetons réécrits en cache à chaque appel**. L'écriture de
+cache représente **65 %** de la facture — ce n'est pas relire l'historique qui
+coûte, c'est le faire grossir.
+
+**Seuil : au-delà de 60 000 jetons de contexte par appel, la session est trop
+chargée.**
 Si le fil dépasse ~40 messages ou change de sujet, **demande à Guillaume
 d'ouvrir une session neuve** avant de commencer. Ne t'exécute pas dans un fil
 chargé.

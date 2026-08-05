@@ -3,6 +3,63 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-08-03 (clôture) — La donnée était là depuis le début
+
+Guillaume : « il faut pouvoir relever le nombre de jetons » et rendre la
+génération depuis un prompt définitive. Écrit en `decisions/018`.
+
+**J'avais tort dans l'entrée précédente.** J'ai écrit « Hermes ne journalise
+aucun décompte de jetons ». Faux : `~/.hermes/state.db`, table
+`session_model_usage`, contient `input_tokens`, `output_tokens`,
+`cache_read_tokens`, `cache_write_tokens`, `api_call_count` et
+`estimated_cost_usd`. J'avais fouillé les logs sans ouvrir la base.
+
+Preuve de fiabilité : sa ligne `opus-4-8` du 30/07 affiche **6,912509 $** — au
+centime près le 6,91 $ relevé à la main et publié dans la proposition.
+
+### La mesure
+
+Session `20260730_203305_a54410a5`, Sonnet 5, **8,79 $** :
+
+| Poste | Montant | Part |
+|---|---|---|
+| Écriture du cache | 5,69 $ | **65 %** |
+| Relecture du cache | 2,53 $ | 29 % |
+| Texte généré | 0,56 $ | 6 % |
+
+**143 803 jetons de contexte par appel** sur 88 appels. **25 881 jetons
+réécrits en cache à chaque appel.** Ce n'est pas relire l'historique qui coûte,
+c'est le faire grossir : la relecture est à 0,1×, l'écriture à 1,25×.
+
+Décomposition vérifiée en testant les quatre combinaisons tarifaires ; une
+seule tombe juste au centime (intro 2/10 $, cache 1,25×).
+
+Cumul de la base : **19,96 M de jetons, 17,32 $**, dont deux tiers sur cette
+seule session jamais refermée.
+
+### Écart à surveiller
+
+`config.yaml` déclare `cache_ttl: 1h` mais la facturation correspond à 1,25×
+(5 min). Soit le réglage n'est pas appliqué — le cache expire pendant un rendu
+de 15 min — soit l'estimateur sous-évalue de 39 % (12,20 $ réels). À trancher.
+
+### Livré
+
+- `scripts/couts.py` — instrument de mesure officiel, déployé et opérationnel
+  sur le VPS. Seuil chiffré : 60 000 jetons/appel.
+- `scripts/deploy-vps.sh` — déploiement reproductible **avec vérification** :
+  fichiers présents, 4 polices, description de skill sous 60 caractères,
+  `AGENTS.md` cohérent aux deux emplacements, et la chaîne capsule testée de
+  bout en bout. `~/imcp` n'étant pas un dépôt git, ce script est la seule
+  garantie contre un oubli de `scp`.
+- `decisions/018` + correction de l'audit et de la RÈGLE E.
+
+### Reste ouvert
+
+`actual_cost_usd` vaut 0 partout, `cost_status` reste `estimated` : Hermes
+n'interroge pas l'API de facturation. `couts.py` reste une estimation — juste
+au centime sur le cas vérifié, mais une estimation.
+
 ## 2026-08-03 (fin) — Audit des 5 $ : ce n'était pas le HTML
 
 Capsule livrée en 15 min pour ~5 $. Audit complet en
