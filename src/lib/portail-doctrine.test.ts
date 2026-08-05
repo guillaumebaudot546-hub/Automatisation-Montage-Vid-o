@@ -186,9 +186,9 @@ describe("portail complet", () => {
   });
 });
 
-describe("praticiens/baudot.json est lisible par du code", () => {
+describe("praticiens/client-01.json est lisible par du code", () => {
   const brut = JSON.parse(
-    readFileSync(join(process.cwd(), "praticiens", "baudot.json"), "utf8"),
+    readFileSync(join(process.cwd(), "praticiens", "client-01.json"), "utf8"),
   );
 
   it("respecte le schema", () => {

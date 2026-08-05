@@ -66,13 +66,13 @@ Le dépôt est **privé**. Il te faudra être authentifié auprès de GitHub
 |---|---|
 | **Le point d'entrée pour l'IA** | [`CLAUDE.md`](CLAUDE.md) — à lire en entier au démarrage |
 | **La doctrine de montage** | [`.claude/skills/montage-imcp/SKILL.md`](.claude/skills/montage-imcp/SKILL.md) |
-| **Les préférences du praticien** | [`praticiens/baudot.json`](praticiens/baudot.json) — corrections datées + exemples validés |
+| **Les préférences du praticien** | [`praticiens/client-01.json`](praticiens/client-01.json) — corrections datées + exemples validés |
 | **Les décisions structurantes** | [`decisions/`](decisions/README.md) — 15 décisions indexées |
 | **La gouvernance** | [`docs/gouvernance/`](docs/gouvernance/) — architecture, vérification, mémoire, sessions, sous-agents |
 | **L'historique des sessions** | [`docs/journal/sessions.md`](docs/journal/sessions.md) — ce qui a été fait et pourquoi |
 | **Le plan du palier en cours** | [`SPEC-PALIER-1.md`](SPEC-PALIER-1.md) |
 | **Tout le déploiement VPS** | [`deploiement/`](deploiement/) — voir ci-dessous |
-| **La charte graphique** | [`src/theme/baudot.ts`](src/theme/baudot.ts) — **source de vérité unique** |
+| **La charte graphique** | [`src/theme/client-01.ts`](src/theme/client-01.ts) — **source de vérité unique** |
 | **Les compositions vidéo** | [`imcp-hyperframes/`](imcp-hyperframes/) — moteur actif |
 | **Remotion** | [`src/`](src/) — **maintenance seulement**, on n'y construit plus |
 

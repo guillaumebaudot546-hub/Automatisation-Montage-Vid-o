@@ -10,8 +10,9 @@
 | `REPRISE.md` | **tu arrives sur une machine neuve** — où est quoi, quoi installer, ce qui reste |
 | `deploiement/hermes-vps-runbook.md` | tu déploies ou administres le VPS (10 phases, sourcé) |
 | `deploiement/AGENTS-vps.md` | tu changes les règles permanentes de l'agent Hermes (à redéployer sur le VPS) |
-| `.claude/skills/montage-imcp/SKILL.md` | tu montes une vidéo (doctrine — chargée comme skill) |
-| `praticiens/baudot.json` | tu montes pour le Dr Baudot : préférences, corrections passées, exemples validés |
+| `.claude/skills/montage-imcp/SKILL.md` | tu montes une vidéo **à partir d'un rush** (doctrine) |
+| `.claude/skills/capsule-prompt/SKILL.md` | tu génères une vidéo **à partir d'un prompt** (decision 017) |
+| `praticiens/client-01.json` | tu montes pour le Dr Baudot : préférences, corrections passées, exemples validés |
 | `docs/gouvernance/architecture.md` | tu crées, déplaces ou fais grossir un fichier |
 | `docs/gouvernance/verification.md` | une tâche semble terminée, avant de la déclarer finie |
 | `docs/gouvernance/memoire-decisions.md` | tu prends une décision technique qui engage la suite |
@@ -47,6 +48,10 @@ Chaque chose appartient à UN domaine. On range par domaine, pas par type techni
 - Lint + sens des dépendances : `npm run lint`
 - Taille des fichiers (src/ ET compositions HyperFrames) : `npm run check:sizes`
 - **Charte couleur des compositions : `npm run check:charte`**
+- **Polices hors du HTML : `npm run fonts:check`** (extraction : `npm run fonts:extract`)
+- **Capsule depuis un prompt** (decision 017) — l'agent n'écrit JAMAIS de HTML :
+  `npm run portail:capsule -- <projet>` → `npm run capsule:build <projet>` →
+  `npm run check` dans le dossier → rendu. Dérive : `npm run capsule:check`.
 - Studio Remotion (maintenance) : `npm run dev`
 - Montage HyperFrames : passer par le routeur `/hyperframes`, jamais à la main
 - Aperçu / rendu d'une composition : `npm run dev` / `npm run render` **dans son dossier**
@@ -58,7 +63,7 @@ Chaque chose appartient à UN domaine. On range par domaine, pas par type techni
   le hook `check-sizes` (bloquant, exit 2).
 - **Le cœur ne dépend pas des détails** — `src/theme/` n'importe JAMAIS depuis
   `scenes/`, `components/`, `hero/`. Garanti par ESLint (`architecture.md`).
-- **La charte est verrouillée.** Toute couleur vient de `src/theme/baudot.ts`.
+- **La charte est verrouillée.** Toute couleur vient de `src/theme/client-01.ts`.
   Accent = cyan `#49B6C9`. Le beige `#d8c7a8` est l'ancien accent remplacé par le
   client : le retrouver est un bug. `npm run check:charte`.
 - **Aucune musique sous droits.** Défaut : `music/ambient-bed.wav` (synthétisé).
@@ -87,7 +92,7 @@ Chaque chose appartient à UN domaine. On range par domaine, pas par type techni
 
 ## Rituel de mémoire (source unique)
 - Décision qui engage la suite → `decisions/` **au moment où elle est prise**.
-- Correction du praticien → `praticiens/<nom>.json` : la correction datée, la
+- Correction du praticien → `praticiens/<client>.json` : la correction datée, la
   préférence mise à jour, ET le segment ajouté à `exemplesValides`. Les trois,
   sinon la boucle n'est pas bouclée (doctrine, RÈGLE 6).
 - Clôture de session → `docs/journal/sessions.md`.

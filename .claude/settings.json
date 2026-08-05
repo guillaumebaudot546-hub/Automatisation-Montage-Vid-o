@@ -7,6 +7,10 @@
           {
             "type": "command",
             "command": "node scripts/guard-render.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node scripts/guard-portail.mjs"
           }
         ]
       }

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="fr" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* Polices du socle — copiees par npm run socle:sync (decision 016). */
+      @font-face { font-family:'Cormorant'; font-style:normal; font-weight:500 700; font-display:block; src:url(./fonts/cormorant-normal.woff2) format('woff2'); }
+      @font-face { font-family:'Cormorant'; font-style:italic; font-weight:500 700; font-display:block; src:url(./fonts/cormorant-italic.woff2) format('woff2'); }
+      @font-face { font-family:'Manrope'; font-style:normal; font-weight:400 700; font-display:block; src:url(./fonts/manrope-normal.woff2) format('woff2'); }
+      @font-face { font-family:'JetBrains Mono'; font-style:normal; font-weight:400 700; font-display:block; src:url(./fonts/jetbrains-mono-normal.woff2) format('woff2'); }
+
+      /* Charte — injectee depuis src/theme/, jamais ecrite a la main (REGLE 4bis). */
+      :root {
+        --navy:#060d18; --ivory:#eef3fa; --cream:#dce4ef;
+        --slate:#9db1c9; --cyan:#49b6c9; --danger:#c9564b; --warn:#c98f4b;
+      }
+      * { margin:0; padding:0; box-sizing:border-box; }
+      html, body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#060d18; }
+      body { font-family:'Manrope', sans-serif; color:var(--ivory); }
+
+      .fill { position:absolute; inset:0; }
+      .scene { position:absolute; inset:0; padding:104px 150px 104px 190px; display:flex;
+               flex-direction:column; justify-content:center; }
+
+      .blob { position:absolute; border-radius:50%; display:block; will-change:transform; }
+      #blob1 { width:1250px; height:1250px; right:-360px; top:-330px;
+               background:radial-gradient(circle, rgba(73,182,201,.20) 0%, rgba(73,182,201,0) 64%); }
+      #blob2 { width:1050px; height:1050px; left:-330px; bottom:-380px;
+               background:radial-gradient(circle, rgba(73,182,201,.11) 0%, rgba(73,182,201,0) 66%); }
+      #grid { position:absolute; inset:-100px; display:block; opacity:.5;
+              background-image:repeating-linear-gradient(90deg, rgba(157,177,201,.075) 0 1px, transparent 1px 108px);
+              will-change:transform; }
+      #scan { position:absolute; left:0; right:0; height:2px; display:block; top:0;
+              background:linear-gradient(90deg, rgba(73,182,201,0), rgba(73,182,201,.32), rgba(73,182,201,0)); }
+
+      .rail { position:absolute; left:150px; top:300px; width:2px; height:340px;
+              background:linear-gradient(180deg, var(--cyan), rgba(73,182,201,0));
+              display:block; transform-origin:top center; }
+
+      .kicker { font-family:'JetBrains Mono', monospace; font-size:22px; letter-spacing:.32em;
+                text-transform:uppercase; color:var(--cyan); display:block; margin-bottom:30px;
+                font-style:normal; }
+      .num { color:var(--slate); margin-right:22px; }
+      .lede { font-family:'Cormorant', serif; font-weight:600; font-size:94px; line-height:1.08;
+              letter-spacing:-.015em; color:var(--ivory); display:block; max-width:1420px; }
+      .lede.sm { font-size:74px; }
+      .lede .l { display:block; overflow:hidden; }
+      .lede .l i { display:block; font-style:normal; }
+      .sub { font-size:29px; line-height:1.56; color:var(--slate); display:block;
+             max-width:1100px; margin-top:32px; }
+      .kw { color:var(--cyan); }
+      .em { font-family:'Cormorant', serif; font-style:italic; }
+      .rule { height:2px; background:var(--cyan); display:block; margin:34px 0;
+              width:220px; transform-origin:left center; }
+
+      .cols { display:flex; gap:56px; margin-top:20px; }
+      .col { flex:1; border:1px solid rgba(157,177,201,.28); border-radius:6px;
+             padding:38px 38px; display:block; }
+      .col .tag { font-family:'JetBrains Mono', monospace; font-size:25px; letter-spacing:.2em;
+                  display:block; margin-bottom:20px; font-weight:700; }
+      .col .body { font-size:26px; line-height:1.55; color:var(--cream); display:block; }
+      .m1 { border-color:rgba(201,86,75,.55); } .m1 .tag { color:var(--danger); }
+      .m2 { border-color:rgba(73,182,201,.55); } .m2 .tag { color:var(--cyan); }
+
+      .marks { display:flex; flex-wrap:wrap; gap:18px; margin-top:36px; max-width:1440px; }
+      .mark { font-family:'JetBrains Mono', monospace; font-size:27px; padding:14px 26px;
+              border:1px solid rgba(73,182,201,.45); border-radius:4px; color:var(--cyan); display:block; }
+
+      .gauge { width:1420px; height:26px; border-radius:13px; overflow:hidden; display:flex; margin-top:44px; }
+      .gauge span { display:block; height:100%; }
+      .g-ok { background:var(--cyan); } .g-warn { background:var(--warn); } .g-bad { background:var(--danger); }
+      .glabels { display:flex; width:1420px; margin-top:16px; font-family:'JetBrains Mono', monospace;
+                 font-size:20px; letter-spacing:.16em; color:var(--slate); }
+      .glabels span { display:block; }
+      .cursor { position:absolute; width:3px; height:44px; background:var(--ivory); display:block;
+                left:150px; margin-top:-9px; }
+
+      .steps { display:flex; gap:28px; margin-top:40px; }
+      .step { flex:1; border-top:2px solid var(--cyan); padding-top:24px; display:block;
+              transform-origin:left top; }
+      .step .t { font-family:'JetBrains Mono', monospace; font-size:21px; color:var(--cyan);
+                 display:block; margin-bottom:13px; letter-spacing:.16em; font-weight:700; }
+      .step .d { font-size:24px; line-height:1.48; color:var(--cream); display:block; }
+
+      .score { display:flex; align-items:baseline; gap:26px; margin-top:36px; }
+      .score .n { font-family:'Cormorant', serif; font-weight:700; font-size:180px;
+                  line-height:.9; color:var(--cyan); display:block; }
+      .score .u { font-size:29px; color:var(--slate); display:block; }
+
+      .duo { display:flex; gap:70px; margin-top:38px; }
+      .card { flex:1; border:1px solid rgba(157,177,201,.28); border-radius:6px; padding:36px 36px; display:block; }
+      .card .h { font-family:'JetBrains Mono', monospace; font-size:22px; letter-spacing:.2em;
+                 color:var(--slate); display:block; margin-bottom:18px; }
+      .card .v { font-family:'Cormorant', serif; font-size:56px; font-weight:700; display:block; }
+      .card .d { font-size:23px; color:var(--slate); display:block; margin-top:14px; line-height:1.45; }
+      .bad .v { color:var(--danger); } .ok .v { color:var(--cyan); }
+
+      .lines { display:block; margin-top:8px; }
+      .line { font-family:'Cormorant', serif; font-size:60px; font-weight:500; line-height:1.34;
+              color:var(--cream); display:block; }
+      .sig { font-family:'JetBrains Mono', monospace; font-size:23px; letter-spacing:.3em;
+             color:var(--cyan); display:block; margin-top:44px; text-transform:uppercase; font-weight:700; }
+
+      .foot { position:absolute; left:150px; bottom:64px; font-family:'JetBrains Mono', monospace;
+              font-size:18px; letter-spacing:.24em; color:var(--slate);
+              text-transform:uppercase; display:block; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="126"
+         data-width="1920" data-height="1080">
+
+      <div id="bg" class="clip fill" data-start="0" data-duration="126" data-track-index="0"
+           style="background:#060d18"></div>
+      <div id="grid" class="clip" data-start="0" data-duration="126" data-track-index="1"></div>
+      <div id="blob1" class="clip blob" data-start="0" data-duration="126" data-track-index="2"></div>
+      <div id="blob2" class="clip blob" data-start="0" data-duration="126" data-track-index="3"></div>
+      <div id="scan" class="clip" data-start="0" data-duration="126" data-track-index="4"></div>
+
+      <!-- 01 -->
+      <section id="s1" class="clip scene" data-start="0" data-duration="11" data-track-index="5">
+        <i id="s1k" class="rail"></i>
+        <em class="kicker"><span class="num">01</span>Le constat</em>
+        <strong id="s1a" class="lede sm"><span class="l"><i>Un implant peut être parfait</i></span><span class="l"><i>le jour de la pose.</i></span></strong>
+        <i id="s1r" class="rule"></i>
+        <span id="s1b" class="sub">Et menacé dix ans plus tard. Nous découvrons la <span class="kw">péri-implantite</span> quand l'os est déjà perdu.</span>
+      </section>
+
+      <!-- 02 -->
+      <section id="s2" class="clip scene" data-start="11" data-duration="11" data-track-index="5">
+        <i id="s2k" class="rail"></i>
+        <em class="kicker"><span class="num">02</span>Changement de paradigme</em>
+        <strong id="s2a" class="lede sm"><span class="l"><i>L'ostéointégration</i></span><span class="l"><i>n'est pas une soudure.</i></span></strong>
+        <i id="s2r" class="rule"></i>
+        <span id="s2b" class="sub">Une réaction <span class="kw">ostéo-immune</span> active : l'os, la muqueuse et l'immunité négocient en permanence son acceptation.</span>
+      </section>
+
+      <!-- 03 -->
+      <section id="s3" class="clip scene" data-start="22" data-duration="14" data-track-index="5">
+        <i id="s3k" class="rail"></i>
+        <em class="kicker"><span class="num">03</span>Les gardiens de l'équilibre</em>
+        <strong id="s3a" class="lede sm"><span class="l"><i>Au centre : les macrophages.</i></span></strong>
+        <div class="cols">
+          <div id="s3c1" class="col m1">
+            <span class="tag">PROFIL M1</span>
+            <span class="body">Ils attaquent, amplifient l'inflammation, recrutent les ostéoclastes. L'os recule.</span>
+          </div>
+          <div id="s3c2" class="col m2">
+            <span class="tag">PROFIL M2</span>
+            <span class="body">Ils apaisent, réparent, stabilisent la barrière muqueuse.</span>
+          </div>
+        </div>
+        <span id="s3b" class="sub">Dans la péri-implantite avancée, <span class="kw">M1 domine</span> — et ce ratio suit la profondeur de poche.</span>
+      </section>
+
+      <!-- 04 -->
+      <section id="s4" class="clip scene" data-start="36" data-duration="12" data-track-index="5">
+        <i id="s4k" class="rail"></i>
+        <em class="kicker"><span class="num">04</span>Le sulcus péri-implantaire</em>
+        <strong id="s4a" class="lede sm"><span class="l"><i>Une <span class="kw">biopsie liquide</span> déjà accessible.</i></span></strong>
+        <div class="marks">
+          <span class="mark s4m">IL-1β</span>
+          <span class="mark s4m">IL-6</span>
+          <span class="mark s4m">MMP-8</span>
+          <span class="mark s4m">RANKL</span>
+          <span class="mark s4m">OPG</span>
+          <span class="mark s4m">miRNA</span>
+        </div>
+        <span id="s4b" class="sub">Cytokines, enzymes, facteurs osseux, microARN — certains déjà associés à la perte osseuse.</span>
+      </section>
+
+      <!-- 05 -->
+      <section id="s5" class="clip scene" data-start="48" data-duration="11" data-track-index="5">
+        <i id="s5k" class="rail"></i>
+        <em class="kicker"><span class="num">05</span>La limite actuelle</em>
+        <strong id="s5a" class="lede sm"><span class="l"><i>Nous mesurons l'incendie.</i></span><span class="l"><i>Pas l'équilibre d'avant.</i></span></strong>
+        <i id="s5r" class="rule"></i>
+        <span id="s5b" class="sub">Ils disent la <span class="kw">destruction en cours</span>. Utiles au diagnostic — insuffisants pour prédire.</span>
+      </section>
+
+      <!-- 06 -->
+      <section id="s6" class="clip scene" data-start="59" data-duration="12" data-track-index="5">
+        <i id="s6k" class="rail"></i>
+        <em class="kicker"><span class="num">06</span>Functional Biologic Equilibrium</em>
+        <strong id="s6a" class="lede sm"><span class="l"><i>Mesurer l'équilibre lui-même.</i></span></strong>
+        <div id="s6g" class="gauge">
+          <span class="g-ok" style="width:52%"></span><span class="g-warn" style="width:26%"></span><span class="g-bad" style="width:22%"></span>
+        </div>
+        <i id="s6cur" class="cursor"></i>
+        <div id="s6l" class="glabels">
+          <span style="width:52%">ÉQUILIBRE</span><span style="width:26%">STRESS</span><span style="width:22%">RUPTURE</span>
+        </div>
+        <span id="s6b" class="sub">Un implant stable, c'est un <span class="kw">équilibre ostéo-immunitaire mesurable</span>.</span>
+      </section>
+
+      <!-- 07 -->
+      <section id="s7" class="clip scene" data-start="71" data-duration="11" data-track-index="5">
+        <i id="s7k" class="rail"></i>
+        <em class="kicker"><span class="num">07</span>Lire la polarisation macrophagique</em>
+        <strong id="s7a" class="lede sm"><span class="l"><i>CD163. CD206.</i></span></strong>
+        <i id="s7r" class="rule"></i>
+        <span id="s7b" class="sub">D'autres spécialités les utilisent déjà. Le FBE les transpose <span class="kw">au sulcus implantaire</span>.</span>
+      </section>
+
+      <!-- 08 -->
+      <section id="s8" class="clip scene" data-start="82" data-duration="16" data-track-index="5">
+        <i id="s8k" class="rail"></i>
+        <em class="kicker"><span class="num">08</span>Du prélèvement à la décision</em>
+        <strong id="s8a" class="lede sm"><span class="l"><i>Un système théranostique.</i></span></strong>
+        <div class="steps">
+          <div class="step s8s"><span class="t">01 · PRÉLEVER</span><span class="d">Prélèvement sulculaire minimalement invasif.</span></div>
+          <div class="step s8s"><span class="t">02 · ANALYSER</span><span class="d">CD163 / CD206 et panel inflammatoire.</span></div>
+          <div class="step s8s"><span class="t">03 · LIRE</span><span class="d">Un score simple : vert, orange, rouge.</span></div>
+          <div class="step s8s"><span class="t">04 · DÉCIDER</span><span class="d">Surveillance, maintenance, décontamination, chirurgie.</span></div>
+        </div>
+        <div class="score"><span id="s8n" class="n">0</span><span id="s8u" class="u">Score FBE — équilibre conservé</span></div>
+      </section>
+
+      <!-- 09 -->
+      <section id="s9" class="clip scene" data-start="98" data-duration="15" data-track-index="5">
+        <i id="s9k" class="rail"></i>
+        <em class="kicker"><span class="num">09</span>Agir sur l'interface</em>
+        <strong id="s9a" class="lede sm"><span class="l"><i>Le test devient la preuve.</i></span></strong>
+        <div class="duo">
+          <div id="s9c1" class="card bad"><span class="h">PILIER STANDARD</span><span id="s9v1" class="v">0</span><span class="d">Joint muqueux instable, profil M1 dominant.</span></div>
+          <div id="s9c2" class="card ok"><span class="h">PILIER BIONECK</span><span id="s9v2" class="v">0</span><span class="d">Joint muqueux stable, profil M2 dominant.</span></div>
+        </div>
+        <span id="s9b" class="sub">Profil d'émergence, choix du pilier : la biologie confirme que le design corrige le déséquilibre.</span>
+      </section>
+
+      <!-- 10 -->
+      <section id="s10" class="clip scene" data-start="113" data-duration="13" data-track-index="5">
+        <i id="s10k" class="rail"></i>
+        <em class="kicker"><span class="num">10</span>L'ambition</em>
+        <div class="lines">
+          <span class="line s10l">Mesurer l'équilibre.</span>
+          <span class="line s10l">Intervenir tôt.</span>
+          <span class="line s10l">Adapter le design prothétique.</span>
+          <span class="line s10l">Suivre l'effet dans le temps.</span>
+        </div>
+        <span id="s10b" class="sub">Le passage de l'implant mécanique à l'implant <span class="kw">immunologiquement piloté</span>.</span>
+        <span id="s10s" class="sig">Functional Biologic Equilibrium</span>
+      </section>
+
+      <div id="foot" class="clip foot" data-start="0" data-duration="126" data-track-index="6">
+        Functional Biologic Equilibrium · capsule de démonstration
+      </div>
+
+      <!-- Lit musical. Nom d'origine conserve : renommer masque la provenance
+           (decision 014). Licence : NON FOURNIE — hors depot. -->
+      <audio id="bgm" src="Clinical_Grace.mp3"
+             data-start="0" data-duration="126" data-track-index="10"
+             data-volume="0.68"></audio>
+
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const D = 126;
+      const E = "power3.out";
+
+      tl.fromTo("#blob1", { x: 0, y: 0 }, { x: -170, y: 110, duration: D, ease: "sine.inOut" }, 0);
+      tl.fromTo("#blob2", { x: 0, y: 0 }, { x: 150, y: -90, duration: D, ease: "sine.inOut" }, 0);
+      tl.fromTo("#grid", { x: 0 }, { x: -216, duration: D, ease: "none" }, 0);
+      tl.fromTo("#scan", { y: -40, opacity: 0 }, { y: 1120, opacity: 1, duration: D / 2, ease: "none", repeat: 1 }, 0);
+      tl.fromTo("#foot", { opacity: 0 }, { opacity: 1, duration: 1, ease: E }, 0.8);
+      tl.fromTo("#bgm", { volume: 0 }, { volume: 0.68, duration: 2.5, ease: "sine.out" }, 0);
+      tl.to("#bgm", { volume: 0, duration: 5, ease: "sine.in" }, 121);
+
+      /* Entree standard d'une scene : rail, kicker, lignes du titre, filet, sous-titre. */
+      function scene(at, id, o) {
+        o = o || {};
+        tl.fromTo("#" + id + "k", { scaleY: 0, opacity: 0 },
+          { scaleY: 1, opacity: 1, duration: 0.75, ease: E }, at);
+        tl.fromTo("#" + id + " .kicker", { opacity: 0, x: -22 },
+          { opacity: 1, x: 0, duration: 0.5, ease: E }, at + 0.1);
+        if (o.lede !== false) {
+          tl.fromTo("#" + id + "a .l i", { yPercent: 108 },
+            { yPercent: 0, duration: 0.72, stagger: 0.11, ease: "power4.out" }, at + 0.26);
+        }
+        if (o.rule) {
+          tl.fromTo("#" + id + "r", { scaleX: 0 },
+            { scaleX: 1, duration: 0.6, ease: E }, at + 0.72);
+        }
+        if (o.sub !== false) {
+          tl.fromTo("#" + id + "b", { opacity: 0, y: 18 },
+            { opacity: 1, y: 0, duration: 0.6, ease: E }, at + (o.subAt || 0.9));
+        }
+      }
+
+      /* Compteur seek-safe : la valeur derive de la progression du tween. */
+      function compteur(sel, to, at, dur) {
+        const o = { v: 0 };
+        tl.to(o, {
+          v: to, duration: dur, ease: "power2.out",
+          onUpdate: function () { document.querySelector(sel).textContent = Math.round(o.v); },
+        }, at);
+      }
+
+      scene(0, "s1", {rule: true});
+      scene(11, "s2", {rule: true});
+      scene(22, "s3", {subAt: 2.2});
+      tl.fromTo("#s3c1", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.62, ease: E }, 23.00);
+      tl.fromTo("#s3c2", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.62, ease: E }, 23.28);
+      scene(36, "s4", {subAt: 2.3});
+      tl.fromTo(".s4m", { opacity: 0, y: 18, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.42, stagger: 0.085, ease: "back.out(2)" }, 36.90);
+      scene(48, "s5", {rule: true});
+      scene(59, "s6", {subAt: 2.5});
+      tl.fromTo("#s6g", { opacity: 0, scaleX: 0.1 },
+        { opacity: 1, scaleX: 1, duration: 0.85, ease: E, transformOrigin: "left center" }, 59.80);
+      tl.fromTo("#s6l", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: E }, 60.50);
+      tl.fromTo("#s6cur", { opacity: 0, x: 0 },
+        { opacity: 1, x: 682, duration: 1.5, ease: "power2.inOut" }, 60.80);
+      scene(71, "s7", {rule: true});
+      scene(82, "s8", {sub: false});
+      tl.fromTo(".s8s", { opacity: 0, y: 22, scaleY: 0.94 },
+        { opacity: 1, y: 0, scaleY: 1, duration: 0.5, stagger: 0.17, ease: E }, 82.90);
+      tl.fromTo("#s8n", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: E }, 84.10);
+      tl.fromTo("#s8u", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 84.50);
+      compteur("#s8n", 78, 84.10, 1.5);
+      scene(98, "s9", {subAt: 2.3});
+      tl.fromTo("#s9c1", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: E }, 98.90);
+      tl.fromTo("#s9c2", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.55, ease: E }, 99.30);
+      compteur("#s9v1", 41, 99.20, 0.9);
+      compteur("#s9v2", 82, 99.60, 1.1);
+      scene(113, "s10", {lede: false, subAt: 2.6});
+      tl.fromTo(".s10l", { opacity: 0, x: -22 },
+        { opacity: 1, x: 0, duration: 0.55, stagger: 0.3, ease: E }, 113.70);
+      tl.fromTo("#s10s", { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.8, ease: E }, 116.60);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

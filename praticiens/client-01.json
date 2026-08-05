@@ -1,8 +1,8 @@
 {
-  "praticien": "Dr Fabrice BAUDOT",
+  "praticien": "Client 01",
   "structure": "IMCP — Institut Microchirurgie Parodontale",
   "charte": {
-    "source": "src/theme/baudot.ts",
+    "source": "src/theme/client-01.ts",
     "accent": "#49B6C9",
     "nomToujoursEnMajuscules": true
   },
@@ -24,7 +24,7 @@
     "stingIntro": "TOUJOURS l'animation logo originale (intro-imcp.mp4) ajustée au format — contenue entière, fond flouté. JAMAIS une nouvelle animation, JAMAIS recadrée",
     "slidesFournies": "Extraire le CONTENU des slides et le ré-animer en cascade dans la charte — ne pas afficher l'image statique",
     "outilAnimations": "Animations codées en HyperFrames (decision 014, depuis le 19/07/2026) : gratuites, reproductibles, retouchables à la seconde. Remotion (src/) reste en maintenance pour les compositions déjà livrées. Pas de Higgsfield tant que pas d'abonnement payant — crédits gratuits non brûlés",
-    "charteVerrouillee": "Toute couleur vient de src/theme/baudot.ts. L'accent est le CYAN #49B6C9. Le beige #d8c7a8 est l'ancien accent remplacé par le client : le retrouver dans une composition est un bug. Vérifier avec npm run check:charte avant livraison",
+    "charteVerrouillee": "Toute couleur vient de src/theme/client-01.ts. L'accent est le CYAN #49B6C9. Le beige #d8c7a8 est l'ancien accent remplacé par le client : le retrouver dans une composition est un bug. Vérifier avec npm run check:charte avant livraison",
     "musiqueLicence": "Aucune piste sous droits. L'œuvre classique peut être dans le domaine public, l'ENREGISTREMENT ne l'est pas. Défaut : music/ambient-bed.wav (synthétisé par scripts/make_music.py). Toute autre piste exige une preuve de licence avant d'entrer dans public/"
   },
   "corrections": [

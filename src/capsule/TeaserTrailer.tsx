@@ -2,8 +2,8 @@ import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, staticFile, useCurr
 import { z } from "zod";
 import { FPS, VerticalCaptions } from "./CapsuleChrome";
 import { SlideAnimated } from "./CapsuleTypography";
-import { Watermark } from "../clinical/BaudotChrome";
-import { BAUDOT } from "../theme/baudot";
+import { Watermark } from "../clinical/ClientChrome";
+import { CHARTE } from "../theme/client-01";
 
 /**
  * TeaserTrailer — short 9:16 « trailer » qui BALAYE les points majeurs d'un cours
@@ -13,7 +13,7 @@ import { BAUDOT } from "../theme/baudot";
  * Une seule intro (titre en surimpression sur le 1er plan). Voir skill montage-imcp.
  */
 
-const C = BAUDOT.color;
+const C = CHARTE.color;
 const FLUO = "#5FE8FF";
 
 const beatSchema = z.object({
@@ -64,7 +64,7 @@ const VideoBeat: React.FC<{ src: string; startSec: number; frames: number; refra
         <OffthreadVideo src={staticFile(src)} trimBefore={Math.round(startSec * FPS)} muted style={{ width: "100%", height: "100%", objectFit: reframe === "crop" ? "cover" : "contain", objectPosition: reframe === "crop" ? "72% 38%" : "center" }} />
       </AbsoluteFill>
       {kicker && (
-        <div style={{ position: "absolute", top: "8%", width: "100%", textAlign: "center", fontFamily: BAUDOT.font.body, fontSize: 26, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: FLUO, textShadow: `0 0 14px ${FLUO}66, 0 2px 8px rgba(0,0,0,0.9)`, opacity: Math.min(interpolate(f, [16, 26], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }), interpolate(f, [frames - 20, frames - 12], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })) }}>
+        <div style={{ position: "absolute", top: "8%", width: "100%", textAlign: "center", fontFamily: CHARTE.font.body, fontSize: 26, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: FLUO, textShadow: `0 0 14px ${FLUO}66, 0 2px 8px rgba(0,0,0,0.9)`, opacity: Math.min(interpolate(f, [16, 26], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }), interpolate(f, [frames - 20, frames - 12], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })) }}>
           {kicker}
         </div>
       )}
@@ -80,7 +80,7 @@ const TitleOverlay: React.FC<{ title: string; frames: number }> = ({ title, fram
   const ty = interpolate(f, [4, 22], [24, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
     <div style={{ position: "absolute", top: "12%", width: "100%", textAlign: "center", opacity: op, transform: `translateY(${ty}px)`, padding: "0 70px" }}>
-      <div style={{ fontFamily: BAUDOT.font.display, fontSize: 74, fontWeight: 700, color: C.ivory, lineHeight: 1.1, textShadow: "0 3px 18px rgba(0,0,0,0.9)" }}>{title}</div>
+      <div style={{ fontFamily: CHARTE.font.display, fontSize: 74, fontWeight: 700, color: C.ivory, lineHeight: 1.1, textShadow: "0 3px 18px rgba(0,0,0,0.9)" }}>{title}</div>
     </div>
   );
 };
@@ -92,11 +92,11 @@ const CtaEnd: React.FC<{ line1: string; url: string; frames: number }> = ({ line
   const ty = interpolate(f, [0, 18], [30, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const pulse = 1 + 0.05 * Math.sin(f / 8);
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
       <div style={{ textAlign: "center", transform: `translateY(${ty}px)` }}>
         <Img src={staticFile("logo-mark.png")} style={{ width: 260, display: "block", margin: "0 auto 40px" }} />
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 60, fontWeight: 700, color: C.ivory, lineHeight: 1.18 }}>{line1}</div>
-        <div style={{ marginTop: 34, transform: `scale(${pulse})`, display: "inline-block", background: FLUO, color: "#06131C", fontFamily: BAUDOT.font.body, fontSize: 34, fontWeight: 800, padding: "22px 56px", borderRadius: 999 }}>{url}</div>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 60, fontWeight: 700, color: C.ivory, lineHeight: 1.18 }}>{line1}</div>
+        <div style={{ marginTop: 34, transform: `scale(${pulse})`, display: "inline-block", background: FLUO, color: "#06131C", fontFamily: CHARTE.font.body, fontSize: 34, fontWeight: 800, padding: "22px 56px", borderRadius: 999 }}>{url}</div>
       </div>
     </AbsoluteFill>
   );

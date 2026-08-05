@@ -1,0 +1,207 @@
+{
+  "type": "capsule-prompt",
+  "titre": "FBE — capsule de démonstration",
+  "charte": "client-01",
+  "format": "16:9",
+  "reseau": "youtube",
+  "pied": "Functional Biologic Equilibrium · capsule de démonstration",
+  "musique": {
+    "fichier": "Clinical_Grace.mp3",
+    "licence": null,
+    "volume": 0.68
+  },
+  "scenes": [
+    {
+      "kicker": "Le constat",
+      "lede": [
+        "Un implant peut être parfait",
+        "le jour de la pose."
+      ],
+      "dureeSec": 11,
+      "bloc": {
+        "type": "rule"
+      },
+      "sub": "Et menacé dix ans plus tard. Nous découvrons la **péri-implantite** quand l'os est déjà perdu."
+    },
+    {
+      "kicker": "Changement de paradigme",
+      "lede": [
+        "L'ostéointégration",
+        "n'est pas une soudure."
+      ],
+      "dureeSec": 11,
+      "bloc": {
+        "type": "rule"
+      },
+      "sub": "Une réaction **ostéo-immune** active : l'os, la muqueuse et l'immunité négocient en permanence son acceptation."
+    },
+    {
+      "kicker": "Les gardiens de l'équilibre",
+      "lede": [
+        "Au centre : les macrophages."
+      ],
+      "dureeSec": 14,
+      "bloc": {
+        "type": "duo-profils",
+        "data": {
+          "gauche": {
+            "tag": "PROFIL M1",
+            "texte": "Ils attaquent, amplifient l'inflammation, recrutent les ostéoclastes. L'os recule."
+          },
+          "droite": {
+            "tag": "PROFIL M2",
+            "texte": "Ils apaisent, réparent, stabilisent la barrière muqueuse."
+          }
+        }
+      },
+      "sub": "Dans la péri-implantite avancée, **M1 domine** — et ce ratio suit la profondeur de poche."
+    },
+    {
+      "kicker": "Le sulcus péri-implantaire",
+      "lede": [
+        "Une **biopsie liquide** déjà accessible."
+      ],
+      "dureeSec": 12,
+      "bloc": {
+        "type": "marqueurs",
+        "data": [
+          "IL-1β",
+          "IL-6",
+          "MMP-8",
+          "RANKL",
+          "OPG",
+          "miRNA"
+        ]
+      },
+      "sub": "Cytokines, enzymes, facteurs osseux, microARN — certains déjà associés à la perte osseuse."
+    },
+    {
+      "kicker": "La limite actuelle",
+      "lede": [
+        "Nous mesurons l'incendie.",
+        "Pas l'équilibre d'avant."
+      ],
+      "dureeSec": 11,
+      "bloc": {
+        "type": "rule"
+      },
+      "sub": "Ils disent la **destruction en cours**. Utiles au diagnostic — insuffisants pour prédire."
+    },
+    {
+      "kicker": "Functional Biologic Equilibrium",
+      "lede": [
+        "Mesurer l'équilibre lui-même."
+      ],
+      "dureeSec": 12,
+      "bloc": {
+        "type": "jauge",
+        "data": {
+          "zones": [
+            {
+              "label": "ÉQUILIBRE",
+              "pct": 52,
+              "ton": "ok"
+            },
+            {
+              "label": "STRESS",
+              "pct": 26,
+              "ton": "warn"
+            },
+            {
+              "label": "RUPTURE",
+              "pct": 22,
+              "ton": "bad"
+            }
+          ],
+          "curseurPct": 48
+        }
+      },
+      "sub": "Un implant stable, c'est un **équilibre ostéo-immunitaire mesurable**."
+    },
+    {
+      "kicker": "Lire la polarisation macrophagique",
+      "lede": [
+        "CD163. CD206."
+      ],
+      "dureeSec": 11,
+      "bloc": {
+        "type": "rule"
+      },
+      "sub": "D'autres spécialités les utilisent déjà. Le FBE les transpose **au sulcus implantaire**."
+    },
+    {
+      "kicker": "Du prélèvement à la décision",
+      "lede": [
+        "Un système théranostique."
+      ],
+      "dureeSec": 16,
+      "bloc": {
+        "type": "etapes-score",
+        "data": {
+          "etapes": [
+            {
+              "titre": "PRÉLEVER",
+              "texte": "Prélèvement sulculaire minimalement invasif."
+            },
+            {
+              "titre": "ANALYSER",
+              "texte": "CD163 / CD206 et panel inflammatoire."
+            },
+            {
+              "titre": "LIRE",
+              "texte": "Un score simple : vert, orange, rouge."
+            },
+            {
+              "titre": "DÉCIDER",
+              "texte": "Surveillance, maintenance, décontamination, chirurgie."
+            }
+          ],
+          "score": {
+            "valeur": 78,
+            "libelle": "Score FBE — équilibre conservé"
+          }
+        }
+      }
+    },
+    {
+      "kicker": "Agir sur l'interface",
+      "lede": [
+        "Le test devient la preuve."
+      ],
+      "dureeSec": 15,
+      "bloc": {
+        "type": "comparatif",
+        "data": {
+          "gauche": {
+            "titre": "PILIER STANDARD",
+            "valeur": 41,
+            "note": "Joint muqueux instable, profil M1 dominant."
+          },
+          "droite": {
+            "titre": "PILIER BIONECK",
+            "valeur": 82,
+            "note": "Joint muqueux stable, profil M2 dominant."
+          }
+        }
+      },
+      "sub": "Profil d'émergence, choix du pilier : la biologie confirme que le design corrige le déséquilibre."
+    },
+    {
+      "kicker": "L'ambition",
+      "dureeSec": 13,
+      "bloc": {
+        "type": "manifeste",
+        "data": {
+          "lignes": [
+            "Mesurer l'équilibre.",
+            "Intervenir tôt.",
+            "Adapter le design prothétique.",
+            "Suivre l'effet dans le temps."
+          ]
+        }
+      },
+      "sub": "Le passage de l'implant mécanique à l'implant **immunologiquement piloté**.",
+      "signature": "Functional Biologic Equilibrium"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, staticFile, useCurrentFrame, interpolate, Easing } from "remotion";
 import { z } from "zod";
 import { FPS, VerticalTitle, VerticalCaptions, EndCard } from "./CapsuleChrome";
-import { Watermark } from "../clinical/BaudotChrome";
+import { Watermark } from "../clinical/ClientChrome";
 import { PortraitSting, KineticList, BrollCutaway, CtaRibbon } from "./CapsuleOverlays";
 import { BigStat, ProgressChart, SiteCard } from "./CapsuleInfographics";
 import { PunchCard, SlideAnimated } from "./CapsuleTypography";

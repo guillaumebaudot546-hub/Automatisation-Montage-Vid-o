@@ -109,7 +109,7 @@ Le portage est un déplacement, pas une réécriture : Hermes suit le standard
 le format.
 
 1. Installer la skill `montage-imcp` dans Hermes
-2. Y joindre `praticiens/baudot.json` (préférences + 4 exemples validés)
+2. Y joindre `praticiens/client-01.json` (préférences + 4 exemples validés)
 3. Mettre les règles permanentes dans `AGENTS.md` — mécanisme de contexte natif
    d'Hermes, lu à chaque conversation
 4. Exposer `scripts/portail-doctrine.mjs` comme outil appelable

@@ -64,7 +64,7 @@ ont dérivé de la charte sans que rien ne le signale (voir « Conséquences »)
   (400/700) : une composition HyperFrames est un HTML mono-fichier par
   conception, lui appliquer le plafond des modules TS serait un contresens.
   Le remède indiqué est l'extraction en blocs.
-- Nouveau `check-charte` : il lit la palette dans `src/theme/baudot.ts` et la
+- Nouveau `check-charte` : il lit la palette dans `src/theme/client-01.ts` et la
   compare aux compositions HyperFrames. **46 écarts sur 13 compositions.**
   Notamment `--champagne: #d8c7a8` — l'ancien beige que le client a
   explicitement remplacé par le cyan `#49B6C9` — présent dans **les 13**.

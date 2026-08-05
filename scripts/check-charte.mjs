@@ -1,7 +1,7 @@
 // Garde-fou "identite" : les compositions HyperFrames doivent porter la charte
 // IMCP, pas une palette recopiee a la main puis derivee de projet en projet.
 //
-// La source de verite est src/theme/baudot.ts — lue ici, jamais recopiee.
+// La source de verite est src/theme/client-01.ts — lue ici, jamais recopiee.
 //
 // Lancer : npm run check:charte           (rapport, ne bloque pas)
 //          npm run check:charte -- --strict  (bloque : exit 2)
@@ -14,7 +14,7 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const RACINE_HF = "imcp-hyperframes";
-const THEME = "src/theme/baudot.ts";
+const THEME = "src/theme/client-01.ts";
 const strict = process.argv.includes("--strict");
 const fix = process.argv.includes("--fix");
 

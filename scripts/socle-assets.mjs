@@ -1,4 +1,5 @@
-// Socle : une seule version de CLI, un seul logo de reference.
+// Socle : une seule version de CLI, un seul jeu d'assets de reference
+// (logo-mark.png, et depuis le 01/08/2026 les 4 polices en fonts/).
 //
 //   npm run socle:sync     aligne les projets sur le socle
 //   npm run socle:check    signale toute divergence (exit 2)
@@ -9,7 +10,7 @@
 // Casser le rendu de 13 videos livrees pour economiser 2,5 Mo que git
 // deduplique deja serait un mauvais echange. Le socle reste la source unique :
 // on edite _socle/assets/, on synchronise, et le check attrape les derives.
-import { readFileSync, writeFileSync, copyFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 
@@ -55,8 +56,40 @@ for (const projet of liste) {
 
   // --- Assets de reference ---
   if (!existsSync(ASSETS)) continue;
+  const html = readFileSync(join(projet, "index.html"), "utf8");
+
   for (const asset of readdirSync(ASSETS)) {
     const source = join(ASSETS, asset);
+
+    // Un asset peut etre un DOSSIER (fonts/). Deux regimes, une seule regle :
+    // on ne copie que ce que la composition reference vraiment.
+    //  - fichier (logo-mark.png) : present dans le projet = utilise. Opt-in,
+    //    comportement d'origine, inchange.
+    //  - dossier (fonts/) : le HTML cite ./fonts/x.woff2. Un fichier manquant
+    //    ne provoque AUCUNE erreur de rendu — la police tombe simplement en
+    //    fallback sans-serif. On doit donc semer le dossier, pas attendre
+    //    qu'il existe.
+    if (statSync(source).isDirectory()) {
+      if (!html.includes(`./${asset}/`)) continue; // la composition ne s'en sert pas
+      const cibleDir = join(projet, asset);
+      mkdirSync(cibleDir, { recursive: true });
+      for (const fichier of readdirSync(source)) {
+        const src = join(source, fichier);
+        const dst = join(cibleDir, fichier);
+        if (existsSync(dst) && md5(src) === md5(dst)) continue;
+        if (verifie) {
+          ecarts.push(
+            `${projet} — ${asset}/${fichier} ${existsSync(dst) ? "differe du" : "absent du"} socle`,
+          );
+        } else {
+          copyFileSync(src, dst);
+          console.log(`→ ${projet} — ${asset}/${fichier} resynchronise`);
+          corriges++;
+        }
+      }
+      continue;
+    }
+
     const cible = join(projet, asset);
     if (!existsSync(cible)) continue; // le projet n'utilise pas cet asset
     if (md5(source) === md5(cible)) continue;
