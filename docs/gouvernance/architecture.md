@@ -16,6 +16,17 @@ Un fichier de 800 lignes qui mélange plusieurs responsabilités est plus diffic
 
 ## Règle 3 — le sens des dépendances ne s'inverse jamais
 La logique métier ne doit jamais importer un détail technique. L'inverse est permis : les détails techniques s'adaptent à la logique métier, jamais le contraire.
-- Dans ce projet : `src/theme/` (le cœur identitaire) n'importe JAMAIS depuis `scenes/`, `components/`, `hero/`.
+- Dans ce projet, `src/` est en **4 couches**. Une couche n'importe jamais d'une couche au-dessus d'elle :
+
+  | Couche | Contenu | Peut importer |
+  |---|---|---|
+  | 0 | `theme/` — identité : palette, typo | rien |
+  | 1 | `lib/` — logique pure, schémas | 0 |
+  | 2 | `components/` — briques d'interface | 0, 1 |
+  | 3 | `scenes/` `hero/` `clinical/` `capsule/` — compositions | 0, 1, 2, et entre elles |
+  | 4 | `Root.tsx` `Composition.tsx` — assemblage | tout ; **personne ne l'importe** |
+
+- Les compositions de la couche 3 peuvent s'appeler entre elles (`capsule/` réutilise déjà des blocs de `clinical/`) : c'est du partage entre pairs, pas une inversion.
 - ✅ **Déjà en place** : garanti par ESLint — un import dans le mauvais sens fait échouer `npm run lint`.
+- *Étendu le 04/08/2026.* La règle ne couvrait que `src/theme/`, soit 2 fichiers sur 70 : juste, mais symbolique. Les 68 autres n'avaient aucune contrainte de sens.
 - Pourquoi : changer un détail technique demain (autre bibliothèque d'animation, autre pipeline de rendu) ne doit toucher qu'un seul endroit — jamais la logique du domaine.

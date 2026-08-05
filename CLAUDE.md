@@ -61,8 +61,11 @@ Chaque chose appartient à UN domaine. On range par domaine, pas par type techni
   Compositions HyperFrames : seuils 400/700 — c'est un HTML mono-fichier par
   conception, le remède est l'extraction en blocs, pas le découpage. Garanti par
   le hook `check-sizes` (bloquant, exit 2).
-- **Le cœur ne dépend pas des détails** — `src/theme/` n'importe JAMAIS depuis
-  `scenes/`, `components/`, `hero/`. Garanti par ESLint (`architecture.md`).
+- **Le cœur ne dépend pas des détails** — `src/` est en 4 couches, et une couche
+  n'importe jamais d'une couche au-dessus : `theme/` (identité, ne dépend de
+  rien) → `lib/` (logique pure) → `components/` (briques) → `scenes/ hero/
+  clinical/ capsule/` (compositions) → `Root.tsx` (assemblage, que personne
+  n'importe). Garanti par ESLint sur tout `src/` (`architecture.md`).
 - **La charte est verrouillée.** Toute couleur vient de `src/theme/client-01.ts`.
   Accent = cyan `#49B6C9`. Le beige `#d8c7a8` est l'ancien accent remplacé par le
   client : le retrouver est un bug. `npm run check:charte`.
