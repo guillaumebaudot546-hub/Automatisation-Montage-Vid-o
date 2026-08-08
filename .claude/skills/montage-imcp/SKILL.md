@@ -1,6 +1,6 @@
 ---
 name: montage-imcp
-description: Doctrine de montage vidéo IMCP — capsules, teasers et publications verticaux/horizontaux à partir des rushes du Dr Baudot. À charger AVANT tout montage, avant même de choisir des timestamps. Moteur = HyperFrames (decision 014). Encode les règles apprises au fil des corrections réelles du praticien (voir praticiens/<nom>.json, decisions/013 et 014).
+description: Doctrine de montage vidéo IMCP — capsules, teasers et publications verticaux/horizontaux à partir des rushes du Dr Baudot. À charger AVANT tout montage, avant même de choisir des timestamps. Moteur = HyperFrames (decision 014). Encode les règles apprises au fil des corrections réelles du praticien (voir praticiens/<client>.json, decisions/013 et 014).
 metadata:
   tags: montage, hyperframes, video, vertical, teaser, capsule, IMCP, doctrine
 ---
@@ -113,7 +113,7 @@ le logo dupliqué 10 fois, les trois versions de CLI (0.7.67 / 0.7.72 / 0.7.77),
 et `teaser-01` qui suit une structure différente.*
 
 ## RÈGLE 4bis — l'identité passe par la charte, jamais par des valeurs à la main
-Toute couleur vient de `src/theme/baudot.ts`, seule source de vérité :
+Toute couleur vient de `src/theme/client-01.ts`, seule source de vérité :
 `navy950 #060D18` · `ivory #EEF3FA` · `cream #DCE4EF` · `slate #9DB1C9` ·
 **`champagne #49B6C9` — le cyan IMCP, imposé par le client**.
 
@@ -195,7 +195,7 @@ liste) : c'est ce qui donne la lecture guidée d'une énumération (RÈGLE 2).
   de licence avant d'entrer dans `public/`.
 
 ## RÈGLE 6 — la boucle d'apprentissage
-Chaque correction du praticien → l'écrire dans `praticiens/<nom>.json`
+Chaque correction du praticien → l'écrire dans `praticiens/<client>.json`
 (préférences + corrections datées). La vidéo suivante part de ces règles. Ne
 jamais refaire deux fois la même erreur corrigée.
 
@@ -213,7 +213,7 @@ Sans le geste 3, l'agent apprend uniquement ce qu'il ne faut pas faire.
 ## RÈGLE 7 — comment construire, concrètement
 1. **Lire d'abord.** Transcrire (whisper), lire la transcription en entier,
    choisir UN fil narratif (RÈGLE 1). Rien ne commence avant.
-2. **Charger le contexte praticien** : `praticiens/<nom>.json` — préférences,
+2. **Charger le contexte praticien** : `praticiens/<client>.json` — préférences,
    corrections passées, exemples validés. Ces règles ne se redemandent pas.
 3. **Router par `/hyperframes`.** C'est le point d'entrée qui choisit le
    workflow et installe les skills nécessaires. Ne pas écrire une composition
