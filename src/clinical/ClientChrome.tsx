@@ -7,7 +7,7 @@ import {
   interpolate,
   Easing,
 } from "remotion";
-import { BAUDOT } from "../theme/baudot";
+import { CHARTE } from "../theme/client-01";
 
 /**
  * Habillage vidéo Dr Baudot (DA landing page) : carton-titre, lower-third,
@@ -15,7 +15,7 @@ import { BAUDOT } from "../theme/baudot";
  * pour toute future vidéo.
  */
 
-const C = BAUDOT.color;
+const C = CHARTE.color;
 
 /* ---------- Carton-titre ---------- */
 export const TitleCard: React.FC<{
@@ -44,7 +44,7 @@ export const TitleCard: React.FC<{
   return (
     <AbsoluteFill
       style={{
-        background: BAUDOT.cardBackground,
+        background: CHARTE.cardBackground,
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -59,7 +59,7 @@ export const TitleCard: React.FC<{
       >
         <div
           style={{
-            fontFamily: BAUDOT.font.body,
+            fontFamily: CHARTE.font.body,
             fontSize: 18,
             letterSpacing: "0.34em",
             textTransform: "uppercase",
@@ -72,7 +72,7 @@ export const TitleCard: React.FC<{
         </div>
         <div
           style={{
-            fontFamily: BAUDOT.font.display,
+            fontFamily: CHARTE.font.display,
             fontSize: 100,
             fontWeight: 600,
             color: C.ivory,
@@ -84,7 +84,7 @@ export const TitleCard: React.FC<{
         {subtitle && (
           <div
             style={{
-              fontFamily: BAUDOT.font.body,
+              fontFamily: CHARTE.font.body,
               marginTop: 20,
               fontSize: 28,
               fontWeight: 500,
@@ -100,7 +100,7 @@ export const TitleCard: React.FC<{
             width: `${lineW}%`,
             maxWidth: 460,
             height: 1.5,
-            background: BAUDOT.hairline(),
+            background: CHARTE.hairline(),
           }}
         />
       </div>
@@ -138,7 +138,7 @@ export const LowerThird: React.FC<{ title: string }> = ({ title }) => {
     >
       <div
         style={{
-          fontFamily: BAUDOT.font.display,
+          fontFamily: CHARTE.font.display,
           fontSize: 32,
           fontWeight: 600,
           color: C.ivory,
@@ -148,14 +148,14 @@ export const LowerThird: React.FC<{ title: string }> = ({ title }) => {
       </div>
       <div
         style={{
-          fontFamily: BAUDOT.font.body,
+          fontFamily: CHARTE.font.body,
           marginTop: 6,
           fontSize: 16,
           letterSpacing: "0.14em",
           color: C.slate,
         }}
       >
-        DR FABRICE BAUDOT — INSTITUT MICROCHIRURGIE PARODONTALE
+        DR FABRICE CHARTE — INSTITUT MICROCHIRURGIE PARODONTALE
       </div>
     </div>
   );
@@ -198,7 +198,7 @@ export const EndCredits: React.FC = () => {
   return (
     <AbsoluteFill
       style={{
-        background: BAUDOT.cardBackground,
+        background: CHARTE.cardBackground,
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -216,7 +216,7 @@ export const EndCredits: React.FC = () => {
         />
         <div
           style={{
-            fontFamily: BAUDOT.font.display,
+            fontFamily: CHARTE.font.display,
             fontSize: 46,
             fontWeight: 600,
             fontStyle: "italic",
@@ -226,11 +226,11 @@ export const EndCredits: React.FC = () => {
             transform: `translateY(${rise(18)}px)`,
           }}
         >
-          DR FABRICE BAUDOT
+          DR FABRICE CHARTE
         </div>
         <div
           style={{
-            fontFamily: BAUDOT.font.body,
+            fontFamily: CHARTE.font.body,
             fontSize: 18,
             letterSpacing: "0.3em",
             textTransform: "uppercase",
@@ -247,13 +247,13 @@ export const EndCredits: React.FC = () => {
             margin: "30px auto 0",
             width: 220,
             height: 1,
-            background: BAUDOT.hairline(0.7),
+            background: CHARTE.hairline(0.7),
             opacity: fade(40),
           }}
         />
         <div
           style={{
-            fontFamily: BAUDOT.font.body,
+            fontFamily: CHARTE.font.body,
             fontSize: 15,
             color: C.slate,
             marginTop: 22,

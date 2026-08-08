@@ -5,7 +5,7 @@
  * scenes/, components/, hero/.
  */
 
-export const BAUDOT = {
+export const CHARTE = {
   color: {
     navy950: "#060D18", // fond principal (navy IMCP)
     navy900: "#0A1524", // sections en relief

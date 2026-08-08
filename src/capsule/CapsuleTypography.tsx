@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame, interpolate, Easing } from "remotion";
-import { BAUDOT } from "../theme/baudot";
-import { Watermark } from "../clinical/BaudotChrome";
+import { CHARTE } from "../theme/client-01";
+import { Watermark } from "../clinical/ClientChrome";
 
 /**
  * Typographie d'impact : carte punch (écran noir + texte fluo) pour les
@@ -8,7 +8,7 @@ import { Watermark } from "../clinical/BaudotChrome";
  * fournie, ré-animé en cascade au lieu de l'image statique).
  */
 
-const C = BAUDOT.color;
+const C = CHARTE.color;
 export const FLUO = "#5FE8FF"; // cyan fluo — palette IMCP poussée en luminance
 const GLOW = `0 0 18px ${FLUO}88, 0 0 60px ${FLUO}44`;
 
@@ -41,10 +41,10 @@ export const PunchCard: React.FC<{
         const s = pop(f, at);
         return (
           <div key={i} style={{ textAlign: "center", ...s }}>
-            <span style={{ fontFamily: BAUDOT.font.display, fontSize: 200, fontWeight: 700, color: FLUO, textShadow: GLOW, lineHeight: 1 }}>
+            <span style={{ fontFamily: CHARTE.font.display, fontSize: 200, fontWeight: 700, color: FLUO, textShadow: GLOW, lineHeight: 1 }}>
               {p.big}
             </span>
-            <div style={{ fontFamily: BAUDOT.font.body, fontSize: 44, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: C.ivory, marginTop: 6 }}>
+            <div style={{ fontFamily: CHARTE.font.body, fontSize: 44, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: C.ivory, marginTop: 6 }}>
               {p.small}
             </div>
             {i < pairs.length - 1 && (
@@ -77,12 +77,12 @@ export const SlideAnimated: React.FC<{
   const headAt = next(8);
   const subAt = next(8);
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, alignItems: "center", justifyContent: "center", padding: "0 80px" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, alignItems: "center", justifyContent: "center", padding: "0 80px" }}>
       <div style={{ width: "100%", textAlign: "center" }}>
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 76, fontWeight: 700, color: FLUO, textShadow: GLOW, ...pop(f, headAt) }}>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 76, fontWeight: 700, color: FLUO, textShadow: GLOW, ...pop(f, headAt) }}>
           {header}
         </div>
-        <div style={{ fontFamily: BAUDOT.font.body, fontSize: 28, fontStyle: "italic", color: C.slate, marginTop: 14, opacity: interpolate(f, [subAt, subAt + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>
+        <div style={{ fontFamily: CHARTE.font.body, fontSize: 28, fontStyle: "italic", color: C.slate, marginTop: 14, opacity: interpolate(f, [subAt, subAt + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>
           {sub}
         </div>
         <div style={{ display: "flex", gap: 40, marginTop: 56, justifyContent: "center" }}>
@@ -90,7 +90,7 @@ export const SlideAnimated: React.FC<{
             const gAt = next(10);
             return (
               <div key={gi} style={{ flex: 1, maxWidth: 430, textAlign: "left", opacity: interpolate(f, [gAt, gAt + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>
-                <div style={{ fontFamily: BAUDOT.font.body, fontSize: 24, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: C.champagne, marginBottom: 22 }}>
+                <div style={{ fontFamily: CHARTE.font.body, fontSize: 24, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: C.champagne, marginBottom: 22 }}>
                   {g.label}
                 </div>
                 {g.items.map((it, ii) => {
@@ -99,7 +99,7 @@ export const SlideAnimated: React.FC<{
                   return (
                     <div key={ii} style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 18, opacity: interpolate(f, [iAt, iAt + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }), transform: `translateX(${tx}px)` }}>
                       <div style={{ width: 10, height: 10, borderRadius: 5, background: FLUO, boxShadow: GLOW }} />
-                      <div style={{ fontFamily: BAUDOT.font.body, fontSize: 29, fontWeight: 600, color: C.ivory }}>{it}</div>
+                      <div style={{ fontFamily: CHARTE.font.body, fontSize: 29, fontWeight: 600, color: C.ivory }}>{it}</div>
                     </div>
                   );
                 })}
@@ -107,7 +107,7 @@ export const SlideAnimated: React.FC<{
             );
           })}
         </div>
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 34, fontStyle: "italic", color: C.champagne, marginTop: 52, opacity: interpolate(f, [cue + 4, cue + 14], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 34, fontStyle: "italic", color: C.champagne, marginTop: 52, opacity: interpolate(f, [cue + 4, cue + 14], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>
           {footer}
         </div>
       </div>

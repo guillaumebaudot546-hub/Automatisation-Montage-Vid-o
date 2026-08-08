@@ -9,8 +9,8 @@ import {
   interpolate,
   Easing,
 } from "remotion";
-import { BAUDOT } from "../theme/baudot";
-import { Watermark } from "../clinical/BaudotChrome";
+import { CHARTE } from "../theme/client-01";
+import { Watermark } from "../clinical/ClientChrome";
 
 /**
  * Chrome portrait de la capsule verticale : segment vidéo, insert slide,
@@ -20,7 +20,7 @@ import { Watermark } from "../clinical/BaudotChrome";
 
 export const FPS = 30;
 export const XFADE = 12;
-const C = BAUDOT.color;
+const C = CHARTE.color;
 
 /* ---------- Segment : extrait vidéo + transition + habillage ---------- */
 export const SegmentBlock: React.FC<{
@@ -80,9 +80,9 @@ export const SlideInsert: React.FC<{ slideSrc: string; label: string; frames: nu
   );
   const push = interpolate(f, [0, frames], [1.0, 1.06], { easing: Easing.inOut(Easing.ease) });
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "absolute", top: "15%", width: "100%", textAlign: "center" }}>
-        <div style={{ fontFamily: BAUDOT.font.body, fontSize: 26, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 600, color: C.champagne }}>
+        <div style={{ fontFamily: CHARTE.font.body, fontSize: 26, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 600, color: C.champagne }}>
           {label}
         </div>
       </div>
@@ -104,11 +104,11 @@ export const VerticalTitle: React.FC<{ eyebrow: string; title: string }> = ({ ey
   const ty = interpolate(f, [0, 22], [26, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const lineW = interpolate(f, [16, 56], [0, 100], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
       <div style={{ textAlign: "center", opacity: op, transform: `translateY(${ty}px)` }}>
-        <div style={{ fontFamily: BAUDOT.font.body, fontSize: 24, letterSpacing: "0.32em", textTransform: "uppercase", fontWeight: 600, color: C.champagne, marginBottom: 34 }}>{eyebrow}</div>
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 78, fontWeight: 600, color: C.ivory, lineHeight: 1.12 }}>{title}</div>
-        <div style={{ margin: "44px auto 0", width: `${lineW}%`, maxWidth: 420, height: 2, background: BAUDOT.hairline() }} />
+        <div style={{ fontFamily: CHARTE.font.body, fontSize: 24, letterSpacing: "0.32em", textTransform: "uppercase", fontWeight: 600, color: C.champagne, marginBottom: 34 }}>{eyebrow}</div>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 78, fontWeight: 600, color: C.ivory, lineHeight: 1.12 }}>{title}</div>
+        <div style={{ margin: "44px auto 0", width: `${lineW}%`, maxWidth: 420, height: 2, background: CHARTE.hairline() }} />
       </div>
     </AbsoluteFill>
   );
@@ -148,7 +148,7 @@ export const VerticalCaptions: React.FC<{
         const ty = interpolate(f, [from, from + 14], [18, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
         return (
           <div key={i} style={{ position: "absolute", left: "50%", bottom: "24%", transform: `translateX(-50%) translateY(${ty}px)`, opacity: op, width: "84%", padding: "0 12px" }}>
-            <div style={{ fontFamily: BAUDOT.font.body, fontSize: 40, fontWeight: 700, lineHeight: 1.4, color: C.ivory, textAlign: "center", textShadow: "0 2px 4px rgba(0,0,0,0.98), 0 3px 14px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.75)" }}>{renderMarkup(c.text)}</div>
+            <div style={{ fontFamily: CHARTE.font.body, fontSize: 40, fontWeight: 700, lineHeight: 1.4, color: C.ivory, textAlign: "center", textShadow: "0 2px 4px rgba(0,0,0,0.98), 0 3px 14px rgba(0,0,0,0.9), 0 0 30px rgba(0,0,0,0.75)" }}>{renderMarkup(c.text)}</div>
           </div>
         );
       })}
@@ -166,10 +166,10 @@ export const VerticalCard: React.FC<{ line1: string; line2: string }> = ({ line1
   );
   const ty = interpolate(f, [0, 20], [22, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
       <div style={{ textAlign: "center", opacity: op, transform: `translateY(${ty}px)` }}>
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 58, fontWeight: 600, color: C.ivory, lineHeight: 1.22 }}>{line1}</div>
-        <div style={{ fontFamily: BAUDOT.font.body, marginTop: 26, fontSize: 30, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: C.champagne }}>{line2}</div>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 58, fontWeight: 600, color: C.ivory, lineHeight: 1.22 }}>{line1}</div>
+        <div style={{ fontFamily: CHARTE.font.body, marginTop: 26, fontSize: 30, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: C.champagne }}>{line2}</div>
       </div>
     </AbsoluteFill>
   );
@@ -186,11 +186,11 @@ export const EndCard: React.FC = () => {
   const rise = (d: number) => interpolate(f, [d, d + 20], [16, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const fade = (d: number) => interpolate(f, [d, d + 16], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, alignItems: "center", justifyContent: "center" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, alignItems: "center", justifyContent: "center" }}>
       <div style={{ textAlign: "center", opacity: op }}>
         <Img src={staticFile("logo-mark.png")} style={{ width: 340, display: "block", margin: "0 auto", opacity: fade(4), transform: `translateY(${rise(4)}px)` }} />
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 44, fontWeight: 600, fontStyle: "italic", color: C.ivory, marginTop: 34, opacity: fade(18), transform: `translateY(${rise(18)}px)` }}>DR FABRICE BAUDOT</div>
-        <div style={{ fontFamily: BAUDOT.font.body, fontSize: 20, letterSpacing: "0.28em", textTransform: "uppercase", color: C.slate, marginTop: 14, opacity: fade(30), transform: `translateY(${rise(30)}px)` }}>Microchirurgie · Laser Er-YAG</div>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 44, fontWeight: 600, fontStyle: "italic", color: C.ivory, marginTop: 34, opacity: fade(18), transform: `translateY(${rise(18)}px)` }}>DR FABRICE CHARTE</div>
+        <div style={{ fontFamily: CHARTE.font.body, fontSize: 20, letterSpacing: "0.28em", textTransform: "uppercase", color: C.slate, marginTop: 14, opacity: fade(30), transform: `translateY(${rise(30)}px)` }}>Microchirurgie · Laser Er-YAG</div>
       </div>
     </AbsoluteFill>
   );

@@ -31,7 +31,7 @@ import {
   statSync,
 } from "node:fs";
 import { createHash } from "node:crypto";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 
 const RACINE = "imcp-hyperframes";
 const FONTS = join(RACINE, "_socle", "assets", "fonts");
@@ -155,7 +155,11 @@ if (verifie) {
     // projet GENERE, pas dans _socle/ (ou les polices vivent sous assets/).
     if (cible === TEMPLATE) continue;
     const html = readFileSync(cible, "utf8");
-    const dossier = cible.slice(0, cible.lastIndexOf("/")) || ".";
+    // dirname() et non un decoupage sur "/" : sous Windows les chemins sont
+    // separes par "\", lastIndexOf("/") rendait -1 et le dossier calcule etait
+    // tronque. Les 60 polices etaient bien la, le controle les declarait
+    // introuvables — un faux echec qui masquait les vrais.
+    const dossier = dirname(cible);
     for (const ref of new Set(
       [...html.matchAll(/url\(\.\/([^)]+\.woff2?)\)/g)].map((m) => m[1]),
     )) {

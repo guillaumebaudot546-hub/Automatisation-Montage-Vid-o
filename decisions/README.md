@@ -22,4 +22,8 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [014](014-hyperframes-moteur-officiel.md) | HyperFrames devient le moteur, Remotion passe en maintenance | Actif — remplace la RÈGLE 4 |
 | [015](015-hermes-orchestrateur.md) | Hermes Agent est l'orchestrateur — pas de bot Telegram maison | Actif — modifie SPEC-PALIER-1 |
 | [016](016-cout-par-video.md) | Le coût par vidéo est un problème de plomberie, pas d'intelligence | Actif — étapes 1 et 4 faites |
-| [017](017-rythme-et-hook.md) | Rythme, ancrage et hook visuel sont des règles du portail | Actif |
+| [017](017-capsule-depuis-prompt.md) | Une capsule depuis un prompt est une AUTRE classe de vidéo — contrat capsule.json | Actif |
+| [018](018-mesurer-les-jetons.md) | On mesure les jetons (state.db + scripts/couts.py), on ne les déduit plus | Actif |
+| [019](019-verrou-de-budget.md) | Le budget devient un verrou (hook pre_tool_call), pas une consigne | Actif |
+| [020](020-le-fichier-teste-est-celui-qui-tourne.md) | Un garde-fou non testé n'est pas un garde-fou — source unique, 6 garde-fous couverts | Actif |
+| [021](021-rythme-et-hook.md) | Le rythme et le hook sont des règles du portail, pas du goût | Actif — écrite le 01/08 sous le n° 017, renumérotée le 08/08 |

@@ -3,73 +3,455 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
-## 2026-07-31 (suite) — Supports commerciaux, et le coût enfin mesuré
+## 2026-08-05 — Le budget devient un verrou
 
-### Le coût réel : 6,91 $, pas 1 €
+Guillaume : « un tel tarif n'est pas acceptable, à corriger ». Écrit en
+`decisions/019`.
 
-Hermes stocke le détail par session dans `~/.hermes/state.db`
-(`session_model_usage`). La session de montage du 30/07 :
+**Le constat qui gouverne.** La réponse du 03/08 avait été d'écrire « une vidéo
+= une session neuve » dans `AGENTS.md` et dans la skill. C'était refaire le
+pari de « RENDRE SANS PORTAIL EST INTERDIT » — consigne en majuscules, ignorée
+trois fois de suite le 30/07. Le projet a déjà tranché : une règle qui dépend
+de la bonne volonté de l'agent n'est pas un garde-fou.
 
-| Poste | Tokens | Coût | Part |
-|---|---|---|---|
-| **Écriture de cache** | 594 464 | **3,72 $** | **54 %** |
-| Lecture de cache | 3 703 390 | 1,85 $ | 27 % |
-| Sortie | 53 793 | 1,34 $ | 19 % |
-| Entrée non cachée | 118 | ~0 | 0 % |
-| | | **6,91 $** | |
+### Livré
 
-Recalculé à la main aux tarifs officiels Opus 4.8 (5 $/25 $ le million) : le
-total tombe exactement sur les 6,91 $ annoncés par la base. **L'écriture de
-cache était le premier poste**, ce qui confirme le diagnostic du TTL de 5 min :
-le contexte était réécrit à 6,25 $/M au lieu d'être relu à 0,50 $/M, soit
-**12,5× plus cher**.
+`scripts/hook-budget.py`, branché en `pre_tool_call` **sans matcher** (donc sur
+tous les outils, pas seulement le terminal) et **avant** `portail.py` — inutile
+de valider un plan dans une session qu'on va arrêter.
 
-Total toutes sessions confondues : **11,22 $**. Guillaume avait relevé 15 € ;
-l'écart vient vraisemblablement des sessions Claude Code, facturées sur le même
-compte Anthropic mais étrangères au service.
+| Seuil | Défaut | Intention |
+|---|---|---|
+| `IMCP_CONTEXTE_MAX` | 60 000 jetons/appel | Préventif : au-delà, chaque appel coûte trop cher avant de commencer |
+| `IMCP_BUDGET_USD` | 2,00 $ | Curatif : filet contre une boucle |
 
-### Proposition commerciale corrigée
+Budget calculé au **tarif standard**, pas au tarif d'introduction : régler un
+verrou sur un prix qui augmente de 50 % le 31/08 serait le régler faux.
 
-`proposition-imcp-studio-video.html` annonçait **« ≈ 1 € par vidéo »** au
-Dr Baudot. Écart de 7× avec la mesure. Corrigée en **révision B** (31/07) :
-chiffre remplacé, décomposition ajoutée, et la correction elle-même est écrite
-dans le document plutôt que masquée. Original conservé en
-`proposition-imcp-studio-video.SAUVEGARDE-avant-correction-couts-2026-07-31.html`.
+Bloquer un outil n'empêche pas l'agent de parler : il garde la possibilité
+d'expliquer au praticien pourquoi il s'arrête, mais il ne peut plus dépenser.
 
-### Livré dans `commercial/`
+### Politique de panne, inverse de portail.py
 
-| Fichier | Ce que c'est |
-|---|---|
-| `landing-agent-montage.html` | Landing page de l'agent. Charte MedStream reprise de la proposition, images produit extraites des vraies vidéos livrées, coûts mesurés affichés |
-| `deck-agents-ia.html` | Catalogue des agents : 4 en production (avec preuve mesurée), 4 à développer (avec le point dur de chacun). Une couleur par domaine |
-| `vitrine-agents/` | Mini-vidéo 16:9, 41 s, rendue en local |
+Base illisible, payload incompréhensible : **on laisse passer**. Un verrou de
+budget cassé ne doit pas geler la production. `portail.py`, lui, bloque quand il
+est cassé — il protège la qualité livrée au praticien, celui-ci ne protège que
+de l'argent.
 
-### Décision : la vitrine n'est PAS dans `imcp-hyperframes/`
+### Vérifié sur le VPS
 
-`check-charte` scanne `imcp-hyperframes/` et impose la charte IMCP (cyan
-`#49B6C9`). Or cette vidéo est un support **MedStream DCA** et demande une
-couleur par agent. Deux mauvaises options écartées : casser le vert du garde-fou,
-ou déguiser les noms de tokens pour passer sous son radar. Retenu : la placer
-dans `commercial/vitrine-agents/`, hors du périmètre scanné. La charte IMCP
-protège les vidéos du praticien, pas les supports de l'agence.
+Cinq chemins testés (session réelle → bloque · seuils relevés → passe · base
+absente → passe · payload illisible → passe · budget dépassé → bloque).
+`hermes hooks doctor` : **« All shell hooks look healthy »**.
 
-### Défauts trouvés et corrigés en cours de route
+### Deux constats d'exploitation
 
-- **Deux tirets cadratins** dans la landing (dont le `<title>`, visible dans
-  l'onglet). La règle du skill est binaire, zéro toléré. Corrigés.
-- **Composition HyperFrames refusée 3 fois** avant de passer : conteneur racine
-  sans `data-composition-id`, sans dimensions, sans `data-start`, puis le
-  gabarit détecté comme seconde entrée. Réglé en déplaçant le gabarit dans
-  `_source/` (il garde son extension `.html` et sa coloration).
-- **Aucun accent dans la vidéo** au premier rendu (« Controleur qualite »,
-  « CONFORMITE »). Inacceptable sur un support commercial français, et inutile :
-  les polices embarquées couvrent latin-ext. Corrigé.
-- **Composition déséquilibrée** : tout le contenu dans la moitié gauche, moitié
-  droite vide en 16:9. Passée en trois colonnes, la preuve à droite.
+- `~/.hermes/agent-hooks/` appartient à **root** : ni toi ni un script de
+  déploiement ne peut y écrire. `portail.py` n'est pas maintenable par le
+  projet ; les garde-fous vivent désormais dans `~/imcp/scripts/`.
+- L'allowlist contrôle la **dérive de mtime** : recopier le script le désactive.
+  `deploy-vps.sh` réapprouve et vérifie automatiquement après chaque copie —
+  sans quoi un déploiement aurait silencieusement éteint le verrou.
 
-Les deux derniers n'ont été vus qu'en extrayant les images du rendu. Le
-`check` passait au vert dans les deux cas : un code de sortie ne remplace pas un
-contrôle visuel.
+### Reste ouvert
+
+La cible de ~0,50 $ par capsule est une **projection**. Elle ne sera établie
+qu'en produisant une capsule dans une session vide, `scripts/couts.py` relevé
+avant et après.
+
+## 2026-08-03 (clôture) — La donnée était là depuis le début
+
+Guillaume : « il faut pouvoir relever le nombre de jetons » et rendre la
+génération depuis un prompt définitive. Écrit en `decisions/018`.
+
+**J'avais tort dans l'entrée précédente.** J'ai écrit « Hermes ne journalise
+aucun décompte de jetons ». Faux : `~/.hermes/state.db`, table
+`session_model_usage`, contient `input_tokens`, `output_tokens`,
+`cache_read_tokens`, `cache_write_tokens`, `api_call_count` et
+`estimated_cost_usd`. J'avais fouillé les logs sans ouvrir la base.
+
+Preuve de fiabilité : sa ligne `opus-4-8` du 30/07 affiche **6,912509 $** — au
+centime près le 6,91 $ relevé à la main et publié dans la proposition.
+
+### La mesure
+
+Session `20260730_203305_a54410a5`, Sonnet 5, **8,79 $** :
+
+| Poste | Montant | Part |
+|---|---|---|
+| Écriture du cache | 5,69 $ | **65 %** |
+| Relecture du cache | 2,53 $ | 29 % |
+| Texte généré | 0,56 $ | 6 % |
+
+**143 803 jetons de contexte par appel** sur 88 appels. **25 881 jetons
+réécrits en cache à chaque appel.** Ce n'est pas relire l'historique qui coûte,
+c'est le faire grossir : la relecture est à 0,1×, l'écriture à 1,25×.
+
+Décomposition vérifiée en testant les quatre combinaisons tarifaires ; une
+seule tombe juste au centime (intro 2/10 $, cache 1,25×).
+
+Cumul de la base : **19,96 M de jetons, 17,32 $**, dont deux tiers sur cette
+seule session jamais refermée.
+
+### Écart à surveiller
+
+`config.yaml` déclare `cache_ttl: 1h` mais la facturation correspond à 1,25×
+(5 min). Soit le réglage n'est pas appliqué — le cache expire pendant un rendu
+de 15 min — soit l'estimateur sous-évalue de 39 % (12,20 $ réels). À trancher.
+
+### Livré
+
+- `scripts/couts.py` — instrument de mesure officiel, déployé et opérationnel
+  sur le VPS. Seuil chiffré : 60 000 jetons/appel.
+- `scripts/deploy-vps.sh` — déploiement reproductible **avec vérification** :
+  fichiers présents, 4 polices, description de skill sous 60 caractères,
+  `AGENTS.md` cohérent aux deux emplacements, et la chaîne capsule testée de
+  bout en bout. `~/imcp` n'étant pas un dépôt git, ce script est la seule
+  garantie contre un oubli de `scp`.
+- `decisions/018` + correction de l'audit et de la RÈGLE E.
+
+### Reste ouvert
+
+`actual_cost_usd` vaut 0 partout, `cost_status` reste `estimated` : Hermes
+n'interroge pas l'API de facturation. `couts.py` reste une estimation — juste
+au centime sur le cas vérifié, mais une estimation.
+
+## 2026-08-03 (fin) — Audit des 5 $ : ce n'était pas le HTML
+
+Capsule livrée en 15 min pour ~5 $. Audit complet en
+`docs/AUDIT-2026-08-03-capsule-5usd.md`.
+
+**Mon hypothèse était fausse.** Je cherchais du HTML écrit à la main. Les trois
+écritures de la session font 280, 287 et 279 caractères — du `capsule.json`. Le
+contrat a tenu, la RÈGLE A a été respectée. Tous les retours d'outils cumulés
+font 54 Ko : l'argent n'est pas passé là.
+
+**Les vraies causes**, déduites du log (Hermes ne journalise aucun jeton — c'est
+une attribution raisonnée, pas une mesure comme le 30/07) :
+
+1. **La session n'a jamais été refermée.** Ouverte le 30/07, **246 messages** à
+   l'arrivée de la demande, **349** à la fin, renvoyés à chacun des **120 appels
+   au modèle** pour 6 tours de conversation.
+2. **17 `vision_analyze`.** L'agent regardait son propre rendu, alors que
+   `portail:capsule`, `hyperframes check` et `ffprobe` donnent la même
+   information objectivement et gratuitement.
+3. **Réglages permissifs** : `idle_compact_after_seconds: 0` (un fil dormant
+   depuis 4 jours jamais compacté), curateur de skills toutes les 15 tours qui
+   relit tout l'historique, plafonds de boucle à 50.
+
+**Correctifs** : config VPS (5 réglages, sauvegarde horodatée, YAML revalidé) +
+RÈGLE E dans `capsule-prompt` + section coût dans `AGENTS.md`.
+
+### Régression que j'ai introduite et corrigée
+
+Ma substitution `BAUDOT` → `CHARTE` du renommage visait l'export TypeScript.
+Elle a aussi frappé le **nom du praticien en majuscules** dans trois fichiers,
+dont `AGENTS.md` déjà déployé sur le VPS : « Dr Fabrice CHARTE ». Corrigé en
+restant sur l'anonymisation demandée (`praticien client-01`, `Client 01`), pas
+en restaurant le nom. `npm run check` vert après correction.
+
+C'est exactement le mode de défaillance du `sed` du 30/07 : une substitution
+large sans vérification de ses effets de bord.
+
+## 2026-08-03 (suite) — Le premier test Telegram échoue : la skill était invisible
+
+Guillaume teste depuis Telegram. Hermes répond « sans voix off, il faut quand
+même une source visuelle réelle » et part chercher du B-roll en `*.mp4`.
+**Il raisonne en `montage-imcp`.** L'aiguillage n'a pas déclenché.
+
+### La cause, trouvée dans agent.log
+
+Une ligne du 31/07 :
+
+> `Description is 192 chars — new skills must fit the 60-char system-prompt`
+> `budget (one sentence, trigger first, ends with a period). The skill index`
+> `truncates longer descriptions`
+
+**Hermes plafonne les descriptions de skill à 60 caractères.** La mienne en
+faisait **298**. L'index que voit le routeur la tronquait : le déclencheur
+« depuis un prompt, sans rush » n'y figurait pas. La skill était installée et
+inatteignable.
+
+`ffmpeg-image-slideshow`, créée par le curateur le 31/07, fait exactement
+60 caractères — après deux rejets pour la même raison. Le garde-fou existait,
+je ne l'avais pas lu.
+
+Corrigé : `Vidéo depuis un texte ou un prompt, sans rush ni caméra.` (56 car.).
+La doctrine détaillée remonte dans le corps du fichier, où elle ne coûte rien.
+
+### Seconde cause, à ne pas confondre
+
+Le test tournait dans `session=20260730_203305_a54410a5` — une session ouverte
+le **30/07**, 196+ messages, dont tout le cadrage « montage du laser Er-YAG pour
+le Dr Baudot ». Même avec une description correcte, un fil aussi chargé ramène
+l'agent vers ce qu'il faisait déjà. La règle est écrite dans CLAUDE.md :
+**une session, un objectif.**
+
+### Reste ouvert
+
+- `montage-imcp` a une description de 350 caractères, également tronquée. Elle
+  fonctionne parce que sa troncature commence par « Doctrine de montage vidéo »,
+  ce qui capte toutes les demandes vidéo — y compris celles qui ne sont pas des
+  montages. À raccourcir, mais c'est une skill utilisateur : décision de
+  Guillaume, pas correction unilatérale.
+- Le test bout-en-bout reste à refaire dans une session neuve.
+
+## 2026-08-03 — Déploiement sur le VPS
+
+Hermes sait désormais générer une capsule depuis un prompt. Déployé sur
+`HermesMedStreamDCA` (78.47.14.178), sauvegarde préalable dans
+`~/sauvegardes/2026-08-03-1147`.
+
+### Trois blocages trouvés à l'inspection, avant de toucher à quoi que ce soit
+
+1. **`~/imcp` n'est pas un dépôt git** — copie manuelle, déploiement par `scp`.
+2. **`src/theme/` n'existait pas du tout sur le VPS.** `capsule-build` et
+   `portail-capsule` le lisent : ils auraient échoué au premier appel. Créé
+   avec `client-01.ts`.
+3. **Le VPS avait encore `praticiens/baudot.json`.** Les scripts renommés
+   cherchent `client-01.json` : déployer sans renommer cassait le montage
+   existant. Renommé dans le même geste.
+
+Constat en passant : l'`AGENTS.md` du VPS datait du **31/07** et ne contenait
+aucune trace du verrou. Tout le travail du 01/08 n'avait jamais été déployé.
+
+### Déployé
+
+5 scripts (`capsule-build`, `portail-capsule`, `guard-portail`,
+`portail-doctrine`, `guard-render`), `src/theme/client-01.ts`,
+`_socle/capsule.template.html` + les 4 polices, la skill `capsule-prompt`
+dans `~/.hermes/skills/video/`, et `AGENTS.md` aux deux emplacements
+(empreintes identiques vérifiées).
+
+**RÈGLE 2 réécrite en aiguillage** : rush → `montage-imcp` + `plan.json` ;
+prompt → `capsule-prompt` + `capsule.json`. Sans ça, la skill était installée
+mais Hermes n'avait aucune raison de la charger.
+
+### Vérifié SUR LE VPS, pas en local
+
+- Portail capsule : 0 violation, reçu écrit.
+- Builder : `index.html` de 11 451 octets, charte lue depuis `src/theme/`.
+- Verrou : plan modifié après validation → **rendu bloqué (2)** ; revalidation
+  → **0** ; rendu autorisé → **0**.
+- `guard-render` : sonde multiplateforme confirmée. **Le garde-fou « jamais
+  deux rendus en parallèle » protège enfin quelque chose là où la production
+  tourne** — il ne sondait que via `powershell.exe`.
+- Montage rush intact après renommage.
+
+### Reste ouvert
+
+- Aucun test bout-en-bout depuis Telegram : la chaîne est vérifiée en ligne de
+  commande sur le VPS, pas via une vraie conversation avec le praticien.
+- Le dépôt GitHub est **public** et les noms restent dans les contenus
+  (~97 occurrences) et dans tout l'historique. Le renommage ne couvre que les
+  identifiants techniques.
+
+## 2026-08-02 (fin) — La génération depuis un prompt devient une doctrine
+
+Demande de Guillaume : que ce type de vidéo soit implémenté dans les skills
+d'Hermes — générer depuis un prompt, via HyperFrames, avec la fiabilité que la
+doctrine garantit pour les montages. Écrit en `decisions/017`.
+
+**Le constat de départ, inconfortable :** la vidéo FBE est partie sans le
+moindre garde-fou. `portail-doctrine.mjs` juge des spans et une couverture de
+sous-titres issus d'une transcription — sans rush, rien à juger. Et
+`guard-portail.mjs`, corrigé la veille, laisse passer tout rendu sans
+`plan.json`. Réutiliser le portail existant était impossible : il fallait un
+second portail.
+
+**Livré :** contrat `capsule.json`, socle `_socle/capsule.template.html`,
+builder `capsule-build.mjs` (8 blocs, balisage restreint `**mot**`, charte lue
+dans `src/theme/`), portail `portail-capsule.mjs`, skill `capsule-prompt`,
+`guard-portail` étendu aux deux contrats, `capsule:check` dans `npm run check`.
+
+**Ce que le portail a immédiatement trouvé, sur sa première utilisation :**
+la piste `Clinical_Grace.mp3` est rejetée faute de licence, et les durées de la
+v2 livrée (123 s) mettent les scènes 1, 3 et 9 entre 3,6 et 4,2 mots/s —
+**la v2 était trop dense à lire.** Corrigé en coupant du texte plutôt qu'en
+allongeant : 126 s, une seule scène encore signalée.
+
+**Bug corrigé :** `capsule-build` et `portail-capsule` résolvaient `src/theme/`
+et le socle relativement au dossier de travail. Hermes lance ses commandes
+depuis le dossier de la vidéo — les deux échouaient. Racine déduite de
+l'emplacement du script.
+
+**Vérifications :** chaîne complète testée depuis le dossier de la vidéo
+(portail 3 → rendu bloqué 2 ; avec licence, portail 0 → reçu écrit) ;
+`hyperframes check` sur la composition générée à 0 erreur et 50/50 contrastes ;
+les 6 garde-fous du dépôt verts.
+
+## 2026-08-02 (suite) — Lit musical ajouté, et un trou dans la politique audio
+
+Guillaume fournit `Clinical_Grace.mp3` et demande de l'ajouter à la vidéo FBE.
+
+### Le fichier
+
+145,2 s · 192 kbps · 3,5 Mo · SHA256 `14c701a5…7302da`.
+**Aucune métadonnée** — ni artiste, ni titre, ni source. Nom d'origine conservé
+dans le projet : renommer masque la provenance, et c'est exactement ce qui a
+laissé passer le Saint-Preux (decision 014).
+
+**Licence non fournie à ce jour.** La règle du dépôt est explicite : « toute
+piste autre que le défaut exige une preuve de licence ». Le fichier est intégré
+au rendu local mais **reste hors dépôt**.
+
+### La faille trouvée
+
+La politique fail-closed du `.gitignore` ne couvrait que `musique/`,
+`public/music/*` et `public/**/*.mp3`. La section médias de
+`imcp-hyperframes/` ignore `.mp4`, `.mov` et `.wav` — **mais pas `.mp3`**.
+Vérifié : `git check-ignore` laissait passer
+`imcp-hyperframes/videos/fbe-presentation/Clinical_Grace.mp3`.
+
+C'est la même classe de faille que le renommage Saint-Preux : un filtre qui a
+un trou ne protège de rien. Corrigé — tout audio est désormais ignoré où qu'il
+soit (`*.mp3 *.m4a *.aac *.flac *.ogg *.opus *.wav *.aiff`), la whitelist des
+5 productions libres de droits vérifiée intacte, et aucun fichier déjà suivi
+n'a été éjecté.
+
+### Le montage audio
+
+`<audio>` séparé, `data-volume 0.68`, fondu d'ouverture 2,5 s et sortie 5 s
+animés sur la timeline (`volume`), pas via `data-volume` — le runtime sonde ces
+keyframes et les applique à l'identique en preview et au rendu.
+
+**Vérifié sur le MP4 final**, pas sur le code : flux AAC 48 kHz stéréo, 123 s.
+Profil mesuré à `volumedetect` — 0-1 s : −29,4 dB · 4-6 s : −22,4 dB ·
+61-63 s : −19,6 dB · 116-117 s : −15,3 dB · **122-123 s : −52,3 dB**. Les deux
+fondus sont dans le fichier.
+
+### À trancher par Guillaume
+
+1. **Licence de `Clinical_Grace.mp3`** — sans preuve, la piste ne peut pas
+   partir chez un praticien ni être poussée sur GitHub.
+2. **La charte utilisée est celle du Dr Baudot** (cyan `#49B6C9` « imposé par le
+   client ») sur une vidéo destinée au **Dr Robert Fromental**. `check-charte`
+   est vert, mais c'est un problème de fond, pas de code.
+
+## 2026-08-02 — Vidéo FBE générée en session (HyperFrames, sans rush)
+
+Demande de Guillaume : générer la vidéo de présentation du FBE dans la session,
+100 % IA, via HyperFrames. Périmètre du palier 1 explicitement outrepassé par
+lui après que la contrainte a été signalée — c'est sa décision.
+
+**Livré :** `imcp-hyperframes/videos/fbe-presentation/` — 10 scènes, 3 min 02,
+1920×1080, 30 fps, 5 460 frames, 6,3 Mo, rendu en 2 min 26. Composition de
+287 lignes (plafond 700).
+
+**Nature réelle du livrable — à ne pas surestimer.** Ce n'est pas la vidéo du
+storyboard : c'est du **motion design typographique muet**. Il manque la voix
+off (workspace Higgsfield à court de crédits, et Guillaume a dit qu'elle
+n'était pas obligatoire) et toutes les 3D des scènes 2, 3, 6, 7 et 9
+(module images IA, decision 011, palier 2-3, non construit). Le texte du
+storyboard a été condensé pour être lisible à l'écran, pas récité.
+
+**Doctrine appliquée :** RÈGLE 2 (typographie plutôt qu'images brutes — c'est
+le point fort ici), RÈGLE 3 (16:9, cible YouTube/site), RÈGLE 4bis (charte
+depuis `src/theme/client-01.ts`). La RÈGLE 0 est satisfaite par construction :
+sans rush, il n'y a pas de voix à hacher.
+
+**Vérifications :** `hyperframes check` → 0 erreur, 48/48 contrôles de contraste
+WCAG AA (un `#foot` à 3,38:1 corrigé en couleur `slate` pleine). `check-sizes`,
+`check-charte`, `fonts:check`, `socle:check` → verts. Frames extraites du MP4
+final et inspectées, pas seulement les snapshots.
+
+**Preuve pour la decision 016 :** le rendu affiche « Fonts: 4 loaded » et les
+frames du MP4 montrent Cormorant, Manrope et JetBrains Mono correctement
+appliquées. C'est la vérification visuelle que l'extraction des polices exigeait.
+
+### Bug corrigé : le verrou du portail bloquait tout
+
+`guard-portail.mjs`, écrit la veille, refusait TOUT rendu sans `plan.json` — il
+aurait bloqué les 13 compositions livrées, écrites à la main. Périmètre corrigé :
+**s'il existe un `plan.json`, il doit être validé ; sinon le rendu passe.** Le
+portail valide un plan de montage dérivé d'un rush ; une composition sans rush
+n'a rien à valider. Retesté : composition sans plan → 0, montage avec plan non
+validé → 2.
+
+### Reste ouvert
+
+- Avertissement `timeline_track_too_dense` (10 éléments sur la piste 2) laissé
+  tel quel. HyperFrames recommande des sous-compositions ; c'est aussi le remède
+  de `check-sizes`. À faire si la composition grossit.
+- Le workspace Higgsfield est à court de crédits — aucune voix off générable.
+
+## 2026-08-01 — Coût par vidéo : sortir la plomberie, garder le raisonnement
+
+Question de Guillaume : réduire largement le coût par vidéo **sans atténuer la
+qualité de la réflexion ni celle du montage**. Décision écrite en
+`decisions/016-cout-par-video.md`, feuille de route en `docs/COUT-PAR-VIDEO.md`.
+
+### Le diagnostic
+
+Décomposition du relevé du 30/07 (6,91 $) : écriture cache 3,72 $ (54 %),
+relecture 1,85 $ (27 %), sortie 1,34 $ (19 %). Soit 7 à 10 M de jetons,
+~120 000 jetons de contexte par appel. **Le coût n'est pas ce que le modèle
+écrit, c'est ce qui s'accumule et se refait relire.**
+
+Le plus gros contributeur mesuré : **144 580 des 168 232 octets de chaque
+composition étaient de la police en base64** (86 %). Une lecture du fichier
+injectait ~42 000 jetons, relus à chaque appel suivant — ~0,88 $ par passage.
+
+Corollaire inconfortable : `proactive_prune_tokens: 120000` et la compression à
+0,4, posés le 31/07, **supprimaient du raisonnement pour faire de la place à du
+base64**. La plomberie ne coûtait pas que de l'argent, elle mangeait la réflexion.
+
+### Ce qui a été fait
+
+- **Polices sorties du HTML** (`scripts/fonts-extract.mjs`, idempotent).
+  14 fichiers, **2 020 438 octets retirés**, −81 % à −93 % par fichier.
+- **`socle-assets.mjs` gère les dossiers d'assets** et sème ceux que le HTML
+  référence, au lieu d'attendre qu'ils existent.
+- **Portail transformé en verrou** (`scripts/guard-portail.mjs`, hook
+  `PreToolUse`). Reçu empreinté SHA-256 ; aucun rendu sans reçu couvrant cette
+  version du plan.
+- **`guard-render.mjs` réparé.** Il ne sondait que via `powershell.exe` : sur le
+  VPS Linux, le `catch` renvoyait `[]` et le garde-fou « jamais deux rendus en
+  parallèle » **ne protégeait rien là où la production tourne**. Sonde `ps` hors
+  Windows.
+
+### Sur le renversement du choix du 31/07
+
+Le base64 avait été choisi la veille, délibérément, pour deux raisons écrites :
+« un HTML mono-fichier » et « aucun chemin relatif à casser entre local et VPS ».
+Ce choix a été renversé **en gardant l'auto-hébergement**, qui était le fond de
+la décision : aucun accès réseau, aucune police système. Seul le transport change.
+
+La contrepartie a été payée. Le base64 achetait l'immunité au défaut invisible
+du 31/07 — police absente, fallback sans-serif, aucune erreur. En reprenant ces
+142 Ko, `npm run fonts:check` **bloque désormais** si une référence `./fonts/`
+ne résout pas. Le défaut est devenu bruyant. Vérifié en cassant volontairement
+une référence : exit 0 → 2 → 0 après `socle:sync`.
+
+Argument qui a levé le doute sur les chemins relatifs : `source.mp4`,
+`logo-mark.png`, `intro-imcp.mp4` sont **déjà** référencés en relatif par les
+compositions qui rendent sur le VPS. Le renderer les résout ; le seul risque
+réel était d'oublier la copie, et c'est précisément ce que `socle:sync` gère.
+
+### Vérifications
+
+- Round-trip **bit-pour-bit contre `HEAD`** : 4/4 polices identiques. Les octets
+  que Chromium reçoit n'ont pas changé, seul leur transport.
+- Signatures `wOF2` sur les 4 fichiers ; 0 référence cassée sur 13 compositions.
+- `teasers:check` → **0 dérive** : le socle regénère toujours l'octet exact.
+- `check-sizes`, `check-charte`, `socle:check`, `fonts:check` → verts.
+- Chaîne du verrou testée : plan valide → portail 0 → rendu autorisé ;
+  plan fautif → portail 3 (RÈGLE 0) → rendu bloqué 2.
+
+**Non vérifié, et ça reste à faire par Guillaume :** un `npx hyperframes render`
+suivi d'un **contrôle visuel du `.mp4`**. La doctrine l'exige et aucune de mes
+vérifications ne le remplace.
+
+### À trancher
+
+`Proposition_Studio_Contenu_IA_Medstream.pdf` §7 affirme que « quatre cinquièmes
+de la facture tiennent au transcript ». `imcp3181.srt` fait 1 573 octets — c'est
+faux, et la promesse commerciale qui en découle (« un rush deux fois plus long
+coûte deux fois plus cher ») ne tient pas. À corriger avant envoi au praticien.
+
+Prochaine étape : redéployer `AGENTS-vps.md` sur le VPS, puis l'étape 2
+(builder `plan.json → index.html`) — qui demande une décision de design sur le
+livrable, à prendre avec Guillaume sur un rendu de référence.
 
 ## 2026-07-31 (suite) — Les polices n'ont JAMAIS été chargées par HyperFrames
 
@@ -82,7 +464,7 @@ projet local depuis le début.**
 
 ### Le diagnostic, fichier par fichier
 
-1. `src/theme/baudot.ts` est bien la source de vérité : cyan `#49B6C9`, fond
+1. `src/theme/client-01.ts` est bien la source de vérité : cyan `#49B6C9`, fond
    navy `#060D18`, display **Cormorant**, corps **Manrope**.
 2. **Remotion (`src/`) charge vraiment ces polices** — `src/index.css` contient
    un `@import` Google Fonts. D'où des montages locaux conformes : le PC a
@@ -368,10 +750,10 @@ explicitement). Non testé faute de rush sous la main.
 | 1 | `apt install unzip` | Manquait ; bloquait le téléchargement de chrome-headless-shell par HyperFrames | `unzip -v` → UnZip 6.00 |
 | 2 | Node déplacé `/root/.hermes/node/` → `/opt/node/` | `/root` est en `700` : aucun compte non-root ne pouvait exécuter `node`. Symlinks `/usr/local/bin/{node,npm,npx}` repointés | `su - guillaume -c 'node -v'` → v22.23.2 |
 | 3 | Swap 4 Go créé | `/swapfile`, ajouté à `/etc/fstab` (persiste au reboot) | `free -h` → Swap 4.0Gi |
-| 4 | Projet doctrine transféré | `/home/guillaume/imcp/` : `praticiens/baudot.json`, `scripts/portail-doctrine.mjs`, `imcp-hyperframes/_socle/` | `find` → 5 fichiers |
+| 4 | Projet doctrine transféré | `/home/guillaume/imcp/` : `praticiens/client-01.json`, `scripts/portail-doctrine.mjs`, `imcp-hyperframes/_socle/` | `find` → 5 fichiers |
 | 5 | Skill installée | `/home/guillaume/.hermes/skills/video/montage-imcp/SKILL.md` | `hermes skills list` → `montage-imcp \| video \| local \| enabled` |
 | 6 | `AGENTS.md` déployé | En `/home/guillaume/.hermes/` (cwd du gateway, lu à chaque conversation) ET `/home/guillaume/imcp/`. Source versionnée : `Déploiement Hermes IA/AGENTS-vps.md` | fichiers présents, 3364 o |
-| 7 | Wrapper `portail-doctrine` | `/usr/local/bin/portail-doctrine` — le portail lit `praticiens/<nom>.json` en RELATIF, donc cassé hors racine projet. Le wrapper fixe le `cd`. Source : `Déploiement Hermes IA/portail-doctrine-wrapper.sh` | testé depuis `/tmp` |
+| 7 | Wrapper `portail-doctrine` | `/usr/local/bin/portail-doctrine` — le portail lit `praticiens/<client>.json` en RELATIF, donc cassé hors racine projet. Le wrapper fixe le `cd`. Source : `Déploiement Hermes IA/portail-doctrine-wrapper.sh` | testé depuis `/tmp` |
 
 ### Preuve que le portail fonctionne sur le VPS
 

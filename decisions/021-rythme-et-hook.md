@@ -1,6 +1,10 @@
-# 017 — Le rythme et le hook sont des règles du portail, pas du goût
+# 021 — Le rythme et le hook sont des règles du portail, pas du goût
 
 **Date :** 2026-08-01 · **Statut :** Actif · **Suite de :** 005 (l'IA décide quoi, le code vérifie comment), 016 (coût)
+
+> *Portait le numéro 017 à sa rédaction. Renumérotée en 021 le 08/08/2026 : une
+> autre branche de travail avait attribué 017 à « une capsule depuis un prompt »
+> en parallèle. Le contenu n'a pas changé.*
 
 ## Contexte
 

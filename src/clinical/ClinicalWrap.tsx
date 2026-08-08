@@ -10,7 +10,7 @@ import {
 } from "remotion";
 import { z } from "zod";
 import { FilmBurn } from "../components/FilmBurn";
-import { TitleCard, LowerThird, Watermark, EndCredits } from "./BaudotChrome";
+import { TitleCard, LowerThird, Watermark, EndCredits } from "./ClientChrome";
 
 /**
  * ClinicalWrap — template vidéo Dr Baudot (DA landing page, cf. TEMPLATE.md).

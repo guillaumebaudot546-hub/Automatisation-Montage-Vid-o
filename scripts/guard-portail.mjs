@@ -22,6 +22,7 @@
 import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join, dirname } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const EST_UN_RENDU = /\b(remotion|hyperframes)\b[^|;&]*\brender\b/i;
 const RECU = ".portail-ok.json";
@@ -45,23 +46,35 @@ export function ecrireRecu(cheminPlan) {
 
 // --- A partir d'ici : le garde-fou proprement dit ---------------------------
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL et non `file://${argv[1]}` : sous Windows argv[1] vaut
+// « C:\...\guard-portail.mjs » quand import.meta.url vaut
+// « file:///C:/.../guard-portail.mjs ». La comparaison naive etait donc
+// TOUJOURS fausse sur Windows — le garde se chargeait sans jamais s'executer,
+// et laissait passer tous les rendus en silence. Sur Linux les deux formes
+// coincidaient, d'ou un verrou actif sur le VPS et inerte sur le poste de
+// travail (constate le 05/08/2026 : 37 tests rouges, aucun symptome visible).
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const commande = commandeAVerifier();
   if (!commande || !EST_UN_RENDU.test(commande)) process.exit(0);
 
+  // PERIMETRE — corrige le 01/08/2026 apres avoir bloque un rendu legitime.
+  //
+  // Le portail valide un PLAN DE MONTAGE derive d'un rush : coupes aux
+  // frontieres de phrases, format, couverture des sous-titres. Une composition
+  // ecrite a la main (les 13 livrees, une presentation typographique) n'a pas
+  // de plan a valider — exiger un recu la bloquerait sans rien proteger.
+  //
+  // Regle : s'il existe un plan.json, il DOIT etre valide. Sinon, on laisse
+  // passer. La RÈGLE 5 d'AGENTS.md impose d'ecrire le plan pour tout montage
+  // issu d'un rush ; ce garde-fou verrouille l'etape d'apres.
   const plan = trouvePlan();
-  if (!plan) {
-    refuse(
-      "Aucun plan.json trouve a cote du rendu.\n" +
-        "Le montage passe par un plan valide, pas par un HTML ecrit a la main.",
-    );
-  }
+  if (!plan) process.exit(0);
 
   const cheminRecu = join(dirname(plan) || ".", RECU);
   if (!existsSync(cheminRecu)) {
     refuse(
       `Le portail n'a jamais valide ${plan}.\n\n` +
-        `  npm run portail -- ${plan} cues.json\n\n` +
+        `  ${commandePortail(plan)}\n\n` +
         "Sortie 0 = passe, 3 = rejet (refaire le plan, plafond 3 essais).",
     );
   }
@@ -73,7 +86,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     refuse(
       `${plan} a change depuis sa validation.\n` +
         "Le recu couvre une version anterieure du plan — le revalider :\n\n" +
-        `  npm run portail -- ${plan} cues.json`,
+        `  ${commandePortail(plan)}`,
     );
   }
 
@@ -81,7 +94,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (!Number.isFinite(age) || age > VALIDITE_MS) {
     refuse(
       `Validation trop ancienne (${Math.round(age / 60000)} min).\n` +
-        `  npm run portail -- ${plan} cues.json`,
+        `  ${commandePortail(plan)}`,
     );
   }
 
@@ -106,11 +119,26 @@ function commandeAVerifier() {
   }
 }
 
-/** Le plan du montage courant : dossier de travail, puis chemin cite. */
+/**
+ * Le contrat du rendu courant. Deux classes de video, deux contrats, un seul
+ * verrou (decision 017) :
+ *   plan.json     — montage issu d'un rush   → portail-doctrine.mjs
+ *   capsule.json  — capsule depuis un prompt → portail-capsule.mjs
+ * Aucun des deux : composition ecrite a la main, rien a valider, on passe.
+ */
 function trouvePlan() {
-  if (existsSync("plan.json")) return "plan.json";
-  const cite = process.argv.slice(2).join(" ").match(/\S+plan\.json/)?.[0];
+  for (const nom of ["plan.json", "capsule.json"]) {
+    if (existsSync(nom)) return nom;
+  }
+  const cite = process.argv.slice(2).join(" ").match(/\S+(plan|capsule)\.json/)?.[0];
   return cite && existsSync(cite) ? cite : null;
+}
+
+/** Chaque contrat a son portail : le message doit citer le bon. */
+function commandePortail(plan) {
+  return plan.endsWith("capsule.json")
+    ? "npm run portail:capsule -- <dossier-projet>"
+    : `npm run portail -- ${plan} cues.json`;
 }
 
 function refuse(message) {

@@ -6,8 +6,8 @@ import {
   interpolate,
   Easing,
 } from "remotion";
-import { BAUDOT } from "../theme/baudot";
-import { Watermark } from "../clinical/BaudotChrome";
+import { CHARTE } from "../theme/client-01";
+import { Watermark } from "../clinical/ClientChrome";
 import { FPS } from "./CapsuleChrome";
 
 /**
@@ -16,7 +16,7 @@ import { FPS } from "./CapsuleChrome";
  * Tous se posent PAR-DESSUS la piste voix continue — jamais ne la coupent.
  */
 
-const C = BAUDOT.color;
+const C = CHARTE.color;
 
 /* ---------- Sting : l'animation logo ORIGINALE (intro-imcp.mp4), ajustée au
    format portrait — vidéo entière contenue au centre, fond = même vidéo floutée.
@@ -55,10 +55,10 @@ export const KineticList: React.FC<{
     interpolate(f, [frames - 12, frames], [1, 0], { extrapolateLeft: "clamp" })
   );
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, justifyContent: "center", padding: "0 96px" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, justifyContent: "center", padding: "0 96px" }}>
       <div
         style={{
-          fontFamily: BAUDOT.font.body,
+          fontFamily: CHARTE.font.body,
           fontSize: 30,
           letterSpacing: "0.26em",
           textTransform: "uppercase",
@@ -81,7 +81,7 @@ export const KineticList: React.FC<{
         return (
           <div key={i} style={{ display: "flex", alignItems: "stretch", gap: 30, opacity: io, transform: `translateX(${tx}px)`, marginBottom: 54 }}>
             <div style={{ width: 6, borderRadius: 3, background: C.champagne, height: `${barH}%`, minHeight: 8, alignSelf: "center" }} />
-            <div style={{ fontFamily: BAUDOT.font.body, fontSize: 30, fontWeight: 500, color: C.slate, paddingTop: 2 }}>
+            <div style={{ fontFamily: CHARTE.font.body, fontSize: 30, fontWeight: 500, color: C.slate, paddingTop: 2 }}>
               <span style={{ display: "block", fontSize: 52, fontWeight: 700, color: C.ivory, lineHeight: 1.18 }}>{item}</span>
             </div>
           </div>
@@ -131,7 +131,7 @@ export const BrollCutaway: React.FC<{
             top: "8%",
             width: "100%",
             textAlign: "center",
-            fontFamily: BAUDOT.font.body,
+            fontFamily: CHARTE.font.body,
             fontSize: 26,
             letterSpacing: "0.22em",
             textTransform: "uppercase",
@@ -172,8 +172,8 @@ export const CtaRibbon: React.FC<{ line1: string; line2: string; frames: number 
         textAlign: "center",
       }}
     >
-      <div style={{ fontFamily: BAUDOT.font.body, fontSize: 34, fontWeight: 700, color: C.ivory }}>{line1}</div>
-      <div style={{ fontFamily: BAUDOT.font.body, marginTop: 8, fontSize: 24, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: C.champagne }}>
+      <div style={{ fontFamily: CHARTE.font.body, fontSize: 34, fontWeight: 700, color: C.ivory }}>{line1}</div>
+      <div style={{ fontFamily: CHARTE.font.body, marginTop: 8, fontSize: 24, fontWeight: 600, letterSpacing: "0.16em", textTransform: "uppercase", color: C.champagne }}>
         {line2}
       </div>
     </div>

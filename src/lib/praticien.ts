@@ -4,7 +4,7 @@ import { z } from "zod";
  * Couches 2 et 3 du skill (decision 003) : les preferences du praticien et les
  * exemples valides, rendues LISIBLES PAR DU CODE.
  *
- * Jusqu'ici praticiens/<nom>.json n'etait lu par aucune ligne de code : la
+ * Jusqu'ici praticiens/<client>.json n'etait lu par aucune ligne de code : la
  * boucle d'apprentissage (doctrine, REGLE 6) reposait entierement sur le fait
  * qu'un humain pense a rouvrir le fichier. Elle s'est arretee toute seule
  * pendant dix jours sans que rien ne le signale.

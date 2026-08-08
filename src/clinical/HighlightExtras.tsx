@@ -5,14 +5,14 @@ import {
   interpolate,
   Easing,
 } from "remotion";
-import { BAUDOT } from "../theme/baudot";
+import { CHARTE } from "../theme/client-01";
 
 /**
  * Extras des vidéos courtes : sous-titres narratifs synchronisés (bandeau
  * bas) + carton CTA final. Utilisés par ClinicalHighlights uniquement.
  */
 
-const C = BAUDOT.color;
+const C = CHARTE.color;
 const FPS = 30;
 
 export interface CaptionCue {
@@ -61,7 +61,7 @@ export const CaptionTrack: React.FC<{ captions: CaptionCue[] }> = ({ captions })
           >
             <div
               style={{
-                fontFamily: BAUDOT.font.body,
+                fontFamily: CHARTE.font.body,
                 fontSize: 27,
                 fontWeight: 600,
                 lineHeight: 1.42,
@@ -103,7 +103,7 @@ export const CtaCard: React.FC<{ line1: string; line2: string }> = ({ line1, lin
   return (
     <AbsoluteFill
       style={{
-        background: BAUDOT.cardBackground,
+        background: CHARTE.cardBackground,
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -111,7 +111,7 @@ export const CtaCard: React.FC<{ line1: string; line2: string }> = ({ line1, lin
       <div style={{ textAlign: "center", opacity: op, transform: `translateY(${ty}px)`, maxWidth: 1500 }}>
         <div
           style={{
-            fontFamily: BAUDOT.font.display,
+            fontFamily: CHARTE.font.display,
             fontSize: 66,
             fontWeight: 600,
             color: C.ivory,
@@ -122,7 +122,7 @@ export const CtaCard: React.FC<{ line1: string; line2: string }> = ({ line1, lin
         </div>
         <div
           style={{
-            fontFamily: BAUDOT.font.body,
+            fontFamily: CHARTE.font.body,
             marginTop: 24,
             fontSize: 30,
             fontWeight: 600,
@@ -139,7 +139,7 @@ export const CtaCard: React.FC<{ line1: string; line2: string }> = ({ line1, lin
             width: `${lineW}%`,
             maxWidth: 420,
             height: 1.5,
-            background: BAUDOT.hairline(),
+            background: CHARTE.hairline(),
           }}
         />
       </div>

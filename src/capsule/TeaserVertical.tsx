@@ -1,8 +1,8 @@
 import { AbsoluteFill, Audio, OffthreadVideo, Sequence, staticFile, useCurrentFrame, interpolate, Easing } from "remotion";
 import { z } from "zod";
 import { FPS, VerticalTitle, VerticalCaptions } from "./CapsuleChrome";
-import { Watermark } from "../clinical/BaudotChrome";
-import { BAUDOT } from "../theme/baudot";
+import { Watermark } from "../clinical/ClientChrome";
+import { CHARTE } from "../theme/client-01";
 
 /**
  * TeaserVertical — short 9:16 tiré d'un cours long PAYSAGE (16:9).
@@ -15,7 +15,7 @@ const HOOK_HOLD = 6; // frames de battement avant le hook
 const TITLE = 66; // 2,2 s
 const CTA = 96; // 3,2 s
 const XF = 9;
-const C = BAUDOT.color;
+const C = CHARTE.color;
 const FLUO = "#5FE8FF";
 
 const clipSchema = z.object({
@@ -77,7 +77,7 @@ const Clip: React.FC<{ src: string; startSec: number; dur: number; reframe: "cro
         />
       </AbsoluteFill>
       {kicker && (
-        <div style={{ position: "absolute", top: "9%", width: "100%", textAlign: "center", fontFamily: BAUDOT.font.body, fontSize: 26, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: FLUO, textShadow: `0 0 14px ${FLUO}66, 0 2px 8px rgba(0,0,0,0.9)` }}>
+        <div style={{ position: "absolute", top: "9%", width: "100%", textAlign: "center", fontFamily: CHARTE.font.body, fontSize: 26, fontWeight: 800, letterSpacing: "0.2em", textTransform: "uppercase", color: FLUO, textShadow: `0 0 14px ${FLUO}66, 0 2px 8px rgba(0,0,0,0.9)` }}>
           {kicker}
         </div>
       )}
@@ -93,10 +93,10 @@ const TeaserCta: React.FC<{ line1: string; line2: string }> = ({ line1, line2 })
   const ty = interpolate(f, [0, 18], [30, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
   const pulse = 1 + 0.05 * Math.sin(f / 8);
   return (
-    <AbsoluteFill style={{ background: BAUDOT.cardBackground, opacity: op, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
+    <AbsoluteFill style={{ background: CHARTE.cardBackground, opacity: op, alignItems: "center", justifyContent: "center", padding: "0 90px" }}>
       <div style={{ textAlign: "center", transform: `translateY(${ty}px)` }}>
-        <div style={{ fontFamily: BAUDOT.font.display, fontSize: 66, fontWeight: 700, color: C.ivory, lineHeight: 1.18 }}>{line1}</div>
-        <div style={{ marginTop: 34, transform: `scale(${pulse})`, display: "inline-block", background: FLUO, color: "#06131C", fontFamily: BAUDOT.font.body, fontSize: 32, fontWeight: 800, padding: "22px 54px", borderRadius: 999 }}>
+        <div style={{ fontFamily: CHARTE.font.display, fontSize: 66, fontWeight: 700, color: C.ivory, lineHeight: 1.18 }}>{line1}</div>
+        <div style={{ marginTop: 34, transform: `scale(${pulse})`, display: "inline-block", background: FLUO, color: "#06131C", fontFamily: CHARTE.font.body, fontSize: 32, fontWeight: 800, padding: "22px 54px", borderRadius: 999 }}>
           {line2}
         </div>
       </div>

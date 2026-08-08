@@ -38,7 +38,7 @@ Le travail n'est plus « écrire un pipeline » mais **approvisionner un agent**
 |---|---|
 | Passerelle Telegram, file, état, corrections | **Fourni par Hermes** — rien à écrire |
 | `.claude/skills/montage-imcp/SKILL.md` | **Skill Hermes** — même standard agentskills.io |
-| `praticiens/baudot.json` | Données de la skill + fichier de contexte |
+| `praticiens/client-01.json` | Données de la skill + fichier de contexte |
 | `scripts/portail-doctrine.mjs` | **Outil** appelé par l'agent (shell, ou exposé en MCP) |
 | `imcp-hyperframes/` + CLI HyperFrames | Installés sur le VPS, invoqués par l'agent |
 | Règles permanentes du projet | `AGENTS.md` — mécanisme de contexte natif d'Hermes |

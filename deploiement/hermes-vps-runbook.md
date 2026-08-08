@@ -52,11 +52,11 @@ Le README annonce « un VPS à 5 $ ». C'est réaliste pour l'agent lui-même, q
 
 | Hébergeur | Entrée de gamme | Remarque |
 |---|---|---|
-| **Hetzner** (CX22) | 3,79 € + 0,50 € IPv4 = **4,29 €/mois HT**, 2 vCPU / 4 Go / 40 Go | Meilleur rapport ressources/prix. Datacenters DE/FI. |
+| **Hetzner** (CX22) | ~4 €/mois, 2 vCPU / 4 Go | Meilleur rapport ressources/prix. Datacenters DE/FI. |
 | **OVH / Scaleway** | ~5 €/mois | Français, facturation FR, RGPD simple à justifier. |
 | **DigitalOcean / Vultr / Linode** | 5–6 $/mois, 1 Go | Écosystème et docs très fournis. |
 
-**Recommandation : Hetzner CX22** (2 vCPU / 4 Go), ou un équivalent d'au moins 2 Go. Le CX22 dépasse le plancher, c'est voulu : 2 Go est le minimum vital, pas la cible.
+**Recommandation : Hetzner CX22 ou équivalent 2 Go minimum.**
 
 Sur le dimensionnement, sois prudent : **je n'ai trouvé aucun minimum de RAM déclaré** dans les sources du projet. ⚠️ Le « 5 $ VPS » du README correspond typiquement à 1 Go. Or l'image Docker embarque Python 3.11+, Node, ffmpeg, ripgrep, et le gateway peut faire tourner plusieurs adaptateurs en parallèle. Sur 1 Go tu vivras sous la menace du OOM-killer. Prends **2 Go**, et ajoute du swap (phase 2.6) quoi qu'il arrive.
 
@@ -121,7 +121,7 @@ cat "$HOME/.ssh/hermes_vps.pub"
 Dans l'interface de l'hébergeur :
 
 1. Image : **Ubuntu 24.04 LTS**
-2. Type : 2 vCPU, 2 Go de RAM **au minimum** — le CX22 recommandé en offre 4
+2. Type : 2 vCPU / 2 Go minimum (Hetzner CX22, ou équivalent)
 3. Localisation : Europe (Nuremberg, Helsinki, Gravelines, Paris…)
 4. **Clé SSH : colle la clé publique de l'étape 1.1.** Ne choisis pas l'authentification par mot de passe.
 5. Nom : `hermes-agent`

@@ -40,7 +40,12 @@
     "teasers:check": "node scripts/teasers-build.mjs --check",
     "socle:sync": "node scripts/socle-assets.mjs",
     "socle:check": "node scripts/socle-assets.mjs --check",
-    "check": "npm run lint && npm run test && npm run check:sizes && npm run check:charte && npm run teasers:check && npm run socle:check"
+    "check": "npm run lint && npm run test && npm run check:sizes && npm run check:charte && npm run fonts:check && npm run teasers:check && npm run capsule:check -- imcp-hyperframes/videos/fbe-presentation && npm run socle:check",
+    "fonts:extract": "node scripts/fonts-extract.mjs",
+    "fonts:check": "node scripts/fonts-extract.mjs --check",
+    "capsule:build": "node scripts/capsule-build.mjs",
+    "capsule:check": "node scripts/capsule-build.mjs --check",
+    "portail:capsule": "node scripts/portail-capsule.mjs"
   },
   "sideEffects": [
     "*.css"

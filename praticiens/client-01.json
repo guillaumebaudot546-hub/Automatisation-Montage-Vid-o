@@ -1,8 +1,8 @@
 {
-  "praticien": "Dr Fabrice BAUDOT",
+  "praticien": "Client 01",
   "structure": "IMCP — Institut Microchirurgie Parodontale",
   "charte": {
-    "source": "src/theme/baudot.ts",
+    "source": "src/theme/client-01.ts",
     "accent": "#49B6C9",
     "nomToujoursEnMajuscules": true
   },
@@ -24,11 +24,8 @@
     "stingIntro": "TOUJOURS l'animation logo originale (intro-imcp.mp4) ajustée au format — contenue entière, fond flouté. JAMAIS une nouvelle animation, JAMAIS recadrée",
     "slidesFournies": "Extraire le CONTENU des slides et le ré-animer en cascade dans la charte — ne pas afficher l'image statique",
     "outilAnimations": "Animations codées en HyperFrames (decision 014, depuis le 19/07/2026) : gratuites, reproductibles, retouchables à la seconde. Remotion (src/) reste en maintenance pour les compositions déjà livrées. Pas de Higgsfield tant que pas d'abonnement payant — crédits gratuits non brûlés",
-    "charteVerrouillee": "Toute couleur vient de src/theme/baudot.ts. L'accent est le CYAN #49B6C9. Le beige #d8c7a8 est l'ancien accent remplacé par le client : le retrouver dans une composition est un bug. Vérifier avec npm run check:charte avant livraison",
-    "musiqueLicence": "Aucune piste sous droits. L'œuvre classique peut être dans le domaine public, l'ENREGISTREMENT ne l'est pas. Défaut : music/ambient-bed.wav (synthétisé par scripts/make_music.py). Toute autre piste exige une preuve de licence avant d'entrer dans public/",
-    "rythmeCalques": "Les calques se repartissent sur toute la video, jamais groupes au debut : ecart >= 2,5 s entre deux calques consecutifs, aucun chevauchement, et au plus 50 % des calques dans le premier tiers. Varier le type d'entree entre deux calques voisins — deux entrees identiques a la suite se voient (correction 2026-08-01).",
-    "hookVisuel": "Hook visuel obligatoire : un calque punch demarre dans les 1,5 s, tient <= 3 s, texte <= 8 mots. Rien avant lui, ni logo ni carton d'intro ni fondu au noir : la premiere image porte deja du mouvement. Promesse ou question concrete tiree de ses propres mots, jamais d'accroche racoleuse — la credibilite clinique prime sur la retention (correction 2026-08-01).",
-    "ancrageCalques": "Chaque calque qui illustre un propos (list, chart, stat) porte un champ « ancre » : la seconde de parole qu'il illustre. Le calque doit etre a l'ecran a cet instant. Une cascade de modules posee avant qu'il ne les nomme est un bloc decoratif, pas une illustration — defaut constate sur la capsule 06, calque a 2 s pour une enumeration a 11,3 s (correction 2026-08-01)."
+    "charteVerrouillee": "Toute couleur vient de src/theme/client-01.ts. L'accent est le CYAN #49B6C9. Le beige #d8c7a8 est l'ancien accent remplacé par le client : le retrouver dans une composition est un bug. Vérifier avec npm run check:charte avant livraison",
+    "musiqueLicence": "Aucune piste sous droits. L'œuvre classique peut être dans le domaine public, l'ENREGISTREMENT ne l'est pas. Défaut : music/ambient-bed.wav (synthétisé par scripts/make_music.py). Toute autre piste exige une preuve de licence avant d'entrer dans public/"
   },
   "corrections": [
     {
@@ -66,12 +63,6 @@
       "video": "Audit du projet (aucune vidéo)",
       "retour": "Constat d'audit, pas un retour praticien. La boucle d'apprentissage était déclarée mais pas bouclée : dernière correction datée du 19/07 alors que 13 projets HyperFrames ont été produits depuis, exemplesValides vide, et aucune ligne de code ne lit ce fichier. La doctrine n'était chargée par aucun mécanisme (jonction morte vers un dossier supprimé)",
       "action": "Doctrine déplacée dans .claude/skills/ pour être réellement chargeable ; RÈGLE 4 réécrite sur HyperFrames (decision 014) ; RÈGLE 4bis (charte verrouillée) et RÈGLE 7 (procédure de construction) ajoutées ; exemplesValides rempli. Reste à faire : faire consommer ce fichier par le montage au lieu de coder l'identité praticien en dur"
-    },
-    {
-      "date": "2026-08-01",
-      "video": "Capsule 06 formation — 9:16, rush 48 s",
-      "retour": "Montage juge de moins bonne qualite pour 20 min d'attente. Les animations motion design sont bonnes en soi mais arrivent EN UN SEUL BLOC au debut du monologue : illisible et desagreable. Attendu : une animation rythmee, repartie, plus dynamique. Demande aussi un hook visuel a l'ouverture, au niveau de ce qui se fait de mieux en marketing reseaux sociaux.",
-      "action": "Deux angles morts du portail. (1) Le calque « list » des trois modules etait pose a 2 s pour 6 s alors que l'enumeration commence a 11,3 s : la cascade arrivait 18 s avant les mots qu'elle illustre, d'ou l'effet bloc en ouverture. La preference « listes en cascade quand il les enumere » existait deja, mais aucune regle ne la verifiait. (2) Aucune regle n'exigeait de hook : le plan livre n'avait rien avant 2 s. Trois regles ajoutees au portail, toutes rejetantes avant rendu : « ancrageCalques » (champ ancre obligatoire, calque a l'ecran au moment du propos), « rythmeCalques » (pas de chevauchement, pas de rafale, pas plus de la moitie des calques dans le premier tiers) et « hookVisuel » (accroche presente, tot, courte). Le plan livre le 01/08 est desormais rejete."
     }
   ],
   "exemplesValides": [
