@@ -178,3 +178,84 @@ describe("--check : detecter un index.html edite a la main", () => {
     expect(html()).toBe(avant);
   });
 });
+
+/* --- Voix off et lisibilite ------------------------------------------------ */
+describe("piste voix off", () => {
+  const scenePhoto = (data) => ({
+    kicker: "Étape",
+    lede: [],
+    dureeSec: 10,
+    bloc: { type: "photo", data },
+  });
+
+  it("cable la voix sur sa propre piste, distincte de la musique", () => {
+    ecris({ ...CAPSULE, voix: { fichier: "vo.mp3", langue: "en" } });
+    expect(build().status).toBe(0);
+    expect(html()).toContain('id="vo"');
+    expect(html()).toContain('data-track-index="11"');
+  });
+
+  it("baisse la musique sous la voix — on doit entendre le propos", () => {
+    ecris({
+      ...CAPSULE,
+      musique: { fichier: "m.mp3", licence: "test" },
+      voix: { fichier: "vo.mp3", langue: "en" },
+    });
+    expect(build().status).toBe(0);
+    expect(html()).toMatch(/id="bgm"[\s\S]*?data-volume="0\.1"/);
+  });
+
+  it("laisse la musique porter la video quand il n'y a pas de voix", () => {
+    ecris({ ...CAPSULE, musique: { fichier: "m.mp3", licence: "test" } });
+    expect(build().status).toBe(0);
+    expect(html()).toMatch(/id="bgm"[\s\S]*?data-volume="0\.68"/);
+  });
+
+  it("n'ecrit aucune balise audio quand ni voix ni musique", () => {
+    ecris(CAPSULE);
+    expect(build().status).toBe(0);
+    expect(html()).not.toContain("<audio");
+  });
+});
+
+describe("lisibilite d'un plan photo", () => {
+  const scenePhoto = (data) => ({
+    kicker: "Avant",
+    lede: [],
+    dureeSec: 10,
+    bloc: { type: "photo", data },
+  });
+
+  it("ne pose pas le sur-titre sur la photo quand la carte porte deja le tag", () => {
+    // Mesure du 09/08 : cyan sur tissu clair = 1,2:1 de contraste, et le mot
+    // etait affiche deux fois. La carte le dit, avec son fond.
+    ecris({ ...CAPSULE, scenes: [scenePhoto({ fichier: "p.jpg", cadrage: "panneau", tag: "Avant" })] });
+    expect(build().status).toBe(0);
+    expect(html()).not.toContain('class="kicker"');
+    expect(html()).toContain('class="ph-carte"');
+  });
+
+  it("garde le sur-titre quand la carte n'a pas de tag", () => {
+    ecris({ ...CAPSULE, scenes: [scenePhoto({ fichier: "p.jpg", cadrage: "panneau", texte: "sans tag" })] });
+    expect(build().status).toBe(0);
+    expect(html()).toContain('class="kicker"');
+  });
+
+  it("marque le debordement voulu de la respiration de camera", () => {
+    ecris({ ...CAPSULE, scenes: [scenePhoto({ fichier: "p.jpg", cadrage: "panneau", tag: "Avant" })] });
+    expect(build().status).toBe(0);
+    expect(html()).toContain("data-layout-allow-overflow");
+  });
+
+  it("reduit un titre trop LARGE, pas seulement trop long", () => {
+    // « Microchirurgie » : 14 caracteres, donc court — mais trop large pour le
+    // cadre a 94px. Coupe net a l'ecran le 09/08.
+    ecris({
+      ...CAPSULE,
+      format: "9:16",
+      scenes: [{ kicker: "IMCP", lede: ["Microchirurgie", "parodontale"], dureeSec: 10, bloc: { type: "rule" } }],
+    });
+    expect(build().status).toBe(0);
+    expect(html()).toContain('class="lede sm"');
+  });
+});

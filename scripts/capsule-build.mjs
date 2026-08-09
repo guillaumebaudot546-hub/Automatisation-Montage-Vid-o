@@ -19,6 +19,7 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { charte } from "./charte.mjs";
 
 /* La racine du depot se deduit de l'emplacement de CE fichier (scripts/ y est
    toujours), jamais du dossier de travail : Hermes lance ses commandes depuis
@@ -36,21 +37,6 @@ if (!projet) {
 
 const lire = (p) => readFileSync(p, "utf8").replace(/^﻿/, "");
 
-/** Palette officielle depuis src/theme/<nom>.ts — jamais recopiee ici. */
-function charte(nom) {
-  const chemin = join(ROOT, "src", "theme", `${nom}.ts`);
-  if (!existsSync(chemin)) {
-    console.error(`❌ Charte introuvable : ${chemin}`);
-    console.error("   Un praticien = un theme. Creer le fichier avant de generer.");
-    process.exit(1);
-  }
-  const src = lire(chemin);
-  const bloc = src.slice(src.indexOf("color: {"), src.indexOf("}", src.indexOf("color: {")));
-  const p = {};
-  for (const m of bloc.matchAll(/(\w+):\s*"(#[0-9a-fA-F]{6})"/g)) p[m[1]] = m[2].toLowerCase();
-  return p;
-}
-
 /**
  * Balisage restreint du sous-titre, tel que la doctrine le definit
  * (REGLE 2 : « mots-cles de CHAQUE sous-titre en cyan fluo, balisage **mot** »).
@@ -66,7 +52,54 @@ const balise = (s) =>
 const ID = (i) => `s${i + 1}`;
 const deuxChiffres = (n) => String(n).padStart(2, "0");
 
+/**
+ * Largeur de police du .lede : Cormorant 600 en pave .l { overflow:hidden } —
+ * une ligne trop large n'est pas renvoyee, elle est tronquee net (bug du
+ * 09/08 : « Microchirurgie », 14 caracteres, tenait sous ledeMaxCar=62 mais
+ * debordait quand meme). Compter les caracteres ne suffit pas : un mot court
+ * et large ("Microchirurgie") deborde alors qu'un mot long et etroit
+ * ("Illinois-il-est-fini") tiendrait. Il faut estimer la largeur en pixels.
+ *
+ * Table de chasse en 1/1000 em, calquee sur Times-Roman (metrique standard
+ * la plus proche d'un serif classique, publiquement documentee) — la lettre
+ * compte, pas la police exacte. x1.35 : Times regular → Cormorant semibold
+ * (600) est nettement plus large, mesure sur « Microchirurgie » (le mot qui a
+ * debordé) recalé pour depasser la largeur utile a 94px. Une estimation ne
+ * sera jamais pixel-parfaite ; en cas de doute mieux vaut rendre trop petit
+ * (cosmetique) qu'omettre un depassement (le texte est coupe, illisible).
+ */
+const CHASSE = {
+  a: 444, b: 500, c: 444, d: 500, e: 444, f: 333, g: 500, h: 500, i: 278,
+  j: 278, k: 500, l: 278, m: 778, n: 500, o: 500, p: 500, q: 500, r: 333,
+  s: 389, t: 278, u: 500, v: 500, w: 722, x: 500, y: 500, z: 444,
+  " ": 250, "-": 333, "'": 180, ".": 250, ",": 250, ":": 278, ";": 278,
+};
+const chasseLettre = (c) => {
+  const majuscule = c !== c.toLowerCase();
+  const bas = c.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return (CHASSE[bas] ?? 500) * (majuscule ? 1.5 : 1);
+};
+const largeurEstimee = (texte, taillePx) =>
+  [...String(texte)].reduce((s, c) => s + chasseLettre(c), 0) / 1000 * taillePx * 1.35;
+
 /* --- Blocs : un type = un rendu + une entree animee ------------------------ */
+
+/**
+ * Carte de legende d'un bloc photo — identique qu'elle porte une image ou une
+ * video. Elle reprend le numero de scene : sur un plan photo le sur-titre
+ * flottant est supprime (illisible sur l'image, cf. .ph-carte .num), et le
+ * numero doit rester quelque part.
+ */
+const legendeDe = (id, d, n) =>
+  d.tag || d.texte
+    ? `        <div id="${id}pc" class="ph-carte">\n` +
+      (d.tag
+        ? `          <span class="tag"><span class="num">${deuxChiffres(n)}</span>` +
+          `${echappe(d.tag)}</span>\n`
+        : "") +
+      (d.texte ? `          <span class="txt">${balise(d.texte)}</span>\n` : "") +
+      `        </div>\n`
+    : "";
 
 const BLOCS = {
   rule: {
@@ -176,38 +209,83 @@ const BLOCS = {
    * huit blocs ne portait d'image. Le chemin conforme n'existait pas : l'agent a
    * pris le seul qu'on lui avait laisse.
    *
-   * data = { fichier, cadrage?: "cover"|"fit", tag?, texte? }
+   * data = { fichier, cadrage?: "cover"|"fit"|"panneau", tag?, texte? }
+   *
+   * « fichier » accepte une image OU une video. Un plan anime (Higgsfield,
+   * ou n'importe quel .mp4) se pose exactement comme une photo : meme cadrage,
+   * meme carte de legende, meme place dans le contrat. Le socle ne fait pas de
+   * difference, donc la doctrine non plus.
    */
   photo: {
-    html: (id, d) => {
+    html: (id, d, n) => {
       const fit = d.cadrage === "fit";
+      const panneau = d.cadrage === "panneau";
+      // Une VIDEO ne se pose pas ici : HyperFrames possede la lecture des
+      // medias, et un <video> imbrique dans une scene n'est jamais mis en
+      // marche — il reste noir. Elle sort en clip de premier niveau, via
+      // `pistes` ci-dessous. Seuls le voile et la carte restent dans la scene.
+      if (/\.(mp4|mov|webm)$/i.test(d.fichier || "")) {
+        return (
+          `        <span class="ph-voile${panneau ? " panneau" : ""}"></span>\n` +
+          legendeDe(id, d, n)
+        );
+      }
       // En « fit », l'image entiere tient dans le cadre et le vide se remplit
       // d'une copie floutee d'elle-meme — jamais d'un aplat, qui ferait trou.
       const flou = fit
         ? `          <img class="ph-flou" src="${echappe(d.fichier)}" alt="" />\n`
         : "";
-      const legende =
-        d.tag || d.texte
-          ? `        <div id="${id}pc" class="ph-carte">\n` +
-            (d.tag ? `          <span class="tag">${echappe(d.tag)}</span>\n` : "") +
-            (d.texte ? `          <span class="txt">${balise(d.texte)}</span>\n` : "") +
-            `        </div>\n`
-          : "";
+      const classes = `ph${fit ? " fit" : ""}${panneau ? " panneau" : ""}`;
+      // data-layout-allow-overflow : le debordement est VOULU. La respiration de
+      // camera (scale 1.02 -> 1.07) fait forcement depasser l'image de son cadre,
+      // qui la rogne — c'est le principe meme du mouvement. Sans cette marque,
+      // `hyperframes check` le signale a chaque scene et noie les vrais defauts.
       return (
-        `        <span class="ph-wrap">\n` +
+        `        <span class="ph-wrap${panneau ? " panneau" : ""}" data-layout-allow-overflow>\n` +
         flou +
-        `          <img id="${id}p" class="ph${fit ? " fit" : ""}" src="${echappe(d.fichier)}" alt="" />\n` +
+        `          <img id="${id}p" class="${classes}" src="${echappe(d.fichier)}" alt="" />\n` +
         `        </span>\n` +
-        `        <span class="ph-voile"></span>\n` +
-        legende
+        `        <span class="ph-voile${panneau ? " panneau" : ""}"></span>\n` +
+        legendeDe(id, d, n)
+      );
+    },
+
+    /**
+     * Clip de premier niveau pour un media video.
+     *
+     * Le contrat HyperFrames : un <video> doit etre un clip a lui seul, avec
+     * data-start / data-duration / data-media-start / data-track-index, place
+     * en frere des scenes (voir capsule-3204, la composition de reference).
+     * Imbrique, il ne joue pas.
+     *
+     * Piste 7 : au-dessus des fonds (0-4) et de la scene (5). PAS la piste 6 —
+     * elle porte deja #foot (le pied de page, 0 a DUREE) dans le socle ; un
+     * clip video y chevauchait #foot et le check le rejetait
+     * (overlapping_clips_same_track, trouve le 09/08 en revalidant ce fichier).
+     * Le voile et la carte restent DANS la scene et repassent devant par
+     * l'ordre du DOM.
+     */
+    pistes: (id, d, at, duree) => {
+      if (!/\.(mp4|mov|webm)$/i.test(d.fichier || "")) return "";
+      const panneau = d.cadrage === "panneau";
+      return (
+        `      <video id="${id}p" class="clip ph${panneau ? " panneau" : ""}"` +
+        ` src="${echappe(d.fichier)}" muted playsinline\n` +
+        `             data-start="${at}" data-duration="${duree}" data-media-start="0"` +
+        ` data-track-index="7"></video>\n`
       );
     },
     // Camera qui respire, pas zoom qui recadre : 1.02 -> 1.07 sur toute la
     // scene (RÈGLE 4ter). Au-dela, on rogne le sujet sans l'avoir voulu.
+    //
+    // Un media DEJA anime ne recoit pas cette respiration : il porte la sienne,
+    // et deux mouvements superposes donnent un flottement desagreable.
     tl: (id, d, at, duree) => {
       const fin = (duree ?? 5).toFixed(2);
-      let s =
-        `      tl.fromTo("#${id}p", { scale: 1.02 }, { scale: 1.07, duration: ${fin}, ease: "none" }, ${at.toFixed(2)});\n`;
+      const estVideo = /\.(mp4|mov|webm)$/i.test(d.fichier || "");
+      let s = estVideo
+        ? ""
+        : `      tl.fromTo("#${id}p", { scale: 1.02 }, { scale: 1.07, duration: ${fin}, ease: "none" }, ${at.toFixed(2)});\n`;
       if (d.tag || d.texte) {
         s +=
           `      tl.fromTo("#${id}pc", { opacity: 0, y: 26 },\n` +
@@ -217,7 +295,16 @@ const BLOCS = {
     },
     // La photo remplace le titre : un lede de 94px par-dessus une image
     // clinique la rendrait illisible, et la legende dit deja ce qu'il faut.
-    opts: () => ({ lede: false, sub: false, plein: true }),
+    //
+    // kicker:false quand la carte porte un tag — le sur-titre flottant disait
+    // alors EXACTEMENT le meme mot que le tag, deux fois a l'ecran, et le
+    // faisait par-dessus la photo a 1,2:1 de contraste. La carte le dit mieux.
+    opts: (d) => ({
+      lede: false,
+      sub: false,
+      plein: true,
+      kicker: !(d && d.tag),
+    }),
   },
 
   aucun: { html: () => "", tl: () => "", opts: () => ({}) },
@@ -244,18 +331,26 @@ function rend(template, cap) {
     }
     const d = sc.bloc?.data;
     const o = bloc.opts(d);
-    const petit = (sc.lede || []).join(" ").length > 34 || (sc.lede || []).length === 1;
+    // .scene { padding:104px 150px 104px 190px } — largeur utile constante,
+    // quel que soit le format (le pave .l qui deborde est coupe net, pas renvoye).
+    const largeurUtile = W - 340;
+    const petit =
+      (sc.lede || []).join(" ").length > 34 ||
+      (sc.lede || []).length === 1 ||
+      (sc.lede || []).some((l) => largeurEstimee(l, 94) > largeurUtile);
 
     let corps = `      <!-- ${deuxChiffres(i + 1)} -->\n`;
     corps += `      <section id="${id}" class="clip scene" data-start="${at}" data-duration="${sc.dureeSec}" data-track-index="5">\n`;
     corps += `        <i id="${id}k" class="rail"></i>\n`;
-    corps += `        <em class="kicker"><span class="num">${deuxChiffres(i + 1)}</span>${echappe(sc.kicker)}</em>\n`;
+    if (o.kicker !== false) {
+      corps += `        <em class="kicker"><span class="num">${deuxChiffres(i + 1)}</span>${echappe(sc.kicker)}</em>\n`;
+    }
     if (o.lede !== false) {
       corps += `        <strong id="${id}a" class="lede${petit ? " sm" : ""}">`;
       corps += sc.lede.map((l) => `<span class="l"><i>${balise(l)}</i></span>`).join("");
       corps += `</strong>\n`;
     }
-    corps += bloc.html(id, d);
+    corps += bloc.html(id, d, i + 1);
     if (o.sub !== false && sc.sub) {
       corps += `        <span id="${id}b" class="sub">${balise(sc.sub)}</span>\n`;
     }
@@ -263,7 +358,10 @@ function rend(template, cap) {
       corps += `        <span id="${id}s" class="sig">${echappe(sc.signature)}</span>\n`;
     }
     corps += `      </section>\n`;
-    sections += corps + (i < cap.scenes.length - 1 ? "\n" : "");
+    // Les clips de premier niveau (video) sortent AVANT la scene : ils sont
+    // ses freres, pas ses enfants — sinon HyperFrames ne les joue pas.
+    const piste = bloc.pistes ? bloc.pistes(id, d, at, sc.dureeSec) : "";
+    sections += piste + corps + (i < cap.scenes.length - 1 ? "\n" : "");
 
     const arg = JSON.stringify(o).replace(/"/g, "").replace(/:/g, ": ").replace(/,/g, ", ");
     timeline += `      scene(${at}, "${id}"${Object.keys(o).length ? `, ${arg}` : ""});\n`;
@@ -279,17 +377,62 @@ function rend(template, cap) {
   });
 
   const m = cap.musique;
-  const audio = m
-    ? `\n      <!-- Lit musical. Nom d'origine conserve : renommer masque la provenance\n` +
-      `           (decision 014). Licence : ${m.licence || "NON FOURNIE — hors depot"}. -->\n` +
-      `      <audio id="bgm" src="${echappe(m.fichier)}"\n` +
-      `             data-start="0" data-duration="${duree}" data-track-index="10"\n` +
-      `             data-volume="${m.volume ?? 0.68}"></audio>\n`
-    : "";
+  const v = cap.voix;
+  /* Sous une voix off, la musique redescend a un lit : « volume ~0,08, fondus
+     entree/sortie » (preference du praticien, praticiens/client-01.json). Seule,
+     elle porte la video et remonte. Le montage ne doit jamais faire choisir
+     entre entendre le propos et entendre la musique. */
+  const volMus = m?.volume ?? (v ? 0.1 : 0.68);
+  const audio =
+    (m
+      ? `\n      <!-- Lit musical. Nom d'origine conserve : renommer masque la provenance\n` +
+        `           (decision 014). Licence : ${m.licence || "NON FOURNIE — hors depot"}. -->\n` +
+        `      <audio id="bgm" src="${echappe(m.fichier)}"\n` +
+        `             data-start="0" data-duration="${duree}" data-track-index="10"\n` +
+        `             data-volume="${volMus}"></audio>\n`
+      : "") +
+    (v
+      ? `\n      <!-- Voix off${v.langue ? ` (${echappe(v.langue)})` : ""}. Piste propre : elle ne\n` +
+        `           subit ni le fondu de la musique ni son attenuation. -->\n` +
+        `      <audio id="vo" src="${echappe(v.fichier)}"\n` +
+        `             data-start="${v.debutSec ?? 0}"` +
+        ` data-duration="${v.dureeSec ?? duree - (v.debutSec ?? 0)}"\n` +
+        `             data-media-start="0" data-track-index="11"\n` +
+        `             data-volume="${v.volume ?? 1}"></audio>\n`
+      : "");
   const audioTl = m
-    ? `      tl.fromTo("#bgm", { volume: 0 }, { volume: ${m.volume ?? 0.68}, duration: 2.5, ease: "sine.out" }, 0);\n` +
+    ? `      tl.fromTo("#bgm", { volume: 0 }, { volume: ${volMus}, duration: 2.5, ease: "sine.out" }, 0);\n` +
       `      tl.to("#bgm", { volume: 0, duration: 5, ease: "sine.in" }, ${duree - 5});\n`
     : "";
+
+  /* Sous-titres de la voix off (RÈGLE 2 : mots-cles en cyan).
+     Les reperes sont exprimes DANS le fichier de voix, pas dans la video : on
+     peut deplacer la voix (debutSec) sans retoucher un seul repere. */
+  const cues = v?.sousTitres || [];
+  const decal = v?.debutSec ?? 0;
+  const sousTitres = cues.length
+    ? `\n      <div id="st" class="st">\n` +
+      cues
+        .map((c, j) => `        <span id="st${j}" class="cue">${balise(c.t)}</span>\n`)
+        .join("") +
+      `      </div>\n`
+    : "";
+  /* Les sous-titres sont empiles au meme endroit : un seul doit etre visible a
+     la fois. Le fondu de sortie doit donc etre TERMINE quand le suivant
+     apparait — sinon deux textes se superposent, illisibles. Mesure du
+     09/08 : 0,13 s de chevauchement entre deux repliques collees, signale par
+     `hyperframes check` (content_overlap). */
+  const SORTIE = 0.14;
+  for (const [j, c] of cues.entries()) {
+    const suivant = cues[j + 1];
+    const finVisible = suivant ? Math.min(c.e, suivant.s - SORTIE) : c.e;
+    const debut = decal + c.s;
+    const fin = decal + Math.max(finVisible, c.s + 0.2);
+    timeline +=
+      `      tl.fromTo("#st${j}", { opacity: 0, y: 12 },\n` +
+      `        { opacity: 1, y: 0, duration: 0.22, ease: E }, ${debut.toFixed(2)});\n` +
+      `      tl.to("#st${j}", { opacity: 0, duration: ${SORTIE}, ease: "none" }, ${fin.toFixed(2)});\n`;
+  }
 
   return template
     .split("{{DUREE}}").join(String(duree))
@@ -302,6 +445,7 @@ function rend(template, cap) {
     .split("{{C_ACCENT}}").join(p.champagne)
     .split("{{FOOT}}").join(echappe(cap.pied))
     .split("{{SCENES}}").join(sections.replace(/\n$/, ""))
+    .split("{{SOUSTITRES}}").join(sousTitres)
     .split("{{AUDIO}}").join(audio)
     .split("{{AUDIO_TL}}").join(audioTl)
     .split("{{TIMELINE}}").join(timeline);

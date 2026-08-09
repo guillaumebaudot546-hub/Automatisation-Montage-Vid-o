@@ -45,7 +45,12 @@
     "fonts:check": "node scripts/fonts-extract.mjs --check",
     "capsule:build": "node scripts/capsule-build.mjs",
     "capsule:check": "node scripts/capsule-build.mjs --check",
-    "portail:capsule": "node scripts/portail-capsule.mjs"
+    "capsule:media": "node scripts/capsule-media.mjs",
+    "portail:capsule": "node scripts/portail-capsule.mjs",
+    "capsule:soustitres": "node scripts/capsule-soustitres.mjs",
+    "parite:vps": "bash scripts/parite-vps.sh",
+    "musique:deploie": "node scripts/musique-deploie.mjs",
+    "musique:liste": "node scripts/musique-deploie.mjs --liste"
   },
   "sideEffects": [
     "*.css"

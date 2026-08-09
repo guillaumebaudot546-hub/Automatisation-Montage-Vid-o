@@ -20,9 +20,51 @@ Sortie : cues.json (et optionnellement un .srt pour lecture humaine).
 """
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
+
+# --- Trouver l'interpreteur qui porte faster_whisper -------------------------
+#
+# POURQUOI (audit du 09/08/2026). faster_whisper est lourd : sur le VPS il vit
+# dans un environnement dedie (.venv-whisper), pas dans le python systeme. Or ce
+# script commence par « #!/usr/bin/env python3 » et l'agent l'appelle
+# « python3 scripts/transcrire.py » — donc avec le python systeme, qui ne le
+# trouve pas. La RÈGLE 1 de la doctrine (« transcris et LIS avant de monter »)
+# etait litteralement inexecutable, sans que rien ne le signale : l'agent voyait
+# une erreur d'import et passait a autre chose.
+#
+# Le script se relance donc lui-meme dans le bon interpreteur. Il marche appele
+# de n'importe quelle facon, sur n'importe quelle machine.
+def _reexec_si_besoin():
+    try:
+        import faster_whisper  # noqa: F401
+        return
+    except ImportError:
+        pass
+    if os.environ.get("IMCP_TRANSCRIRE_REEXEC"):
+        print(
+            "erreur : faster_whisper introuvable, et aucun environnement dedie.\n"
+            "  Installer :  uv venv .venv-whisper && "
+            "uv pip install --python .venv-whisper/bin/python faster-whisper",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
+    racine = Path(__file__).resolve().parent.parent
+    for candidat in (racine / ".venv-whisper" / "bin" / "python",
+                     racine / ".venv" / "bin" / "python",
+                     racine / ".venv-whisper" / "Scripts" / "python.exe"):
+        if candidat.exists():
+            os.environ["IMCP_TRANSCRIRE_REEXEC"] = "1"
+            os.execv(str(candidat), [str(candidat), __file__, *sys.argv[1:]])
+    print(
+        "erreur : faster_whisper introuvable et aucun .venv-whisper a la racine.\n"
+        "  Installer :  uv venv .venv-whisper && "
+        "uv pip install --python .venv-whisper/bin/python faster-whisper",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 # Le vocabulaire que les modeles generalistes ecorchent systematiquement.
 # Ajouter ici tout terme mal transcrit revu dans une correction du praticien.
@@ -67,6 +109,9 @@ def main() -> int:
     p.add_argument("-m", "--modele", default="small",
                    help="tiny|base|small|medium|large-v3 (defaut: small)")
     p.add_argument("--srt", action="store_true", help="ecrire aussi un .srt")
+    p.add_argument("--langue", default="fr",
+                   help="langue parlee (fr, en, ...) — forcee, car la detection "
+                        "automatique se trompe sur les rushs courts")
     p.add_argument("--amorce", default=AMORCE,
                    help="amorce de vocabulaire (defaut: vocabulaire IMCP)")
     args = p.parse_args()
@@ -75,14 +120,17 @@ def main() -> int:
         print(f"erreur : fichier introuvable — {args.source}", file=sys.stderr)
         return 1
 
+    _reexec_si_besoin()
     from faster_whisper import WhisperModel
 
     modele = WhisperModel(args.modele, device="cpu", compute_type="int8")
     segments, info = modele.transcribe(
         args.source,
-        language="fr",
+        language=args.langue,
         vad_filter=True,          # coupe les silences : evite des cues fantomes
-        initial_prompt=args.amorce,
+        # L amorce porte le vocabulaire IMCP francais : elle ne peut que nuire
+        # a une transcription dans une autre langue.
+        initial_prompt=args.amorce if args.langue.startswith("fr") else None,
     )
 
     # `segments` est un generateur paresseux : la transcription se fait ici.

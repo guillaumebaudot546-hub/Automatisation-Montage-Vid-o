@@ -254,3 +254,108 @@ describe("bloc photo", () => {
     expect(r.stdout).toContain("ne saura pas ce qu'il regarde");
   });
 });
+
+/* --- Voix off ------------------------------------------------------------- */
+describe("voix off", () => {
+  const avecVoix = (voix, scenes) => ({
+    ...CAPSULE_OK,
+    voix,
+    ...(scenes ? { scenes } : {}),
+  });
+
+  it("laisse passer une voix declaree dont le fichier existe", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(avecVoix({ fichier: "vo.mp3", langue: "fr" }));
+    expect(r.status).toBe(0);
+  });
+
+  it("REJETTE une voix dont le fichier manque — sinon la video sort muette", () => {
+    const r = juge(avecVoix({ fichier: "absent.mp3", langue: "fr" }));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("absent.mp3");
+  });
+
+  it("REJETTE une voix sans langue declaree", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(avecVoix({ fichier: "vo.mp3" }));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("langue");
+  });
+
+  it("REJETTE une voix anglaise laissee avec des textes francais a l'ecran", () => {
+    // Le defaut le plus couteux : il ne se voit qu'a la relecture du praticien.
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(
+      avecVoix({ fichier: "vo.mp3", langue: "en" }, [
+        { ...CAPSULE_OK.scenes[0], lede: ["Le socle répond."] },
+      ]),
+    );
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("restes en francais");
+  });
+
+  it("laisse passer une voix anglaise avec des textes anglais", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(
+      avecVoix({ fichier: "vo.mp3", langue: "en" }, [
+        {
+          kicker: "Test",
+          lede: ["The socle answers."],
+          dureeSec: 10,
+          bloc: { type: "rule" },
+          sub: "Automated verification.",
+        },
+      ]),
+    );
+    expect(r.status).toBe(0);
+  });
+});
+
+/* --- Sous-titres cales sur la voix ----------------------------------------- */
+describe("sous-titres de la voix off", () => {
+  const avecST = (sousTitres) => ({
+    ...CAPSULE_OK,
+    voix: { fichier: "vo.mp3", langue: "en", debutSec: 0, dureeSec: 8, sousTitres },
+    scenes: [{ kicker: "Test", lede: ["The socle answers."], dureeSec: 10,
+      bloc: { type: "rule" }, sub: "Automated verification." }],
+  });
+
+  it("laisse passer des reperes coherents", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    expect(juge(avecST([{ s: 0, e: 3, t: "A blue margin." }])).status).toBe(0);
+  });
+
+  it("REJETTE un repere qui deborde de la video", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(avecST([{ s: 0, e: 40, t: "Too late." }]));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("coupe");
+  });
+
+  it("REJETTE un repere pose sur du silence apres la voix", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(avecST([{ s: 8.6, e: 9.5, t: "Nobody speaks here." }]));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("silence");
+  });
+
+  it("REJETTE un sous-titre illisible — trop de mots en trop peu de temps", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(avecST([{ s: 0, e: 1, t: "one two three four five six seven eight" }]));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("illisible");
+  });
+
+  it("REJETTE une fin avant le debut", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(avecST([{ s: 5, e: 2, t: "Backwards." }]));
+    expect(r.status).toBe(3);
+  });
+
+  it("attrape un sous-titre reste en francais sous une voix anglaise", () => {
+    writeFileSync(join(dossier, "vo.mp3"), "faux-mp3");
+    const r = juge(avecST([{ s: 0, e: 3, t: "La gencive est saine." }]));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("restes en francais");
+  });
+});
