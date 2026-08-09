@@ -1,0 +1,29 @@
+# Fins de ligne — pourquoi ce fichier existe.
+#
+# Le 09/08/2026, le hook du portail est arrive sur le VPS avec des fins de ligne
+# Windows. Son shebang devenait « #!/usr/bin/env python3\r » : env cherchait un
+# programme nomme « python3\r », introuvable, et sortait en 127. Hermes voit un
+# code non nul avec une sortie vide, en conclut « hook observateur », et LAISSE
+# PASSER. Le verrou cense empecher un rendu non valide etait donc decoratif —
+# et `hooks doctor` le declarait « healthy ».
+#
+# Ces fichiers traversent vers un serveur Linux : ils doivent garder des fins de
+# ligne LF dans le depot ET dans la copie de travail, quelle que soit la machine.
+
+* text=auto
+
+# Executes sur le VPS — LF obligatoire, meme sous Windows.
+*.py   text eol=lf
+*.sh   text eol=lf
+*.mjs  text eol=lf
+
+# Binaires : jamais convertis.
+*.woff2 binary
+*.mp4   binary
+*.mov   binary
+*.wav   binary
+*.mp3   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.docx  binary
