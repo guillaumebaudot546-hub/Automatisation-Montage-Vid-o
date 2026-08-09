@@ -244,6 +244,29 @@ describe("CLI — codes de sortie et recu", () => {
     expect(r.stderr).toContain("Usage");
   });
 
+  // Les tests ci-dessus lancent tous le CLI avec cwd = RACINE. La production ne
+  // fait PAS ca : l'agent travaille dans le dossier de la video. Le 09/08/2026,
+  // le portail lisait praticiens/<nom>.json en chemin relatif au cwd et mourait
+  // sur un ENOENT des qu'on l'appelait d'ailleurs — invisible ici, parce que le
+  // test se placait a l'endroit ou le chemin relatif tombait juste.
+  it("tourne depuis N'IMPORTE QUEL dossier, pas seulement la racine", () => {
+    const p = ecrisPlan(planValide);
+    const r = spawnSync(process.execPath, [SCRIPT, p], {
+      cwd: dossier, // le dossier de la video, comme en production
+      encoding: "utf8",
+    });
+    expect(r.stderr).not.toContain("ENOENT");
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain("Aucune violation");
+  });
+
+  it("nomme le fichier manquant quand la fiche praticien n'existe pas", () => {
+    const r = lance(ecrisPlan(planValide), "--praticien", "inexistant");
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("Fiche praticien introuvable");
+    expect(r.stderr).toContain("inexistant");
+  });
+
   it("sort 0 sur un plan conforme", () => {
     const r = lance(ecrisPlan(planValide));
     expect(r.status).toBe(0);

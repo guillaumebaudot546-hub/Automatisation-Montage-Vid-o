@@ -63,14 +63,39 @@ n'apparaissait même pas dans le diagnostic initial.
 | Plan modifié après validation | re-bloque | `block` — « a changé depuis » |
 | Portail lancé hors racine projet | passe | wrapper `portail-doctrine` OK |
 
-### Défaut restant, non corrigé
+### Défaut du chemin relatif — corrigé dans la foulée
 
-`node scripts/portail-doctrine.mjs` lit `praticiens/client-01.json` en chemin
-**relatif au dossier courant** : lancé ailleurs que depuis `~/imcp`, il plante
-(`ENOENT`). La vérification du script de déploiement ne l'a pas vu parce qu'elle
-tourne depuis `~/imcp`. Le wrapper `/usr/local/bin/portail-doctrine` — la voie
-documentée dans `AGENTS.md` — fait le `cd` et fonctionne. L'appel direct reste
-un piège pour qui ne suit pas la doctrine.
+`node scripts/portail-doctrine.mjs` lisait `praticiens/client-01.json` en chemin
+**relatif au dossier courant** : lancé ailleurs que depuis `~/imcp`, il mourait
+sur un `ENOENT` brut. L'agent travaille dans le dossier de la vidéo — le cas
+nominal, donc. Le wrapper `/usr/local/bin/portail-doctrine` masquait le défaut
+en faisant un `cd` : la voie documentée marchait, l'appel direct non.
+
+**La fiche praticien se résout désormais depuis l'emplacement du script**, plus
+depuis le dossier courant. Un nom inconnu donne un message qui nomme le fichier
+cherché, au lieu d'une pile d'appels.
+
+### Un second défaut trouvé en écrivant le test
+
+`--praticien <nom>` **n'a jamais pu fonctionner**. Le filtre des arguments ne
+retirait que ce qui commence par `--`, pas la valeur qui suit : `--praticien
+baudot` laissait « baudot » parmi les positionnels, où il était lu comme
+`cues.json`. L'option figurait pourtant dans la ligne d'usage du fichier.
+
+Corrigé, avec le garde sur `indexOf` qui vaut `-1` quand l'option est absente —
+sans lui, `-1 + 1 = 0` supprimait le premier argument, c'est-à-dire le plan.
+(Ma première version du correctif faisait exactement cette faute : 6 tests
+rouges, rattrapés par la suite existante.)
+
+### Pourquoi les tests ne voyaient rien
+
+Les tests CLI lançaient tous le script avec `cwd: RACINE` — l'endroit précis où
+le chemin relatif tombait juste. Deux tests ajoutés : un qui lance depuis le
+dossier de la vidéo comme en production, un qui vérifie le message d'erreur.
+147 tests au total.
+
+Vérifié sur le VPS après redéploiement : appel direct depuis un dossier de
+vidéo, option `--praticien`, et message d'erreur — les trois répondent.
 
 ## 2026-08-05 — Le budget devient un verrou
 

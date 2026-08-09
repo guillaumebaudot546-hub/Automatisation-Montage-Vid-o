@@ -5,7 +5,10 @@
 // au portail ② (juge, sous-agent) puis au Dr Baudot, seul oracle du gout.
 //
 // Usage :
-//   node scripts/portail-doctrine.mjs <plan.json> [cues.json] [--praticien baudot]
+//   node scripts/portail-doctrine.mjs <plan.json> [cues.json] [--praticien client-01]
+//
+// Appelable depuis n'importe quel dossier : la fiche praticien se resout depuis
+// l'emplacement de ce script, pas depuis le dossier courant.
 //
 // Le plan attendu :
 //   { "format": "9:16", "reseau": "instagram reels",
@@ -24,7 +27,7 @@
 // avaient deja diverge : l'ecriture du recu et la sortie 3 n'existaient que
 // dans le fichier non teste. Les regles vivent desormais ici, exportees et
 // testees ; le CLI n'est plus qu'une enveloppe autour d'elles.
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { argv, exit } from "node:process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -174,9 +177,18 @@ const appelDirect =
   argv[1] && resolve(argv[1]) === resolve(fileURLToPath(import.meta.url));
 
 if (appelDirect) {
-  const args = argv.slice(2).filter((a) => !a.startsWith("--"));
-  const iPraticien = argv.indexOf("--praticien");
-  const praticienNom = iPraticien > -1 ? argv[iPraticien + 1] : "client-01";
+  // On retire l'option ET sa valeur. Le filtre precedent ne coupait que ce qui
+  // commence par « -- » : « --praticien baudot » laissait « baudot » dans les
+  // positionnels, ou il etait lu comme cues.json. L'option documentee dans la
+  // ligne d'usage ci-dessus n'a donc jamais pu servir — elle plantait sur un
+  // ENOENT nommant un fichier que personne n'avait demande.
+  const brut = argv.slice(2);
+  const iPraticien = brut.indexOf("--praticien");
+  const praticienNom = iPraticien > -1 ? brut[iPraticien + 1] : "client-01";
+  // iPraticien vaut -1 quand l'option est absente : sans ce garde, « -1 + 1 »
+  // vaut 0 et le PREMIER argument — le plan — disparaissait.
+  const iValeur = iPraticien > -1 ? iPraticien + 1 : -1;
+  const args = brut.filter((a, i) => !a.startsWith("--") && i !== iValeur);
 
   if (args.length === 0) {
     console.error("Usage : node scripts/portail-doctrine.mjs <plan.json> [cues.json]");
@@ -190,7 +202,25 @@ if (appelDirect) {
 
   const plan = lire(args[0]);
   const cues = args[1] ? lire(args[1]) : [];
-  const praticien = lire(`praticiens/${praticienNom}.json`);
+
+  // Le fichier praticien se resout depuis l'EMPLACEMENT DU SCRIPT, pas depuis
+  // le dossier courant. L'agent travaille dans le dossier de la video
+  // (imcp-hyperframes/videos/xxx/) : un chemin relatif au cwd y pointait dans
+  // le vide et le portail mourait sur un ENOENT brut, sans dire lequel des deux
+  // fichiers manquait. Constate le 09/08/2026 sur le VPS — le wrapper
+  // /usr/local/bin/portail-doctrine masquait le defaut en faisant un cd, si
+  // bien que la voie documentee marchait et l'appel direct non.
+  const cheminPraticien = resolve(
+    fileURLToPath(import.meta.url), "..", "..", "praticiens", `${praticienNom}.json`,
+  );
+  if (!existsSync(cheminPraticien)) {
+    console.error(
+      `Fiche praticien introuvable : ${cheminPraticien}\n` +
+        `Verifier le nom passe a --praticien (recu : « ${praticienNom} »).`,
+    );
+    exit(1);
+  }
+  const praticien = lire(cheminPraticien);
   const seuils = seuilsDe(praticien);
 
   const { violations } = portailDoctrine(plan, cues, seuils, dureeTotaleDe(plan));
