@@ -56,11 +56,13 @@ const FORMAT_ATTENDU = {
   youtube: "16:9", site: "16:9", linkedin: "16:9", feed: "1:1",
 };
 const BLOCS = ["rule", "duo-profils", "marqueurs", "jauge", "etapes-score",
-  "comparatif", "manifeste", "aucun"];
+  "comparatif", "manifeste", "photo", "aucun"];
 /** Retard avant l'apparition du sous-titre, par type de bloc (voir le builder). */
 const ENTREE = {
   rule: 1.5, "duo-profils": 2.8, marqueurs: 2.9, jauge: 3.1,
   "etapes-score": 3.6, comparatif: 2.9, manifeste: 3.2, aucun: 1.5,
+  // La photo n'a pas de sous-titre separe : sa legende est dans le bloc.
+  photo: 0,
 };
 
 const violations = [];
@@ -125,6 +127,25 @@ scenes.forEach((sc, i) => {
   }
   if (!sc.dureeSec || sc.dureeSec < S.dureeSceneMinSec) {
     rejet("duree", `Scene ${n} : ${sc.dureeSec || 0} s (minimum ${S.dureeSceneMinSec} s).`);
+  }
+
+  /* Photo : un fichier absent ne se voit qu'au rendu, sous la forme d'un cadre
+     vide — six minutes de machine pour decouvrir une faute de frappe. Et un
+     cadrage non declare laisse le builder choisir « cover » : sur un plan large
+     ou une slide, il rognerait le sujet (RÈGLE 3). */
+  if (type === "photo") {
+    const d = sc.bloc?.data || {};
+    if (!d.fichier) {
+      rejet("photo", `Scene ${n} : bloc photo sans « fichier ».`);
+    } else if (!existsSync(join(projet, d.fichier))) {
+      rejet("photo", `Scene ${n} : image introuvable — ${d.fichier}`);
+    }
+    if (d.cadrage && !["cover", "fit"].includes(d.cadrage)) {
+      rejet("photo", `Scene ${n} : cadrage « ${d.cadrage} » inconnu (cover ou fit). Etirer l'image est interdit — RÈGLE 5bis.`);
+    }
+    if (!d.tag && !d.texte) {
+      avertit("photo", `Scene ${n} : photo sans legende — le spectateur ne saura pas ce qu'il regarde.`);
+    }
   }
   if (mots(sc.kicker) && net(sc.kicker).length > S.kickerMaxCar) {
     avertit("debordement", `Scene ${n} : sur-titre de ${net(sc.kicker).length} caracteres (max ${S.kickerMaxCar}) — il est en majuscules interlettrees, il deborde.`);

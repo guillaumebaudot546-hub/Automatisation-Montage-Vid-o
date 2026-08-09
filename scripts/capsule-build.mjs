@@ -167,6 +167,59 @@ const BLOCS = {
     opts: () => ({ lede: false, subAt: 2.6 }),
   },
 
+  /* Photo plein cadre.
+   *
+   * POURQUOI CE BLOC EXISTE. Le 09/08/2026, une galerie de photos a produit une
+   * video en ffmpeg brut : police DejaVu du systeme, rectangle gris en guise de
+   * carton, zoompan pour toute animation. Elle etait hors doctrine sans que rien
+   * ne le signale — le portail n'avait aucun contrat a juger, parce qu'AUCUN des
+   * huit blocs ne portait d'image. Le chemin conforme n'existait pas : l'agent a
+   * pris le seul qu'on lui avait laisse.
+   *
+   * data = { fichier, cadrage?: "cover"|"fit", tag?, texte? }
+   */
+  photo: {
+    html: (id, d) => {
+      const fit = d.cadrage === "fit";
+      // En « fit », l'image entiere tient dans le cadre et le vide se remplit
+      // d'une copie floutee d'elle-meme — jamais d'un aplat, qui ferait trou.
+      const flou = fit
+        ? `          <img class="ph-flou" src="${echappe(d.fichier)}" alt="" />\n`
+        : "";
+      const legende =
+        d.tag || d.texte
+          ? `        <div id="${id}pc" class="ph-carte">\n` +
+            (d.tag ? `          <span class="tag">${echappe(d.tag)}</span>\n` : "") +
+            (d.texte ? `          <span class="txt">${balise(d.texte)}</span>\n` : "") +
+            `        </div>\n`
+          : "";
+      return (
+        `        <span class="ph-wrap">\n` +
+        flou +
+        `          <img id="${id}p" class="ph${fit ? " fit" : ""}" src="${echappe(d.fichier)}" alt="" />\n` +
+        `        </span>\n` +
+        `        <span class="ph-voile"></span>\n` +
+        legende
+      );
+    },
+    // Camera qui respire, pas zoom qui recadre : 1.02 -> 1.07 sur toute la
+    // scene (RÈGLE 4ter). Au-dela, on rogne le sujet sans l'avoir voulu.
+    tl: (id, d, at, duree) => {
+      const fin = (duree ?? 5).toFixed(2);
+      let s =
+        `      tl.fromTo("#${id}p", { scale: 1.02 }, { scale: 1.07, duration: ${fin}, ease: "none" }, ${at.toFixed(2)});\n`;
+      if (d.tag || d.texte) {
+        s +=
+          `      tl.fromTo("#${id}pc", { opacity: 0, y: 26 },\n` +
+          `        { opacity: 1, y: 0, duration: 0.55, ease: E }, ${(at + 0.5).toFixed(2)});\n`;
+      }
+      return s;
+    },
+    // La photo remplace le titre : un lede de 94px par-dessus une image
+    // clinique la rendrait illisible, et la legende dit deja ce qu'il faut.
+    opts: () => ({ lede: false, sub: false, plein: true }),
+  },
+
   aucun: { html: () => "", tl: () => "", opts: () => ({}) },
 };
 
@@ -214,7 +267,10 @@ function rend(template, cap) {
 
     const arg = JSON.stringify(o).replace(/"/g, "").replace(/:/g, ": ").replace(/,/g, ", ");
     timeline += `      scene(${at}, "${id}"${Object.keys(o).length ? `, ${arg}` : ""});\n`;
-    timeline += bloc.tl(id, d, at);
+    // La duree de scene est passee en 4e argument : le bloc photo en a besoin
+    // pour etaler sa respiration de camera sur toute la scene, ni plus ni moins.
+    // Les autres blocs l'ignorent.
+    timeline += bloc.tl(id, d, at, sc.dureeSec);
     if (sc.signature) {
       timeline += `      tl.fromTo("#${id}s", { opacity: 0, y: 18 },\n` +
         `        { opacity: 1, y: 0, duration: 0.8, ease: E }, ${(at + 3.6).toFixed(2)});\n`;

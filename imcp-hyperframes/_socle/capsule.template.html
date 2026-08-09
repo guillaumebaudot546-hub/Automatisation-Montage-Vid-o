@@ -77,6 +77,42 @@
       .cursor { position:absolute; width:3px; height:44px; background:var(--ivory); display:block;
                 left:150px; margin-top:-9px; }
 
+      /* ---- Bloc photo -------------------------------------------------
+         Une photo n'est pas un bloc « dans » une scene de texte : elle EST la
+         scene. Elle occupe tout le cadre, le texte se pose dessus.
+
+         object-fit:cover et JAMAIS fill : la RÈGLE 5bis interdit d'etirer
+         l'image pour remplir. On recadre, on ne deforme pas. Le voile en
+         degrade rend le texte lisible sans assombrir le sujet : sur une photo
+         clinique, ecraser la luminosite ferait perdre ce qu'on montre. */
+      .ph-wrap { position:absolute; inset:0; overflow:hidden; display:block; z-index:0; }
+      .ph { width:100%; height:100%; object-fit:cover; display:block;
+            transform-origin:50% 50%; will-change:transform; }
+      .ph.fit { object-fit:contain; }
+      .ph-flou { position:absolute; inset:0; width:100%; height:100%;
+                 object-fit:cover; filter:blur(48px) brightness(.34) saturate(1.1);
+                 display:block; z-index:-1; }
+      .ph-voile { position:absolute; inset:0; display:block; z-index:1;
+                  background:linear-gradient(180deg,
+                    rgba(6,13,24,.72) 0%, rgba(6,13,24,0) 26%,
+                    rgba(6,13,24,0) 46%, rgba(6,13,24,.88) 88%); }
+
+      /* Carte de legende — vocabulaire d'ombres de la RÈGLE 4ter : une ombre
+         noire large qui decolle du fond, plus une lueur cyan faible (.12) qui
+         raccroche a la charte. Sans la seconde la carte parait collee ; trop
+         forte, elle vire au neon. */
+      .ph-carte { position:absolute; left:150px; right:150px; bottom:150px;
+                  z-index:2; display:block; padding:38px 44px; border-radius:18px;
+                  background:rgba(2,7,13,.86);
+                  border:1px solid rgba(143,163,184,.28);
+                  box-shadow:0 30px 90px rgba(0,0,0,.6), 0 0 60px rgba(73,182,201,.12); }
+      .ph-carte .tag { font-family:'JetBrains Mono', monospace; font-size:22px;
+                       letter-spacing:.3em; text-transform:uppercase; color:var(--cyan);
+                       display:block; margin-bottom:18px; font-weight:700; }
+      .ph-carte .txt { font-family:'Manrope', sans-serif; font-size:40px; font-weight:600;
+                       line-height:1.28; color:var(--ivory); display:block;
+                       text-shadow:0 3px 20px rgba(0,0,0,.9); }
+
       .steps { display:flex; gap:28px; margin-top:40px; }
       .step { flex:1; border-top:2px solid var(--cyan); padding-top:24px; display:block;
               transform-origin:left top; }

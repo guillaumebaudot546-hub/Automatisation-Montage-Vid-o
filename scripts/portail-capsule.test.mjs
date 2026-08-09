@@ -208,3 +208,49 @@ describe("debordement", () => {
     expect(r.stdout).toContain("deborde");
   });
 });
+
+// Le bloc photo est ne d'un trou de couverture : le 09/08/2026, une galerie de
+// photos a produit une video hors doctrine — police systeme, carton gris, aucune
+// animation — parce qu'AUCUN bloc ne portait d'image. Le portail n'avait rien a
+// juger, donc il a laisse passer vingt fois de suite. Ces tests verrouillent le
+// chemin conforme.
+describe("bloc photo", () => {
+  const scenePhoto = (data) => ({
+    kicker: "Étape 2",
+    lede: [],
+    dureeSec: 6,
+    bloc: { type: "photo", data },
+  });
+
+  it("accepte une photo dont le fichier existe", () => {
+    writeFileSync(join(dossier, "p01.jpg"), "faux-jpeg");
+    const r = juge(avecScene(scenePhoto({ fichier: "p01.jpg", cadrage: "cover", tag: "Étape 2", texte: "Greffe." })));
+    expect(r.status).toBe(0);
+  });
+
+  it("REJETTE une image introuvable — sinon le cadre sort vide apres six minutes de rendu", () => {
+    const r = juge(avecScene(scenePhoto({ fichier: "absente.jpg", tag: "x", texte: "y" })));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("introuvable");
+  });
+
+  it("REJETTE un bloc photo sans fichier", () => {
+    const r = juge(avecScene(scenePhoto({ tag: "x", texte: "y" })));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("sans « fichier »");
+  });
+
+  it("REJETTE un cadrage hors vocabulaire — etirer l'image est interdit", () => {
+    writeFileSync(join(dossier, "p01.jpg"), "faux-jpeg");
+    const r = juge(avecScene(scenePhoto({ fichier: "p01.jpg", cadrage: "fill", tag: "x", texte: "y" })));
+    expect(r.status).toBe(3);
+    expect(r.stdout).toContain("RÈGLE 5bis");
+  });
+
+  it("avertit sur une photo sans legende, sans bloquer", () => {
+    writeFileSync(join(dossier, "p01.jpg"), "faux-jpeg");
+    const r = juge(avecScene(scenePhoto({ fichier: "p01.jpg", cadrage: "cover" })));
+    expect(r.status).toBe(0);
+    expect(r.stdout).toContain("ne saura pas ce qu'il regarde");
+  });
+});

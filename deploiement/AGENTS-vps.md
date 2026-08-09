@@ -53,6 +53,28 @@ Telegram ; tu lui renvoies une vidéo montée, et il valide.
    API tierce (données de santé, RGPD).
 4. **L'accent est le cyan `#49B6C9`.** Le beige `#d8c7a8` est l'ancien accent
    remplacé par le client : le retrouver est un bug, pas un choix.
+
+4bis. **TOUTE vidéo est rendue par HyperFrames. Sans exception, quel que soit
+   ce qu'on t'envoie** — rush filmé, texte, photos, capture d'écran, ou un
+   mélange. Il n'existe pas de « cas à part » qui justifierait `ffmpeg` en
+   direct, `drawtext`, `zoompan`, ou un assemblage de clips fait à la main.
+
+   | Ce que tu reçois | Le chemin |
+   |---|---|
+   | Rush filmé (voix) | `plan.json` → `portail-doctrine` → HyperFrames |
+   | Texte, prompt, sujet | `capsule.json` → `portail:capsule` → HyperFrames |
+   | Photos, galerie, images | `capsule.json` avec des blocs `photo` → `portail:capsule` → HyperFrames |
+
+   *Le 09/08/2026, une galerie de photos a été montée en ffmpeg brut. Résultat :
+   police DejaVu du système, rectangle gris pour tout carton, aucune animation,
+   et zéro contrôle — le portail n'avait pas de contrat à juger. Le praticien a
+   jugé la vidéo mauvaise, et il avait raison. Sortir de HyperFrames, c'est
+   sortir du socle : plus de Cormorant/Manrope, plus d'ombres de la charte, plus
+   d'entrées animées. Aucun gain ne compense ça.*
+
+   Si un contenu semble ne rentrer dans aucun des trois chemins : **tu demandes,
+   tu n'improvises pas**. Un chemin manquant se corrige dans le socle, pas en
+   contournant le socle.
 5. **RENDRE SANS AVOIR APPELÉ LE PORTAIL EST INTERDIT.** Pas « recommandé » :
    interdit. Ce n'est plus une consigne mais un **verrou** : depuis le
    01/08/2026, le portail écrit un reçu empreinté et `guard-portail.mjs` refuse
@@ -150,9 +172,20 @@ dans cet ordre :
 
 1. **Le fil n'avait jamais été refermé** — ouvert le 30/07, 246 messages à
    l'arrivée de la demande, 349 à la fin, renvoyés à chacun des 120 appels au
-   modèle. **Une vidéo = une session neuve.** Si le fil dépasse ~40 messages ou
-   change de sujet, demande à Guillaume d'en ouvrir un nouveau avant de
-   commencer.
+   modèle. **Une vidéo = une session neuve.**
+
+   *Cette règle était écrite ici depuis le 03/08 et n'a rien empêché : le
+   09/08, la conversation écrivait ENCORE dans la session du 30/07 —
+   **143 827 jetons de contexte par appel** pour un plafond de 60 000, et
+   14,87 $ cumulés dont 68 % en réécriture de cache. Le travail utile de la
+   dernière vidéo tenait en **216 jetons d'entrée**.*
+
+   La cause était un réglage, pas un oubli de l'agent : `session_reset.mode`
+   valait `none`. Il vaut désormais `both` — la session se referme après 60 min
+   d'inactivité et chaque nuit à 4 h. **Tu n'as plus à y penser**, mais si un
+   fil dépasse ~40 messages ou change de sujet en cours de route, demande quand
+   même à Guillaume d'en ouvrir un neuf : le compteur ne voit pas les
+   changements de sujet.
 2. **17 analyses d'images sur ton propre rendu.** Une image coûte des milliers
    de jetons et reste dans l'historique. Tes contrôles sont objectifs et
    gratuits : les portails, `hyperframes check`, `ffprobe`. N'utilise
