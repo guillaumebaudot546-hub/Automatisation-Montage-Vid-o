@@ -36,9 +36,17 @@ existe, se déclare sain, et ne garde rien.
 
 ### Correctifs
 
-1. **`.gitattributes`** — `eol=lf` imposé pour `*.py`, `*.sh`, `*.mjs`, et
-   `binary` pour les médias. La copie de travail est désormais en LF sur toute
+1. **`.gitattributes`** — `eol=lf` imposé pour `*.py`, `*.sh`, `*.mjs`, `*.html`,
+   et `binary` pour les médias. La copie de travail est désormais en LF sur toute
    machine ; vérifié : 0 CR sur les 5 scripts déployés, avant et après copie.
+
+   `*.html` a été ajouté pour une **seconde** raison, découverte en relançant
+   `npm run check` : `capsule-build` compare le fichier généré à l'octet près
+   pour détecter une édition manuelle. Le gabarit en CRLF et les blocs générés
+   en JavaScript (toujours en `\n`) produisaient un mélange — le contrôle
+   annonçait « index.html a dérivé du socle » là où seule la fin de ligne
+   différait. Les teasers passaient, eux, parce que gabarit et sortie étaient
+   cohérents : le défaut ne se voyait que sur la capsule.
 2. Fins de ligne réparées sur le VPS, hooks réapprouvés (leur empreinte change
    à chaque copie — un redéploiement sans réapprobation les rend muets).
 
