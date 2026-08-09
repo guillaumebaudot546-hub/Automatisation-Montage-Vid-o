@@ -58,7 +58,10 @@ Higgsfield/
 # scripts/make_music.py (aucun sample, aucun droit voisin) sont whitelistés
 # un par un ci-dessous. Ajouter une ligne « ! » = affirmer que le fichier est
 # libre de droits, enregistrement compris.
-musique/
+# « musique/* » et non « musique/ » : git ne descend jamais dans un dossier
+# entierement ignore, donc les exceptions « ! » a l'interieur n'ont aucun effet.
+# C'est le contenu qu'on ignore, pour pouvoir en excepter deux fichiers.
+musique/*
 public/music/*
 public/**/*.mp3
 
@@ -82,6 +85,13 @@ public/**/*.mp3
 !public/sfx/cinematic-riser-2.mp3      # idem
 !public/voiceover.mp3                  # voix off ElevenLabs (licence du compte)
 !public/voiceover-fast.mp3             # idem
+
+# Le CATALOGUE n'est PAS de l'audio : c'est la preuve de provenance de chaque
+# piste, et le portail le lit pour refuser un enregistrement sous droits. Il doit
+# etre versionne avec le code qui s'en sert — sinon la regle vit sur une seule
+# machine, ce qui est exactement le probleme qu'il resout.
+!musique/CATALOGUE.json
+!musique/prompts-musique.md
 
 # Rushes et livrables a la racine / dans public (medias bruts, hors depot)
 TEASER-*.mp4

@@ -13,6 +13,12 @@
 * text=auto
 
 # Executes sur le VPS — LF obligatoire, meme sous Windows.
+# .md : la doctrine elle-meme. Sans cette ligne, tout fichier deploye depuis
+# Windows part en CRLF, et TOUTE comparaison local/VPS repond « les 260 lignes
+# different » — ce qui masque la seule ligne qui differe vraiment. C'est
+# exactement ce qui a laisse vivre une reference morte (src/theme/baudot.ts)
+# dans la doctrine du VPS jusqu'au 09/08/2026.
+*.md   text eol=lf
 *.py   text eol=lf
 *.sh   text eol=lf
 *.mjs  text eol=lf
