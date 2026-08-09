@@ -17,6 +17,13 @@
 *.sh   text eol=lf
 *.mjs  text eol=lf
 
+# Compositions HyperFrames — LF aussi, pour une deuxieme raison.
+# capsule-build et teasers-build comparent le fichier genere a l'octet pres pour
+# detecter une edition manuelle. Le gabarit en CRLF et les blocs generes en JS
+# (toujours en \n) produisaient un melange : le controle signalait une derive
+# la ou il n'y avait qu'une difference de fin de ligne.
+*.html text eol=lf
+
 # Binaires : jamais convertis.
 *.woff2 binary
 *.mp4   binary

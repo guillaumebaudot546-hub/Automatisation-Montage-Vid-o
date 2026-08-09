@@ -3,6 +3,67 @@
 > Une entrée par session, ajoutée AVANT de fermer (cycles-sessions.md).
 > L'état courant du code vit dans SESSION-PRD.md ; les décisions dans decisions/.
 
+## 2026-08-09 — Déploiement VPS testé : le verrou du portail était décoratif
+
+`scripts/deploy-vps.sh` exécuté pour la première fois depuis ce poste Windows.
+Ses 16 contrôles sont passés au vert. **Le verrou ne verrouillait rien.**
+
+### Ce que la vérification du script ne voyait pas
+
+Le script conclut sur `hooks doctor`, qui affichait :
+
+```
+✓ ran clean with empty stdout (exit=127, 0.002s) — hook is observer-only
+All shell hooks look healthy.
+```
+
+`exit=127` veut dire « commande introuvable ». Hermes voit une sortie vide,
+en déduit un hook d'observation, et **laisse passer**. Le diagnostic disait
+« healthy » sur un hook qui ne s'exécutait pas.
+
+### La cause : un retour chariot
+
+`~/.hermes/agent-hooks/portail.py` était arrivé avec des fins de ligne Windows.
+Son shebang devenait `#!/usr/bin/env python3\r` → `env` cherchait un programme
+nommé « python3\r » → 127.
+
+Mécanisme : `core.autocrlf=true` sur ce poste convertit LF → CRLF **dans la
+copie de travail**, et `scp` envoie la copie de travail telle quelle. Le dépôt,
+lui, stockait bien du LF — l'erreur naissait entre les deux.
+
+C'est exactement le mode de panne que la decision 020 nomme : un garde-fou qui
+existe, se déclare sain, et ne garde rien.
+
+### Correctifs
+
+1. **`.gitattributes`** — `eol=lf` imposé pour `*.py`, `*.sh`, `*.mjs`, et
+   `binary` pour les médias. La copie de travail est désormais en LF sur toute
+   machine ; vérifié : 0 CR sur les 5 scripts déployés, avant et après copie.
+2. Fins de ligne réparées sur le VPS, hooks réapprouvés (leur empreinte change
+   à chaque copie — un redéploiement sans réapprobation les rend muets).
+
+`hooks doctor` affiche maintenant, pour les **deux** hooks :
+`✓ produced valid JSON on synthetic payload (exit=0)`. `hook-budget.py`
+n'apparaissait même pas dans le diagnostic initial.
+
+### Comportement du verrou, prouvé sur le VPS
+
+| Situation | Attendu | Obtenu |
+|---|---|---|
+| Rendu sans validation | bloque | `{"decision":"block"}` |
+| Plan validé par le portail | passe | `{}` |
+| Plan modifié après validation | re-bloque | `block` — « a changé depuis » |
+| Portail lancé hors racine projet | passe | wrapper `portail-doctrine` OK |
+
+### Défaut restant, non corrigé
+
+`node scripts/portail-doctrine.mjs` lit `praticiens/client-01.json` en chemin
+**relatif au dossier courant** : lancé ailleurs que depuis `~/imcp`, il plante
+(`ENOENT`). La vérification du script de déploiement ne l'a pas vu parce qu'elle
+tourne depuis `~/imcp`. Le wrapper `/usr/local/bin/portail-doctrine` — la voie
+documentée dans `AGENTS.md` — fait le `cd` et fonctionne. L'appel direct reste
+un piège pour qui ne suit pas la doctrine.
+
 ## 2026-08-05 — Le budget devient un verrou
 
 Guillaume : « un tel tarif n'est pas acceptable, à corriger ». Écrit en
