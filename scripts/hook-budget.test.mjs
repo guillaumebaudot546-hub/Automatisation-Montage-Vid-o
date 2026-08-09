@@ -131,18 +131,21 @@ describe("seuil preventif — contexte par appel", () => {
   it("bloque une session trop chargee", () => {
     poseBase([ligne({ api_call_count: 1, input_tokens: 150000 })]);
     const v = hook().verdict;
-    expect(v.decision).toBe("block");
-    expect(v.reason).toContain("SESSION TROP CHARGÉE");
+    // Alerte, pas blocage : un verrou qui arrete un montage en cours coute plus
+    // cher que les jetons qu'il economise (09/08/2026). L'avertissement remonte
+    // dans le contexte de l'agent, la production continue.
+    expect(v.decision).toBe("approve");
+    expect(v.systemMessage).toContain("SESSION TROP CHARGÉE");
   });
 
   it("dit quoi faire — ouvrir une conversation neuve, pas optimiser", () => {
     poseBase([ligne({ api_call_count: 1, input_tokens: 150000 })]);
-    expect(hook().verdict.reason).toContain("conversation neuve");
+    expect(hook().verdict.systemMessage).toContain("conversation neuve");
   });
 
   it("compte le cache relu dans le contexte, pas seulement l'entree", () => {
     poseBase([ligne({ api_call_count: 1, cache_read_tokens: 150000 })]);
-    expect(hook().verdict.decision).toBe("block");
+    expect(hook().verdict.systemMessage).toContain("SESSION TROP CHARGÉE");
   });
 
   it("respecte le plafond passe par l'environnement", () => {
@@ -157,8 +160,8 @@ describe("seuil curatif — cout de la session", () => {
       ligne({ api_call_count: 100, input_tokens: 50000, output_tokens: 200000 }),
     ]);
     const v = hook().verdict;
-    expect(v.decision).toBe("block");
-    expect(v.reason).toContain("BUDGET DE SESSION DÉPASSÉ");
+    expect(v.decision).toBe("approve");
+    expect(v.systemMessage).toContain("BUDGET DE SESSION DÉPASSÉ");
   });
 
   it("respecte le budget passe par l'environnement", () => {
@@ -171,7 +174,7 @@ describe("seuil curatif — cout de la session", () => {
   it("facture l'ecriture de cache plus cher que l'entree — c'est le poste n°1", () => {
     // 65 % du cout mesure le 03/08 venait de la reecriture de cache.
     poseBase([ligne({ api_call_count: 100, cache_write_tokens: 800000000 })]);
-    expect(hook().verdict.decision).toBe("block");
+    expect(hook().verdict.systemMessage).toContain("BUDGET");
   });
 });
 

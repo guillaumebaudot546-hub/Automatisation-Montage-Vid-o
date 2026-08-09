@@ -75,6 +75,98 @@ Telegram ; tu lui renvoies une vidéo montée, et il valide.
    Si un contenu semble ne rentrer dans aucun des trois chemins : **tu demandes,
    tu n'improvises pas**. Un chemin manquant se corrige dans le socle, pas en
    contournant le socle.
+
+4ter. **La chaîne capsule a quatre commandes, dans cet ordre. Aucune ne se
+   remplace par une commande maison.**
+
+   ```bash
+   npm run capsule:media      -- <projet>  # médias mis au format de sortie
+   npm run capsule:soustitres -- <projet>  # SI voix off : cale les sous-titres
+   npm run portail:capsule    -- <projet>  # contrôle doctrine (0 = passe)
+   npm run capsule:build         <projet>  # génération du HTML
+   npm run check                           # dans le dossier du projet
+   npx hyperframes@0.7.77 render           # rendu
+   ```
+
+   `capsule:media` **écrit dans le `capsule.json`** (noms des plans mis au
+   format, durée réelle de la voix). Le lancer après le portail invaliderait le
+   reçu et le rendu serait bloqué. L'ordre n'est pas cosmétique.
+
+   *Le 09/08/2026, la mise au format des plans animés a été faite à la main, en
+   ffmpeg, dans un terminal. La vidéo était bonne — et impossible à reproduire
+   pour toi, parce que l'étape n'existait dans aucun script. C'est exactement la
+   définition d'un contournement : ça marche une fois, pour une personne. Toute
+   étape qui compte est une commande, ou elle n'existe pas.*
+
+   Ce que la chaîne sait faire, et que tu n'as donc pas à bricoler :
+   plans animés dans un bloc `photo` · cadrage `panneau` (photo clinique paysage
+   en vidéo verticale) · voix off avec atténuation automatique de la musique ·
+   sous-titres calés sur la voix, mots-clés en cyan · contrôle de la largeur des
+   titres en pixels · contrôle de cohérence entre la langue de la voix et celle
+   de l'écran.
+
+4sexies. **Tu PROPOSES une ambiance musicale, tu ne la choisis pas seul, et tu
+   ne prends jamais un fichier au hasard dans `public/music/`.**
+
+   Le catalogue est `musique/CATALOGUE.json`. Il porte, pour chaque piste, son
+   étiquette, sa durée, son usage — et surtout son **statut de droits**.
+   Tu ne proposes QUE les pistes au statut `libre`.
+
+   ```
+   ♪ Sérénité — ambient calme        (lit sous une voix off, ne prend jamais le dessus)
+   ♪ Élégance clinique — cordes      (cas clinique premium, montage lent)
+   ```
+
+   Présente-les au praticien avec leur étiquette et ce à quoi elles servent,
+   puis attends son choix. `npm run musique:liste` te les montre.
+
+   *Le 09/08/2026, `public/music/concerto.mp3` s'est révélé être, octet pour
+   octet, l'enregistrement Saint-Preux déposé à la SACEM — simplement renommé.
+   Un dossier de musique n'est pas une bibliothèque libre de droits : c'est un
+   tas de fichiers dont certains appartiennent à quelqu'un. Le portail compare
+   désormais l'empreinte de la piste à celles des pistes interdites : un
+   renommage ne le trompe plus.*
+
+4septies. **Une vidéo validée se livre AVEC ses descriptions.** Charge la skill
+   `description-reseaux` : deux propositions par réseau, ton adapté à chaque
+   plateforme, et un garde-fou déontologique — le Dr Baudot informe, il ne
+   démarche pas. Tu prépares le texte ; **il** publie.
+
+   **La description part du SUJET de la vidéo**, que tu as sous les yeux :
+   `capsule.json` porte le cas (`lede`), la chronologie (`tag` et `texte` des
+   blocs photo) et le propos exact (`sousTitres`). N'attends pas qu'on te donne
+   des mots-clés pour proposer quelque chose : tu viens de monter la vidéo, tu
+   sais de quoi elle parle. Une vidéo livrée sans description n'est livrée
+   qu'à moitié — le praticien doit encore écrire le texte lui-même, au moment
+   de publier.
+
+   Trois cas, dans cet ordre : **ce qu'il a dit** l'emporte sur tout · sinon
+   **ce que la vidéo montre** · et si ni l'un ni l'autre ne suffit — cas non
+   nommé, terme clinique dont tu n'es pas sûr — **tu demandes le fait précis
+   qui te manque. Tu n'inventes pas.** Une phrase clinique inventée qui sonne
+   juste est plus dangereuse qu'une question posée : elle sera publiée sous son
+   nom, et il la relira sans la voir.
+
+4quinquies. **LE TEXTE VIENT DU CONTRAT. LES REPÈRES VIENNENT DE L'AUDIO.**
+   Jamais l'inverse. Tu écris le texte des sous-titres — celui que la voix
+   prononce, que tu connais — et `capsule:soustitres` va chercher dans l'audio
+   *quand* chaque réplique est dite.
+
+   **N'affiche JAMAIS le texte sorti de la transcription.** Le 09/08/2026, sur
+   cette voix, Whisper a rendu « pre-**prostatic** surgery » pour
+   « pre-prosthetic surgery », et « the area glazer » pour « Er-YAG laser ».
+   Une vidéo médicale qui affiche « prostatic » sur une intervention
+   parodontale n'est pas imparfaite : c'est une faute que le praticien porte à
+   son nom. La transcription est excellente pour dire QUAND, mauvaise pour dire
+   QUOI.
+
+4quater. **Si le portail te refuse, tu corriges et tu relances — tu ne t'arrêtes
+   pas pour demander.** Un rejet est une consigne de travail, pas un incident :
+   il dit précisément quoi corriger. Tu ne remontes à Guillaume qu'après les 3
+   essais du plafond, en disant ce que tu as tenté.
+   *Le 09/08, un rendu s'est arrêté sur un reçu périmé — la situation exacte que
+   le portail est fait pour signaler — et il a fallu intervenir à la main pour
+   relancer. Le blocage n'était pas le problème : l'absence de reprise l'était.*
 5. **RENDRE SANS AVOIR APPELÉ LE PORTAIL EST INTERDIT.** Pas « recommandé » :
    interdit. Ce n'est plus une consigne mais un **verrou** : depuis le
    01/08/2026, le portail écrit un reçu empreinté et `guard-portail.mjs` refuse
@@ -180,12 +272,26 @@ dans cet ordre :
    14,87 $ cumulés dont 68 % en réécriture de cache. Le travail utile de la
    dernière vidéo tenait en **216 jetons d'entrée**.*
 
-   La cause était un réglage, pas un oubli de l'agent : `session_reset.mode`
-   valait `none`. Il vaut désormais `both` — la session se referme après 60 min
-   d'inactivité et chaque nuit à 4 h. **Tu n'as plus à y penser**, mais si un
-   fil dépasse ~40 messages ou change de sujet en cours de route, demande quand
-   même à Guillaume d'en ouvrir un neuf : le compteur ne voit pas les
-   changements de sujet.
+   Une cause était un réglage : `session_reset.mode` valait `none`. Il vaut
+   désormais `both` — la session se referme après 60 min d'inactivité et chaque
+   nuit à 4 h.
+
+   **Mais ça ne suffit pas, et c'est le piège** : deux vidéos demandées coup sur
+   coup restent dans la MÊME session, puisque l'utilisateur est actif. La
+   réinitialisation automatique ne protège que les fils abandonnés. Le 09/08,
+   une session relancée 35 min après la précédente portait toujours
+   143 613 jetons hérités.
+
+   **C'est donc ton travail, à chaque nouvelle vidéo :**
+
+   > Avant de commencer un montage, si le fil contient déjà une vidéo livrée,
+   > **demande à Guillaume de taper `/new`** et attends qu'il l'ait fait. Une
+   > phrase suffit : « Avant de partir, tape `/new` — ça repart d'un contexte
+   > vide et divise le coût. »
+
+   `/new` est la seule commande qui coupe vraiment le fil. Écrire « Clear » ne
+   fait rien : c'est un message ordinaire, il s'ajoute au contexte au lieu de le
+   vider.
 2. **17 analyses d'images sur ton propre rendu.** Une image coûte des milliers
    de jetons et reste dans l'historique. Tes contrôles sont objectifs et
    gratuits : les portails, `hyperframes check`, `ffprobe`. N'utilise

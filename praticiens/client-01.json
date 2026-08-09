@@ -16,7 +16,7 @@
     "renduMinimum": "1080p toujours ; 4K si la source le permet. Source basse résolution → prétraitement (débruitage + lanczos + netteté) AVANT montage",
     "infographies": "L'IA RÉFLÉCHIT sur la transcription et matérialise chaque promesse en visuel qui vend (style Instagram) : chiffre cité → chiffre-choc animé ; 'mon site' → carte site avec bouton ; 'progresser' → graphique flèche montante. Le spectateur doit se projeter et avoir envie d'acheter",
     "lienSite": "Site de vente de formations : https://www.imcpformations.fr/ (confirmé par Guillaume le 2026-07-18) — à afficher quand il mentionne son site",
-    "musique": "Lit classique discret sous la voix (volume ~0,08, fondus entrée/sortie). Morceau fourni par Guillaume : Pace_pace_nel_mio_sen.mp3 (public/music/pace-capsule.wav, 117 s préparées). ⚠️ Vérifier que l'ENREGISTREMENT est bien libre de droit (l'œuvre classique est domaine public, l'interprétation a ses propres droits). Jamais de Saint-Preux (SACEM)",
+    "musique": "Catalogue dans musique/CATALOGUE.json — proposer les ambiances au statut « libre » par leur etiquette, jamais un nom de fichier. Lit discret sous la voix (volume auto 0,10), plus present sans voix (0,68).",
     "phrasesCles": "Toute phrase-structure du discours ('3 sur la machine, 3 dans vos mains') → carte punch : écran noir, texte cyan fluo (#5FE8FF) avec glow, même palette",
     "sousTitresMotsCles": "Les mots importants de CHAQUE sous-titre en cyan fluo (balisage **mot** dans les props)",
     "dureeInfographies": "Une infographie ne s'attarde JAMAIS : graphique ≤ 5-6 s, puis retour à l'image ou B-roll",
@@ -25,7 +25,11 @@
     "slidesFournies": "Extraire le CONTENU des slides et le ré-animer en cascade dans la charte — ne pas afficher l'image statique",
     "outilAnimations": "Animations codées en HyperFrames (decision 014, depuis le 19/07/2026) : gratuites, reproductibles, retouchables à la seconde. Remotion (src/) reste en maintenance pour les compositions déjà livrées. Pas de Higgsfield tant que pas d'abonnement payant — crédits gratuits non brûlés",
     "charteVerrouillee": "Toute couleur vient de src/theme/client-01.ts. L'accent est le CYAN #49B6C9. Le beige #d8c7a8 est l'ancien accent remplacé par le client : le retrouver dans une composition est un bug. Vérifier avec npm run check:charte avant livraison",
-    "musiqueLicence": "Aucune piste sous droits. L'œuvre classique peut être dans le domaine public, l'ENREGISTREMENT ne l'est pas. Défaut : music/ambient-bed.wav (synthétisé par scripts/make_music.py). Toute autre piste exige une preuve de licence avant d'entrer dans public/"
+    "musiqueLicence": "Aucune piste sous droits. L'œuvre classique peut être dans le domaine public, l'ENREGISTREMENT ne l'est pas. Défaut : music/ambient-bed.wav (synthétisé par scripts/make_music.py). Toute autre piste exige une preuve de licence avant d'entrer dans public/",
+    "cadrage": "Photo clinique paysage en video verticale : cadrage « panneau » par defaut. En « cover » le sujet clinique sort du cadre, en « fit » l image est trop petite — les deux ont ete rejetes le 09/08/2026.",
+    "ordre": "Chronologie clinique stricte : avant → diagnostic → gestes operatoires → cicatrisation → resultat → apres. Un ordre esthetique qui casse la chronologie fait perdre le fil du cas.",
+    "voixClonee": "Accord donne le 09/08/2026 pour le clonage de sa voix (version anglaise). Echantillon source : rush teaser, out/teaser/voice-norm.wav.",
+    "descriptions": "Deux propositions A/B par reseau (decision 010), ecrites A PARTIR DU SUJET de la video (capsule.json : lede, tags, sous-titres) — on ne reclame pas de mots-cles avant de proposer. Une demande explicite du praticien (angle, public, terme a mettre en avant) l emporte sur tout. Registre : formation entre confreres, jamais promesse commerciale."
   },
   "corrections": [
     {
@@ -63,6 +67,12 @@
       "video": "Audit du projet (aucune vidéo)",
       "retour": "Constat d'audit, pas un retour praticien. La boucle d'apprentissage était déclarée mais pas bouclée : dernière correction datée du 19/07 alors que 13 projets HyperFrames ont été produits depuis, exemplesValides vide, et aucune ligne de code ne lit ce fichier. La doctrine n'était chargée par aucun mécanisme (jonction morte vers un dossier supprimé)",
       "action": "Doctrine déplacée dans .claude/skills/ pour être réellement chargeable ; RÈGLE 4 réécrite sur HyperFrames (decision 014) ; RÈGLE 4bis (charte verrouillée) et RÈGLE 7 (procédure de construction) ajoutées ; exemplesValides rempli. Reste à faire : faire consommer ce fichier par le montage au lieu de coder l'identité praticien en dur"
+    },
+    {
+      "date": "2026-08-09",
+      "video": "reel-liseret-bleu (cas clinique liseret gingival bleu, 9:16, 44 s)",
+      "retour": "Quatre retours successifs sur la meme video : (1) cadrage des photos non conforme — en cover le sujet clinique sortait du cadre, en fit l image devenait minuscule dans un cadre vertical ; (2) ordre des photos ne suivant pas la chronologie clinique ; (3) texte de cloture coupe net au bord du cadre ; (4) exigence de fond : le rendu produit par l agent Hermes ne doit pas etre de qualite inferieure a celui obtenu en direct — pas de contournement, pas de divergence.",
+      "action": "Cadrage panneau cree (image sur les 2/3 hauts, legende sur fond de charte en bas) ; ordre remis en chronologie clinique avant/diagnostic/gestes/cicatrisation/resultat/apres ; controle de largeur des titres passe des caracteres aux pixels ; les trois etapes qui n existaient qu en manuel sont devenues des commandes (decision 022)."
     }
   ],
   "exemplesValides": [
@@ -89,6 +99,14 @@
       "ou": "imcp-hyperframes/videos/tuto-hermes-16x9|1x1|9x16/",
       "pourquoi": "Montre la RÈGLE 3 en pratique : le format est un paramètre choisi selon le réseau, avec un recadrage adapté à chaque cible",
       "format": "16:9, 1:1, 9:16"
+    },
+    {
+      "quoi": "Capsule photo/plans animes en 9:16, cadrage panneau, musique + voix off",
+      "ou": "imcp-hyperframes/videos/reel-liseret-bleu",
+      "format": "9:16",
+      "pourquoi": "Premiere video ou un plan anime et une photo cohabitent dans le meme vocabulaire de bloc, et premiere a passer 24/24 des controles de contraste WCAG AA. Sert de reference pour toute galerie clinique."
     }
-  ]
+  ],
+  "motsCles": [],
+  "_motsClesNote": "Se remplit a l usage : quand il corrige une description, retenir les termes qu il emploie spontanement. Ne pas les lui reclamer en formulaire."
 }

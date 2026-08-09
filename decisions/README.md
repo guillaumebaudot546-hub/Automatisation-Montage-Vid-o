@@ -27,3 +27,4 @@ change d'avis, on crée une nouvelle décision qui remplace l'ancienne (et on le
 | [019](019-verrou-de-budget.md) | Le budget devient un verrou (hook pre_tool_call), pas une consigne | Actif |
 | [020](020-le-fichier-teste-est-celui-qui-tourne.md) | Un garde-fou non testé n'est pas un garde-fou — source unique, 6 garde-fous couverts | Actif |
 | [021](021-rythme-et-hook.md) | Le rythme et le hook sont des règles du portail, pas du goût | Actif — écrite le 01/08 sous le n° 017, renumérotée le 08/08 |
+| [022](022-toute-etape-est-une-commande.md) | Toute étape qui compte est une commande, ou elle n existe pas — 3 étapes manuelles scriptées | Actif |

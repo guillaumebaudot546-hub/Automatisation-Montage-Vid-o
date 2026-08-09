@@ -1,6 +1,6 @@
 ---
 name: montage-imcp
-description: Doctrine de montage vidéo IMCP — capsules, teasers et publications verticaux/horizontaux à partir des rushes du Dr Baudot. À charger AVANT tout montage, avant même de choisir des timestamps. Moteur = HyperFrames (decision 014). Encode les règles apprises au fil des corrections réelles du praticien (voir praticiens/<client>.json, decisions/013 et 014).
+description: Doctrine de montage vidéo IMCP — capsules, teasers et publications verticaux/horizontaux à partir des rushes du Dr Baudot. À charger AVANT tout montage, avant même de choisir des timestamps. Moteur = HyperFrames (decision 014). Encode les règles apprises au fil des corrections réelles du praticien (voir praticiens/<client>.json, decisions/013-doctrine-talking-head.md et 014-hyperframes-moteur-officiel.md).
 metadata:
   tags: montage, hyperframes, video, vertical, teaser, capsule, IMCP, doctrine
 ---
@@ -226,7 +226,7 @@ Sans le geste 3, l'agent apprend uniquement ce qu'il ne faut pas faire.
 ## RÈGLE 8 — le portail doctrine, avant de rendre
 
 Une règle que rien ne vérifie est un vœu. Ces règles sont désormais **vérifiées
-par du code** — portail ① de la boucle auto-critique (`decisions/006`) :
+par du code** — portail ① de la boucle auto-critique (`decisions/006-boucle-auto-critique.md`) :
 
 ```bash
 npm run portail -- plan.json cues.json

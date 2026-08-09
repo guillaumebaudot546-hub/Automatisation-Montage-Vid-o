@@ -1,0 +1,95 @@
+{
+  "_pourquoi": "Catalogue des lits musicaux proposables au praticien. Une piste n'entre dans une video que si elle figure ici avec statut « libre ». Le 09/08/2026, public/music/concerto.mp3 s'est revele etre, octet pour octet, l'enregistrement Saint-Preux sous SACEM — renomme. Un nom de fichier ne prouve rien : ce fichier-ci est la preuve, et le portail le lit.",
+  "_statuts": {
+    "libre": "provenance etablie, utilisable en publication",
+    "a-verifier": "provenance inconnue — proposable a personne tant qu'elle n'est pas etablie",
+    "interdit": "droits averes d'un tiers — ne doit jamais entrer dans une video ni sur le VPS"
+  },
+  "_comment_proposer": "Montre au praticien l'etiquette et la colonne « pourQuoi », pas les noms de fichiers. Il choisit une ambiance, pas un fichier.",
+  "pistes": [
+    {
+      "id": "ambient-serein",
+      "etiquette": "Sérénité — ambient calme",
+      "fichier": "public/music/ambient-bed.wav",
+      "dureeSec": 60,
+      "intensite": "tres discret",
+      "pourQuoi": "Lit sous une voix off continue. Ne bouge pas, ne prend jamais le dessus.",
+      "statut": "libre",
+      "licence": "Synthetise par scripts/make_music.py — ondes calculees, aucun echantillon, aucune oeuvre source. Propriete du projet."
+    },
+    {
+      "id": "clinical-grace",
+      "etiquette": "Élégance clinique — cordes feutrées",
+      "fichier": "musique/Clinical_Grace.mp3",
+      "dureeSec": 145,
+      "intensite": "tres discret",
+      "pourQuoi": "Cas clinique premium, montage lent. Sert la gravite du propos sans pathos.",
+      "statut": "libre",
+      "licence": "Generation IA, propriete de Guillaume — confirme le 09/08/2026. Aucune source tierce."
+    },
+    {
+      "id": "afternoon-estate",
+      "etiquette": "Lumière douce — piano de fin de journée",
+      "fichier": "musique/Afternoon_at_the_Estate.mp3",
+      "dureeSec": 176,
+      "intensite": "tres discret",
+      "pourQuoi": "Temoignage, presentation de cabinet, ton chaleureux. Moins clinique qu'« Élégance ».",
+      "statut": "libre",
+      "licence": "Generation IA, propriete de Guillaume — confirme le 09/08/2026. Aucune metadonnee d'editeur, meme signature d'encodage que Clinical_Grace."
+    },
+    {
+      "id": "curated-breath",
+      "etiquette": "Respiration — nappe minimale",
+      "fichier": "musique/The_Curated_Breath.mp3",
+      "dureeSec": 174,
+      "intensite": "tres discret",
+      "pourQuoi": "Geste operatoire, plan long, silence habite. La musique s'efface derriere l'image.",
+      "statut": "libre",
+      "licence": "Generation IA, propriete de Guillaume — confirme le 09/08/2026."
+    },
+    {
+      "id": "white-porcelain",
+      "etiquette": "Porcelaine — clair, précis",
+      "fichier": "musique/White_Porcelain.mp3",
+      "dureeSec": 176,
+      "intensite": "present",
+      "pourQuoi": "Montage rythme, peu ou pas de voix. Avant/apres, sequence technique.",
+      "statut": "libre",
+      "licence": "Generation IA, propriete de Guillaume — confirme le 09/08/2026."
+    },
+    {
+      "id": "pace",
+      "etiquette": "Souffle lyrique — cordes amples",
+      "fichier": "musique/Pace_pace_nel_mio_sen.mp3",
+      "dureeSec": 176,
+      "intensite": "present",
+      "pourQuoi": "Cloture, resultat a long terme, moment d'emotion mesuree. La plus ample du catalogue.",
+      "statut": "libre",
+      "licence": "Generation IA, propriete de Guillaume — confirme le 09/08/2026. ATTENTION : le nom evoque un air de Verdi (domaine public pour l'oeuvre, pas pour un enregistrement). Ce fichier n'est PAS un enregistrement de cet air : il est genere, sans metadonnee d'editeur. Ne pas le renommer d'apres une oeuvre reelle a l'avenir — c'est ce qui rend une provenance indechiffrable six mois plus tard."
+    },
+    {
+      "id": "teaser-bed",
+      "etiquette": "(en attente)",
+      "fichier": "public/music/teaser-bed.wav",
+      "dureeSec": 42,
+      "statut": "a-verifier",
+      "licence": "Provenance non documentee, et aucune source nommee correspondante dans musique/. A etablir avant toute proposition."
+    },
+    {
+      "id": "teaser-bed2",
+      "etiquette": "(en attente)",
+      "fichier": "public/music/teaser-bed2.wav",
+      "dureeSec": 42,
+      "statut": "a-verifier",
+      "licence": "Provenance non documentee, et aucune source nommee correspondante dans musique/."
+    },
+    {
+      "id": "concerto",
+      "etiquette": "(retiree)",
+      "fichier": "public/music/concerto.mp3",
+      "statut": "interdit",
+      "licence": "Saint-Preux, « Concerto pour une voix » (version 1995), interprete par Laurence Janot — SACEM. Le fichier porte encore ses metadonnees d'origine : titre, artiste, et l'URL YouTube dont il a ete extrait. Identique octet pour octet a la copie de musique/. Le renommage en « concerto.mp3 » n'a rien change aux droits : c'est precisement le mode de defaillance decrit par la decision 014.",
+      "empreinte": "93c571842561059d"
+    }
+  ]
+}

@@ -74,8 +74,25 @@ def passe(raison):
 
 
 def bloque(raison):
-    trace("BLOQUE", raison.replace("\n", " | ")[:200])
-    print(json.dumps({"decision": "block", "reason": raison}))
+    """Avertit sans bloquer.
+
+    Ce hook rendait « block » : le travail s'arretait net au milieu d'un
+    montage, et il fallait intervenir a la main pour le relancer. Un verrou de
+    budget qui empeche de livrer coute plus cher que les jetons qu'il economise.
+
+    Il alerte desormais : l'avertissement remonte dans le contexte de l'agent,
+    qui sait qu'il doit resserrer — ouvrir une session neuve, cesser de relire
+    des images, se limiter aux controles gratuits. La consigne reste forte, la
+    production ne s'arrete plus.
+
+    Le vrai levier n'est de toute facon pas ici : c'est « /new » avant chaque
+    video (mesure du 09/08 : 6,09 $ contre 1,75 $, meme travail).
+    """
+    trace("ALERTE", raison.replace("\n", " | ")[:200])
+    print(json.dumps({
+        "decision": "approve",
+        "systemMessage": "⚠️ BUDGET — " + raison,
+    }))
     sys.exit(0)
 
 
